@@ -1,6 +1,6 @@
 ---
 name: feature-spec
-description: Scaffold the spec for the next unstarted phase on the roadmap — reads specs/roadmap.md, specs/mission.md, and specs/tech-stack.md, then asks exactly 3 grouped questions (scope, key decisions, validation) via AskUserQuestion before writing anything. Creates a branch and specs/YYYY-MM-DD-feature-name/{requirements,plan,validation}.md, commits, pushes, and opens a draft PR. Use only when called directly.
+description: Scaffold the spec for the next unstarted phase on the roadmap — reads specs/roadmap.md, specs/mission.md, and specs/tech-stack.md, then asks exactly 3 grouped questions (scope, key decisions, validation) via AskUserQuestion before writing anything. Creates a branch and specs/YYYY-MM-DD-feature-name/{requirements,plan,validation}.md, ensures every feature task pairs with a test task, commits, pushes, and opens a draft PR gated on the project's GitHub Actions CI checks. Use only when called directly.
 user-invocable: true
 ---
 
@@ -71,16 +71,30 @@ phase looks self-explanatory.
    - **plan.md** — numbered task groups covering the in-scope checklist items, sequenced
      sensibly (e.g. data model before UI before polish), each group naming the relevant
      stack piece (Next.js route, Neon migration, Clerk role check, etc.) where applicable.
+     **Every feature task group must pair with a test task**, per `tech-stack.md`'s Testing
+     & CI/CD Practices: a Vitest + React Testing Library unit/component test for the unit,
+     and — if the task is user-facing (a page, a form, a workflow) — a Playwright E2E test
+     covering its primary flow. A task group with no corresponding test task is incomplete;
+     don't write one. If the phase itself is the one standing up the test/CI tooling (per
+     roadmap.md, e.g. Phase 1), sequence that setup as task group 1 so later groups' test
+     tasks have something to run against.
    - **validation.md** — a checklist of how to verify the implementation can be merged,
      built from the validation answer plus the phase's stated "Success criteria" line from
-     roadmap.md.
+     roadmap.md. Always include, verbatim as merge gates (from `tech-stack.md`): all four
+     required GitHub Actions checks (lint + typecheck, unit/component tests, E2E tests,
+     production build) green, plus at least one review approval before merge. Add any
+     phase-specific manual verification (e.g. real-device QA) on top of, not instead of,
+     these gates.
 
 8. **Commit, push, open a draft PR.**
    - `git add` the new spec folder only.
    - Commit message summarizing the phase being speced.
    - Push with `-u` to origin.
-   - `gh pr create --draft` with a title referencing the phase and a body summarizing scope,
-     key decisions, and validation approach.
+   - `gh pr create --draft` with a title referencing the phase and a body with a `## Summary`
+     (scope and key decisions) and a `## Test plan` section listing the unit/E2E tests
+     plan.md commits to and the CI checks from validation.md — so the PR is legible against
+     the GitHub Actions run before it's marked ready for review. Leave it in draft; per
+     `tech-stack.md` it only moves to ready once CI is green and it has a reviewer.
 
 9. **Report** the branch name, PR URL, and file paths, plus a one-line summary of the
    biggest judgment calls made from the answers so the user can spot anything to correct.
@@ -91,3 +105,7 @@ phase looks self-explanatory.
   an explicit answer from step 5 — if it's neither, that's the signal to have asked instead.
 - Don't mark the roadmap phase's checkboxes done here — this skill scaffolds the spec, it
   doesn't implement or close out the phase.
+- If `.github/workflows/` doesn't exist yet and this phase isn't the one tasked with adding
+  it (per roadmap.md), say so in requirements.md as a blocking dependency rather than
+  writing a validation.md that assumes CI checks will run — the merge gates in
+  `tech-stack.md` only bite once the workflow exists.

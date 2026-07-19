@@ -9,9 +9,15 @@ facility data to be entered.
 - [ ] Neon Postgres database provisioned and connected
 - [ ] Clerk auth integrated with roles (e.g. scale operator vs. admin)
 - [ ] Base mobile-friendly layout/navigation shell
+- [ ] Vitest + React Testing Library configured for unit/component tests
+- [ ] Playwright configured for E2E tests
+- [ ] GitHub Actions CI pipeline (lint + typecheck, unit tests, E2E tests,
+      production build) required on every PR
 
 **Success criteria:** A logged-in user can reach an empty authenticated
-shell of the app on both mobile and desktop.
+shell of the app on both mobile and desktop, and a PR against `main` runs
+the full CI pipeline (lint, typecheck, unit tests, E2E tests, build)
+automatically and must pass before merge.
 
 ## Phase 2: Producers & Sequestration Sites
 
