@@ -1,6 +1,6 @@
 ---
 name: feature-spec
-description: Scaffold the spec for the next unstarted phase on the roadmap — reads specs/roadmap.md, specs/mission.md, and specs/tech-stack.md, then asks exactly 3 grouped questions (scope, key decisions, validation) via AskUserQuestion before writing anything. Creates a branch and specs/YYYY-MM-DD-feature-name/{requirements,plan,validation}.md, ensures every feature task pairs with a test task, commits, pushes, and opens a draft PR gated on the project's GitHub Actions CI checks. Use only when called directly.
+description: Scaffold the spec for the next unstarted phase on the roadmap — reads specs/roadmap.md, specs/mission.md, and specs/tech-stack.md, then asks exactly 3 grouped questions (scope, key decisions, validation) via AskUserQuestion before writing anything. Creates a branch and specs/YYYY-MM-DD-feature-name/{requirements,plan,validation}.md, ensures every feature task pairs with a test task, then asks explicit go-ahead before creating the branch and again before committing, pushing, and opening a draft PR gated on the project's GitHub Actions CI checks. Use only when called directly.
 user-invocable: true
 ---
 
@@ -17,6 +17,16 @@ AskUserQuestion has been called once with exactly 3 questions — scope, key dec
 validation — and the answers are folded into the drafts.** Don't guess at scope or
 tradeoffs the phase's checklist leaves open; ask instead. This applies even if the roadmap
 phase looks self-explanatory.
+
+**Hard rule: every git-mutating command requires the user's explicit go-ahead in this
+conversation before it runs — `git checkout -b`, `git add`, `git commit`, `git push`, and
+`gh pr create` are never authorized by the step-5 answers alone.** The scope/decisions/
+validation answers approve *content*, not *touching git*. Ask for confirmation at two
+checkpoints: once before step 6 (branch + folder creation) and once before step 8 (commit,
+push, draft PR) — a plain "ready to create the branch?" / "ready to commit, push, and open
+the draft PR?" is enough, it doesn't need to be an AskUserQuestion call. If the user says
+yes to one checkpoint, that does not carry forward to the other, and it does not carry
+forward to a future run of this skill.
 
 ## Workflow
 
@@ -57,7 +67,9 @@ phase looks self-explanatory.
 
    Do not proceed past this step without answers.
 
-6. **Create the branch and folder.**
+6. **Confirm, then create the branch and folder.**
+   - Ask the user for explicit go-ahead before running any git command (see hard rule above)
+     — don't treat the step-5 answers as that go-ahead.
    - Branch name: `spec/YYYY-MM-DD-<slug>` using today's actual date.
    - Folder: `specs/YYYY-MM-DD-<slug>/` (same date/slug).
    - `git checkout -b` the branch before writing files.
@@ -86,7 +98,10 @@ phase looks self-explanatory.
      phase-specific manual verification (e.g. real-device QA) on top of, not instead of,
      these gates.
 
-8. **Commit, push, open a draft PR.**
+8. **Confirm, then commit, push, and open a draft PR.**
+   - Ask the user for explicit go-ahead before running any git/gh command in this step (see
+     hard rule above) — the step-6 confirmation does not cover this step, and a "yes" here
+     only authorizes this run of the skill, not future ones.
    - `git add` the new spec folder only.
    - Commit message summarizing the phase being speced.
    - Push with `-u` to origin.
