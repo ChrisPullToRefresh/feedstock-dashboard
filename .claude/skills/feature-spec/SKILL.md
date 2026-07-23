@@ -1,6 +1,6 @@
 ---
 name: feature-spec
-description: Scaffold the spec for the next unstarted phase on the roadmap — reads specs/roadmap.md, specs/mission.md, and specs/tech-stack.md, then asks exactly 3 grouped questions (scope, key decisions, validation) via AskUserQuestion before writing anything. Creates a branch and specs/YYYY-MM-DD-feature-name/{requirements,plan,validation}.md, ensures every feature task pairs with a test task, then asks explicit go-ahead before creating the branch and again before committing, pushing, and opening a draft PR gated on the project's GitHub Actions CI checks. Use only when called directly.
+description: Scaffold the spec for the next unstarted phase on the roadmap — reads specs/roadmap.md, specs/mission.md, and specs/tech-stack.md, then asks exactly 3 grouped questions (scope, key decisions, validation) via AskUserQuestion before writing anything. Creates a branch and specs/YYYY-MM-DD-feature-name/{requirements,plan,validation}.md, ensures every feature task pairs with a test task, then asks explicit go-ahead before creating the branch and again before committing, pushing, and opening a draft PR that's marked ready once reviewed — the PR itself adds only spec markdown, so the project's GitHub Actions CI gates (which validation.md records) apply to the phase's future implementation PR, not this one. Use only when called directly.
 user-invocable: true
 ---
 
@@ -90,13 +90,16 @@ forward to a future run of this skill.
      don't write one. If the phase itself is the one standing up the test/CI tooling (per
      roadmap.md, e.g. Phase 1), sequence that setup as task group 1 so later groups' test
      tasks have something to run against.
-   - **validation.md** — a checklist of how to verify the implementation can be merged,
-     built from the validation answer plus the phase's stated "Success criteria" line from
-     roadmap.md. Always include, verbatim as merge gates (from `tech-stack.md`): all four
-     required GitHub Actions checks (lint + typecheck, unit/component tests, E2E tests,
-     production build) green, plus at least one review approval before merge. Add any
-     phase-specific manual verification (e.g. real-device QA) on top of, not instead of,
-     these gates.
+   - **validation.md** — a checklist of how the phase's future *implementation* will be
+     verified before merge, built from the validation answer plus the phase's stated
+     "Success criteria" line from roadmap.md. Always include, verbatim as merge gates (from
+     `tech-stack.md`) for that future implementation PR: all four required GitHub Actions
+     checks (lint + typecheck, unit/component tests, E2E tests, production build) green,
+     plus at least one review approval before merge. Add any phase-specific manual
+     verification (e.g. real-device QA) on top of, not instead of, these gates. State
+     explicitly that these gates belong to the implementation PR that follows this spec —
+     this spec PR itself adds no code, so none of the test/build checks have anything to run
+     against yet.
 
 8. **Confirm, then commit, push, and open a draft PR.**
    - Ask the user for explicit go-ahead before running any git/gh command in this step (see
@@ -106,10 +109,15 @@ forward to a future run of this skill.
    - Commit message summarizing the phase being speced.
    - Push with `-u` to origin.
    - `gh pr create --draft` with a title referencing the phase and a body with a `## Summary`
-     (scope and key decisions) and a `## Test plan` section listing the unit/E2E tests
-     plan.md commits to and the CI checks from validation.md — so the PR is legible against
-     the GitHub Actions run before it's marked ready for review. Leave it in draft; per
-     `tech-stack.md` it only moves to ready once CI is green and it has a reviewer.
+     (scope and key decisions) and a `## Test plan` section. This PR only adds spec markdown
+     under `specs/` — it has no code, so the four GitHub Actions checks in `tech-stack.md`
+     (lint/typecheck, unit tests, E2E tests, build) have nothing to run against and are not a
+     merge gate for it. Frame the Test plan section around the *implementation* those checks
+     will gate once the phase is built: the unit/E2E tests plan.md commits to, plus the merge
+     gates recorded in validation.md — so a reviewer can see what "done" will look like later
+     without mistaking it for this PR's own bar. Leave it in draft; mark it ready once it has
+     a reviewer, rather than waiting on CI job types that can't fail or pass against a
+     docs-only diff.
 
 9. **Report** the branch name, PR URL, and file paths, plus a one-line summary of the
    biggest judgment calls made from the answers so the user can spot anything to correct.
