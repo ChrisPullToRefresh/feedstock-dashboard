@@ -21,6 +21,8 @@ validation.md's Vercel preview check for later PRs).
 
 ## 2. Testing & CI tooling
 
+**Status:** Complete
+
 - Install and configure Vitest + React Testing Library (`vitest.config.ts`,
   jsdom environment, RTL setup file).
 - Install and configure Playwright (`playwright.config.ts`, including a
