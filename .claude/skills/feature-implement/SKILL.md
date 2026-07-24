@@ -28,6 +28,18 @@ the conversation or in a prior run.
 validation.md) fails or can't be run.** Report the failure and stop — don't move on to the
 next group with a known-broken one behind it.
 
+**Hard rule: never run a command that deploys to Vercel from this skill** (`vercel deploy`,
+`vercel --prod`, `vercel --yes`/`vercel -y`, or any other invocation that uploads a build).
+Per tech-stack.md, deploys happen only through Vercel's GitHub integration when a PR is
+pushed/merged — never from the local CLI. This applies even to a task explicitly named
+"deploy" or "confirm an initial deploy succeeds" in plan.md: satisfy it by pushing a branch
+(with the user's go-ahead, per the git-mutating hard rule above) and pointing at the
+resulting GitHub-triggered deployment (e.g. the preview URL Vercel posts on the PR, or the
+production deployment after merge), not by deploying yourself. One-time external setup that
+doesn't push code — `vercel link`, `vercel git connect` to attach an already-existing repo,
+provisioning a database — is not a deploy and is fine, but confirm with the user first since
+it creates or modifies external account resources.
+
 ## Workflow
 
 1. **Locate the active spec directory.**
