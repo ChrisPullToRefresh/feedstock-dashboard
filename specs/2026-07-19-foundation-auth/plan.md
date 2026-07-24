@@ -40,6 +40,8 @@ Delete/replace these once Group 5's real shell tests land.
 
 ## 3. Neon Postgres provisioning & connection
 
+**Status:** Complete
+
 - Provision a Neon Postgres database and link it to the Vercel project
   (env vars for connection string).
 - Add a database client/ORM connection module.

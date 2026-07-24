@@ -20,7 +20,7 @@ before merge.
 
 - [x] Vitest smoke test passes (Group 2 tooling proof)
 - [x] Playwright smoke test passes (Group 2 tooling proof)
-- [ ] Database connection module unit test passes (Group 3)
+- [x] Database connection module unit test passes (Group 3)
 - [ ] Auth middleware unit test passes: signed-out → redirected to sign-in,
       signed-in → allowed through (Group 4)
 - [ ] Auth E2E test passes: unauthenticated → sign-in redirect → sign in →
