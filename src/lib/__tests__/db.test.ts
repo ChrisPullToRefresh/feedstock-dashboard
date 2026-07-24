@@ -26,17 +26,26 @@ describe("db connection module", () => {
     process.env.DATABASE_URL = originalDatabaseUrl;
   });
 
-  it("constructs a client from the DATABASE_URL env var", async () => {
-    await import("../db");
+  it("does not require DATABASE_URL just to import the module", async () => {
+    delete process.env.DATABASE_URL;
+    await expect(import("../db")).resolves.toBeDefined();
+    expect(PoolMock).not.toHaveBeenCalled();
+  });
+
+  it("constructs a client from the DATABASE_URL env var on first use", async () => {
+    queryMock.mockResolvedValue({ rowCount: 1 });
+    const { healthCheck } = await import("../db");
+    await healthCheck();
     expect(PoolMock).toHaveBeenCalledWith({
       connectionString: "postgres://user:pass@host/db",
     });
     expect(attachDatabasePoolMock).toHaveBeenCalled();
   });
 
-  it("throws if DATABASE_URL is not set", async () => {
+  it("throws if DATABASE_URL is not set when a query is attempted", async () => {
     delete process.env.DATABASE_URL;
-    await expect(import("../db")).rejects.toThrow(
+    const { healthCheck } = await import("../db");
+    await expect(healthCheck()).rejects.toThrow(
       "DATABASE_URL environment variable is not set"
     );
   });
