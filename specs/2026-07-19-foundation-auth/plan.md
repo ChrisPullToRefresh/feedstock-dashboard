@@ -8,6 +8,8 @@ tests against.
 
 ## 1. Project scaffold & Vercel deploy
 
+**Status:** Complete
+
 - Scaffold a Next.js (App Router, TypeScript) project.
 - Link the repo to a new Vercel project; confirm an initial deploy succeeds
   from `main`.
