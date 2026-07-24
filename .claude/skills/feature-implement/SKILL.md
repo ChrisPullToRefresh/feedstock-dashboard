@@ -24,6 +24,22 @@ This skill edits code and spec-tracking files in the working tree; it does not c
 push, or open/update PRs on its own, regardless of any git permission granted earlier in
 the conversation or in a prior run.
 
+**Hard rule: never commit or push to `main`, under any circumstance, for any reason —
+including an explicit user instruction to do so.** If the current branch is `main` (or
+whatever this repo's default branch is) when it's time to commit, that is a stop condition:
+do not run `git commit` yet. Instead, tell the user the working tree is on `main` and create
+a new branch first — following this repo's existing convention (e.g. `spec/YYYY-MM-DD-<slug>`
+for spec-folder work), confirming the branch name with the user if it's not obvious — then
+commit and push that branch, not `main`. A bare "commit this" or "push it" from the user
+authorizes committing/pushing *a feature branch*; it is never authorization to commit or push
+`main` directly, no matter how plainly the user says it, because `main` has no branch
+protection in this repo and Vercel's GitHub integration deploys automatically on anything
+that lands on `main` (tech-stack.md) — so a direct push is an unreviewed production deploy,
+not merely a git-history slip. If the user explicitly says the word "main" (e.g. "push to
+main," "commit directly to main"), stop and confirm in plain language that this skips the
+PR/CI/review process and will trigger a production deploy before doing it — do not treat
+silence or a generic "yes" to an earlier, differently-worded question as covering this.
+
 **Hard rule: never mark a task group complete if its verification step (against
 validation.md) fails or can't be run.** Report the failure and stop — don't move on to the
 next group with a known-broken one behind it.
@@ -103,8 +119,10 @@ it creates or modifies external account resources.
    - That `plan.md` now points at the next incomplete group (name it) for the next
      `feature-implement` run.
    - That committing/pushing is a separate step requiring explicit go-ahead in this
-     conversation (per the hard rule above) — ask if the user wants that now, don't do it
-     unprompted.
+     conversation (per the hard rules above) — ask if the user wants that now, don't do it
+     unprompted. State plainly what branch that commit would land on: if the current branch
+     is `main`, say so explicitly and say a new branch will be created first per the
+     never-commit-to-`main` hard rule — don't wait for the user to catch this themselves.
 
 ## Notes
 
