@@ -53,6 +53,8 @@ health-check function returns successfully against a test/dev database.
 
 ## 4. Clerk auth integration with roles
 
+**Status:** Complete
+
 - Integrate Clerk into the Next.js app (provider, sign-in/sign-up routes).
 - Add Next.js middleware that reads `auth()` and requires a signed-in user
   for all routes except sign-in/sign-up.
