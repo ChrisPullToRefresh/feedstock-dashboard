@@ -18,7 +18,7 @@ that an admin can eventually build on top of.
 
 ### In scope
 
-All seven Phase 1 checklist items from roadmap.md:
+All eight Phase 1 checklist items from roadmap.md:
 
 1. Next.js project scaffolded, deployed to Vercel
 2. Neon Postgres database provisioned and connected
@@ -29,6 +29,8 @@ All seven Phase 1 checklist items from roadmap.md:
 6. Playwright configured for E2E tests
 7. GitHub Actions CI pipeline (lint + typecheck, unit tests, E2E tests,
    production build) required on every PR
+8. Commit-message linting (Conventional Commits via commitlint) enforced
+   both locally (Husky `commit-msg` hook) and in CI
 
 ### Out of scope (deferred)
 
@@ -89,6 +91,23 @@ not just by omitting a sign-up page from the UI.
   sign-up flow directly through Clerk's hosted UI or API even if the
   Next.js route didn't exist.
 
+### Commit message conventions: Conventional Commits, enforced locally and in CI
+
+Every commit follows [Conventional Commits](https://www.conventionalcommits.org/)
+(`type(scope): summary`), linted by `commitlint` both via a local Husky `commit-msg` hook
+and as a required GitHub Actions check on the PR's commit range.
+
+**Rationale:**
+- Per tech-stack.md's Commit Message Conventions section — this phase is where the
+  repo's tooling gets stood up (Vitest/Playwright/CI in Group 2), so commit linting
+  belongs alongside it rather than waiting for a later phase to retrofit.
+- Checking both locally and in CI (rather than either alone) means a bypassed or
+  missing local hook (`--no-verify`, a fresh clone, a GitHub web UI edit) still gets
+  caught before merge.
+- This repo's commit history predates the convention (see prior commits' free-form
+  subject lines) — enforcement starts from this phase forward; there's no need to
+  rewrite existing history to comply.
+
 ## Context from mission.md
 
 - Primary persona (Facility Scale Operator) works in the field, often
@@ -105,7 +124,9 @@ not just by omitting a sign-up page from the UI.
 - Vitest + React Testing Library for unit/component tests; Playwright for
   E2E, including mobile-viewport emulation.
 - GitHub Actions must run lint + typecheck, unit/component tests, E2E
-  tests, and a production build (`next build`) on every PR; all four must
-  be green, plus at least one review approval, before merge. PRs open as
-  drafts and move to ready only once CI is green and the test plan is
-  filled in.
+  tests, a production build (`next build`), and commit-message lint on
+  every PR; all five must be green, plus at least one review approval,
+  before merge. PRs open as drafts and move to ready only once CI is green
+  and the test plan is filled in.
+- Commit messages follow Conventional Commits, enforced by commitlint both
+  via a local Husky `commit-msg` hook and as a required CI check.

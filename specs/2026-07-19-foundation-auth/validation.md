@@ -4,8 +4,8 @@
 
 A logged-in user can reach an empty authenticated shell of the app on both
 mobile and desktop, and a PR against `main` runs the full CI pipeline
-(lint, typecheck, unit tests, E2E tests, build) automatically and must pass
-before merge.
+(lint, typecheck, unit tests, E2E tests, build, commit-message lint)
+automatically and must pass before merge.
 
 ## Merge gates (tech-stack.md, required verbatim)
 
@@ -13,6 +13,7 @@ before merge.
 - [ ] Unit/component tests (Vitest + React Testing Library) check green
 - [ ] E2E tests (Playwright) check green
 - [ ] Production build (`next build`) check green
+- [ ] Commit-message lint (commitlint, Conventional Commits) check green
 - [ ] At least one review approval (CI green alone is not sufficient to
       merge)
 
@@ -30,6 +31,12 @@ before merge.
 - [ ] Layout/nav shell component test passes (Group 5)
 - [ ] Shell E2E test passes at both mobile-viewport and desktop-viewport
       Playwright device profiles (Group 5)
+- [ ] Commitlint config test passes: accepts well-formed Conventional
+      Commits messages, rejects malformed ones (Group 6)
+- [ ] Husky `commit-msg` hook blocks a malformed commit locally (Group 6,
+      manual/local check — not something CI can observe about itself)
+- [ ] GitHub Actions commit-message lint check is green on this phase's PR
+      commit range (Group 6)
 
 ## Manual verification (this phase's validation answer)
 

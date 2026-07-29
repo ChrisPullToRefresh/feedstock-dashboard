@@ -6,6 +6,12 @@ Vitest/RTL/Playwright/GitHub Actions tooling itself, per tech-stack.md's
 Testing & CI/CD Practices, so every group after it has something to run
 tests against.
 
+Group 6 (commit-message linting) is conceptually repo tooling like Group 2
+and would normally sit right after it, but it was added to this plan after
+Groups 1–4 had already landed — renumbering/reinserting among completed
+groups would rewrite settled history for no benefit, so it's appended at
+the end instead. Its CI/Husky wiring doesn't depend on any other group.
+
 ## 1. Project scaffold & Vercel deploy
 
 **Status:** Complete
@@ -96,3 +102,21 @@ health-check function returns successfully against a test/dev database.
   desktop viewport, covering the primary flow: sign in → land on the empty
   authenticated shell (this is the scenario validation.md's automated-test
   gate and manual mobile-viewport check both key off of).
+
+## 6. Commit-message linting (commitlint)
+
+- Install and configure `commitlint` with `@commitlint/config-conventional`.
+- Add a Husky `commit-msg` git hook so every local commit is linted before
+  it's created.
+- Add a commit-message lint step to the GitHub Actions CI workflow, linting
+  the PR's full commit range (not just the latest commit) as a required
+  check, per tech-stack.md.
+- Document the convention (allowed types, format, examples) for
+  contributors — e.g. in `CONTRIBUTING.md` or this repo's README.
+
+**Test task:** Vitest test invoking commitlint's programmatic API directly
+against a table of sample commit messages — confirms the config accepts
+well-formed Conventional Commits messages and rejects malformed ones
+(missing type, non-imperative-looking noise, oversized summary line), so
+the rule set itself is verified independent of the Husky/CI wiring around
+it.

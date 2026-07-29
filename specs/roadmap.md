@@ -13,11 +13,13 @@ facility data to be entered.
 - [ ] Playwright configured for E2E tests
 - [ ] GitHub Actions CI pipeline (lint + typecheck, unit tests, E2E tests,
       production build) required on every PR
+- [ ] Commit-message linting (Conventional Commits via commitlint) enforced
+      both locally (Husky `commit-msg` hook) and in CI
 
 **Success criteria:** A logged-in user can reach an empty authenticated
 shell of the app on both mobile and desktop, and a PR against `main` runs
-the full CI pipeline (lint, typecheck, unit tests, E2E tests, build)
-automatically and must pass before merge.
+the full CI pipeline (lint, typecheck, unit tests, E2E tests, build,
+commit-message lint) automatically and must pass before merge.
 
 ## Phase 2: Producers & Sequestration Sites
 
