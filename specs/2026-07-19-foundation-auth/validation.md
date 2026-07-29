@@ -40,11 +40,14 @@ automatically and must pass before merge.
 
 ## Manual verification (this phase's validation answer)
 
-- [ ] **Vercel preview review:** open the actual deployed Vercel preview
-      URL for the PR (not just localhost/CI) and confirm sign-in and the
-      empty shell work against the real deployment — catches deploy/env
-      misconfiguration (e.g. Clerk redirect URLs, Neon connection string)
-      that localhost-based automated tests can't.
+- [ ] **Vercel preview review (Group 5):** open the actual deployed Vercel
+      preview URL for the PR (not just localhost/CI) and confirm sign-in
+      and the empty shell work against the real deployment — catches
+      deploy/env misconfiguration (e.g. Clerk redirect URLs, Neon
+      connection string) that localhost-based automated tests can't.
+      Deferred to Group 5: there's no shell to review yet, only the
+      default Next.js starter page behind sign-in — not required to land
+      or mark ready any PR that covers Group 4 alone.
 - [ ] **Real mobile-device check:** open the Vercel preview URL on an
       actual phone/tablet and confirm sign-in and the shell render and
       behave correctly, in addition to Playwright's emulated mobile
