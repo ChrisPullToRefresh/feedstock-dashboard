@@ -20,6 +20,38 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Manual setup steps
+
+Some setup can't be scripted and has to be done by hand in each provider's dashboard.
+
+### Clerk: expose `publicMetadata` on the session token
+
+`src/proxy.ts` reads each user's role off `sessionClaims.metadata.role`, but Clerk
+doesn't include `publicMetadata` in the session token by default. Configure it once per
+Clerk application:
+
+1. Go to [dashboard.clerk.com](https://dashboard.clerk.com) and select this project's
+   Clerk application (`clerk-fulvous-bucket`).
+2. In the left sidebar, click **Sessions**.
+3. Find the **"Customize session token"** section and its **Claims** editor.
+4. Add this claim (merge it in if the editor already has other claims, don't replace them):
+   ```json
+   {
+     "metadata": "{{user.public_metadata}}"
+   }
+   ```
+5. Click **Save**.
+
+No restart or redeploy needed. Notes:
+- Custom claims refresh roughly every 60 seconds, so a role change can take up to a
+  minute to show up in a live session.
+- Keep total custom claims under ~1.2KB — session tokens are stored in a cookie, and
+  browsers cap cookies at ~4KB.
+
+Each test/dev user's role is set via `publicMetadata.role` (`"admin"` or `"operator"`),
+either in the Clerk dashboard's Users page or via `clerk api /users/<id>/metadata -X
+PATCH -d '{"public_metadata":{"role":"operator"}}'`.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
