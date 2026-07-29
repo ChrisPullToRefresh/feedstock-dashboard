@@ -25,6 +25,8 @@ before merge.
       signed-in → allowed through (Group 4)
 - [x] Auth E2E test passes: unauthenticated → sign-in redirect → sign in →
       authenticated shell (Group 4)
+- [x] No-public-sign-up E2E test passes: `/sign-up` redirects unauthenticated
+      visitors to sign-in and 404s for signed-in users (Group 4)
 - [ ] Layout/nav shell component test passes (Group 5)
 - [ ] Shell E2E test passes at both mobile-viewport and desktop-viewport
       Playwright device profiles (Group 5)

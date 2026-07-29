@@ -55,22 +55,32 @@ health-check function returns successfully against a test/dev database.
 
 **Status:** Complete
 
-- Integrate Clerk into the Next.js app (provider, sign-in/sign-up routes).
+- Integrate Clerk into the Next.js app (provider, sign-in route).
 - Add Next.js middleware that reads `auth()` and requires a signed-in user
-  for all routes except sign-in/sign-up.
+  for all routes except sign-in.
 - Set each test/dev user's role via `publicMetadata.role` (`"admin"` or
   `"operator"`) in the Clerk dashboard; read the role off
   `sessionClaims.metadata.role` in middleware so it's available for future
   gating (enforcement itself is Phase 4 scope, per requirements.md).
+- **No public sign-up.** There is no `/sign-up` route. New users are
+  provisioned only by admins, via Clerk invitations (or, for scripted
+  test/dev setup, the Backend API) — never self-service. Enforced at the
+  Clerk instance level (`restricted_to_allowlist: true` via
+  `PATCH /beta_features/instance_settings`), not just by omitting the page,
+  so it can't be reached even if someone finds/guesses the URL.
 
 **Test tasks:**
 - Vitest/RTL unit test for the middleware's redirect behavior (signed-out
-  user → sign-in page; signed-in user → allowed through), mocking Clerk's
-  `auth()`.
+  user → sign-in page; signed-in user → allowed through; hitting `/sign-up`
+  is treated as any other protected route, not a public one), mocking
+  Clerk's `auth()`.
 - Playwright E2E test covering the primary flow: an unauthenticated user
   hitting the app is redirected to sign-in; after signing in (test Clerk
   credentials from repo/environment secrets, per tech-stack.md), the user
   reaches the authenticated shell.
+- Playwright E2E test confirming `/sign-up` offers no self-serve sign-up:
+  unauthenticated visitors are redirected to sign-in (same as any other
+  route); a signed-in user gets a 404 (the route doesn't exist).
 
 ## 5. Base mobile-friendly layout/navigation shell
 

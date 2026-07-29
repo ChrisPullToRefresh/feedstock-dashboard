@@ -68,16 +68,23 @@ describe("proxy", () => {
     expect(response).toBeDefined();
   });
 
-  it.each(["/sign-in", "/sign-up"])(
-    "does not require sign-in on the public route %s",
-    async (pathname) => {
-      const proxy = await loadProxy();
-      const auth = makeAuth({ signedIn: false });
+  it("does not require sign-in on the public /sign-in route", async () => {
+    const proxy = await loadProxy();
+    const auth = makeAuth({ signedIn: false });
 
-      const response = await proxy(auth, makeRequest(pathname));
+    const response = await proxy(auth, makeRequest("/sign-in"));
 
-      expect(auth.protect).not.toHaveBeenCalled();
-      expect(response).toBeDefined();
-    }
-  );
+    expect(auth.protect).not.toHaveBeenCalled();
+    expect(response).toBeDefined();
+  });
+
+  it("requires sign-in on /sign-up (no public sign-up route exists)", async () => {
+    const proxy = await loadProxy();
+    const auth = makeAuth({ signedIn: false });
+
+    await expect(proxy(auth, makeRequest("/sign-up"))).rejects.toThrow(
+      "redirect-to-sign-in"
+    );
+    expect(auth.protect).toHaveBeenCalled();
+  });
 });

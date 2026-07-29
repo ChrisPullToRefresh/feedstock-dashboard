@@ -1,7 +1,9 @@
 import { clerkMiddleware } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-const PUBLIC_PATHS = ["/sign-in", "/sign-up"];
+// No public sign-up: this app has no /sign-up route. New users are
+// provisioned by admins via Clerk invitations, never self-service.
+const PUBLIC_PATHS = ["/sign-in"];
 
 export default clerkMiddleware(async (auth, req) => {
   const isPublicRoute = PUBLIC_PATHS.some((path) =>

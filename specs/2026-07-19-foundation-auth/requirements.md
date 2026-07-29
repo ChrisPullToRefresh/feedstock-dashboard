@@ -22,7 +22,8 @@ All seven Phase 1 checklist items from roadmap.md:
 
 1. Next.js project scaffolded, deployed to Vercel
 2. Neon Postgres database provisioned and connected
-3. Clerk auth integrated with roles (scale operator vs. admin)
+3. Clerk auth integrated with roles (scale operator vs. admin); no public
+   self-serve sign-up — admins provision users via Clerk invitations
 4. Base mobile-friendly layout/navigation shell
 5. Vitest + React Testing Library configured for unit/component tests
 6. Playwright configured for E2E tests
@@ -67,6 +68,26 @@ later.
   systems this early; also rejected: Clerk Organizations, which models
   multi-tenant orgs that mission.md's single-facility context doesn't call
   for).
+
+### No public sign-up: admin-issued Clerk invitations only
+
+There is no self-serve `/sign-up` route or flow anywhere in the app. New
+users are provisioned only by an admin, through Clerk's invitation
+mechanism (or, for scripted test/dev users, the Backend API). This is
+enforced on the Clerk instance itself (`restricted_to_allowlist: true`),
+not just by omitting a sign-up page from the UI.
+
+**Rationale:**
+- The Facility Scale Operator and admin roles both correspond to real
+  facility staff, not an open user base — there's no scenario where an
+  unknown person should be able to create their own account.
+- Auditability (tech-stack.md's rationale for choosing Clerk) depends on
+  every account being traceable to a deliberate admin action, not a
+  self-service form.
+- Enforcing this at the instance level (rather than only deleting the
+  `/sign-up` page) closes the gap where someone could still reach a
+  sign-up flow directly through Clerk's hosted UI or API even if the
+  Next.js route didn't exist.
 
 ## Context from mission.md
 
