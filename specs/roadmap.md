@@ -5,13 +5,14 @@
 **Goal:** Stand up the app skeleton with authenticated access, ready for
 facility data to be entered.
 
-- [ ] Next.js project scaffolded, deployed to Vercel
-- [ ] Neon Postgres database provisioned and connected
-- [ ] Clerk auth integrated with roles (e.g. scale operator vs. admin)
+- [x] Next.js project scaffolded, deployed to Vercel
+- [x] Neon Postgres database provisioned and connected
+- [x] Clerk auth integrated with roles (e.g. scale operator vs. admin); no
+      public self-serve sign-up — admin-issued invitations only
 - [ ] Base mobile-friendly layout/navigation shell
-- [ ] Vitest + React Testing Library configured for unit/component tests
-- [ ] Playwright configured for E2E tests
-- [ ] GitHub Actions CI pipeline (lint + typecheck, unit tests, E2E tests,
+- [x] Vitest + React Testing Library configured for unit/component tests
+- [x] Playwright configured for E2E tests
+- [x] GitHub Actions CI pipeline (lint + typecheck, unit tests, E2E tests,
       production build) required on every PR
 - [ ] Commit-message linting (Conventional Commits via commitlint) enforced
       both locally (Husky `commit-msg` hook) and in CI
