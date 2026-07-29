@@ -18,16 +18,19 @@ that an admin can eventually build on top of.
 
 ### In scope
 
-All seven Phase 1 checklist items from roadmap.md:
+All eight Phase 1 checklist items from roadmap.md:
 
 1. Next.js project scaffolded, deployed to Vercel
 2. Neon Postgres database provisioned and connected
-3. Clerk auth integrated with roles (scale operator vs. admin)
+3. Clerk auth integrated with roles (scale operator vs. admin); no public
+   self-serve sign-up — admins provision users via Clerk invitations
 4. Base mobile-friendly layout/navigation shell
 5. Vitest + React Testing Library configured for unit/component tests
 6. Playwright configured for E2E tests
 7. GitHub Actions CI pipeline (lint + typecheck, unit tests, E2E tests,
    production build) required on every PR
+8. Commit-message linting (Conventional Commits via commitlint) enforced
+   both locally (Husky `commit-msg` hook) and in CI
 
 ### Out of scope (deferred)
 
@@ -68,6 +71,43 @@ later.
   multi-tenant orgs that mission.md's single-facility context doesn't call
   for).
 
+### No public sign-up: admin-issued Clerk invitations only
+
+There is no self-serve `/sign-up` route or flow anywhere in the app. New
+users are provisioned only by an admin, through Clerk's invitation
+mechanism (or, for scripted test/dev users, the Backend API). This is
+enforced on the Clerk instance itself (`restricted_to_allowlist: true`),
+not just by omitting a sign-up page from the UI.
+
+**Rationale:**
+- The Facility Scale Operator and admin roles both correspond to real
+  facility staff, not an open user base — there's no scenario where an
+  unknown person should be able to create their own account.
+- Auditability (tech-stack.md's rationale for choosing Clerk) depends on
+  every account being traceable to a deliberate admin action, not a
+  self-service form.
+- Enforcing this at the instance level (rather than only deleting the
+  `/sign-up` page) closes the gap where someone could still reach a
+  sign-up flow directly through Clerk's hosted UI or API even if the
+  Next.js route didn't exist.
+
+### Commit message conventions: Conventional Commits, enforced locally and in CI
+
+Every commit follows [Conventional Commits](https://www.conventionalcommits.org/)
+(`type(scope): summary`), linted by `commitlint` both via a local Husky `commit-msg` hook
+and as a required GitHub Actions check on the PR's commit range.
+
+**Rationale:**
+- Per tech-stack.md's Commit Message Conventions section — this phase is where the
+  repo's tooling gets stood up (Vitest/Playwright/CI in Group 2), so commit linting
+  belongs alongside it rather than waiting for a later phase to retrofit.
+- Checking both locally and in CI (rather than either alone) means a bypassed or
+  missing local hook (`--no-verify`, a fresh clone, a GitHub web UI edit) still gets
+  caught before merge.
+- This repo's commit history predates the convention (see prior commits' free-form
+  subject lines) — enforcement starts from this phase forward; there's no need to
+  rewrite existing history to comply.
+
 ## Context from mission.md
 
 - Primary persona (Facility Scale Operator) works in the field, often
@@ -84,7 +124,9 @@ later.
 - Vitest + React Testing Library for unit/component tests; Playwright for
   E2E, including mobile-viewport emulation.
 - GitHub Actions must run lint + typecheck, unit/component tests, E2E
-  tests, and a production build (`next build`) on every PR; all four must
-  be green, plus at least one review approval, before merge. PRs open as
-  drafts and move to ready only once CI is green and the test plan is
-  filled in.
+  tests, a production build (`next build`), and commit-message lint on
+  every PR; all five must be green, plus at least one review approval,
+  before merge. PRs open as drafts and move to ready only once CI is green
+  and the test plan is filled in.
+- Commit messages follow Conventional Commits, enforced by commitlint both
+  via a local Husky `commit-msg` hook and as a required CI check.

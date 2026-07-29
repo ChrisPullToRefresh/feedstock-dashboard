@@ -19,10 +19,13 @@ name** (e.g. `/feature-implement`, "run feature-implement"). General requests li
 going through this skill's workflow or its plan.md/validation.md bookkeeping.
 
 **Hard rule: never run a git-mutating command (`git add`, `git commit`, `git push`, branch
-creation/switching) without the user's explicit go-ahead in this specific conversation.**
-This skill edits code and spec-tracking files in the working tree; it does not commit,
-push, or open/update PRs on its own, regardless of any git permission granted earlier in
-the conversation or in a prior run.
+creation/switching, opening/updating a PR) without the user's explicit go-ahead in this
+specific conversation.** This skill edits code and spec-tracking files in the working tree;
+it does not commit, push, or open/update a PR on its own, regardless of any git permission
+granted earlier in the conversation or in a prior run. Once the user gives that go-ahead,
+treat commit + push + open-or-update-the-task-group-PR as one step per tech-stack.md's PR
+practice (see workflow step 8) — don't stop after pushing and make the user ask separately
+for the PR.
 
 **Hard rule: never commit or push to `main`, under any circumstance, for any reason —
 including an explicit user instruction to do so.** If the current branch is `main` (or
@@ -102,9 +105,9 @@ it creates or modifies external account resources.
      could plausibly break them — catching this now is cheaper than in CI later.
    - Check off the matching `- [ ]` → `- [x]` items in validation.md's automated coverage
      checklist for this group only. Do **not** check off the "Merge gates" checklist (CI
-     job checks, review approval) — those apply to the eventual implementation PR as a
-     whole once all groups land, not to a single local task-group run, and this skill
-     doesn't open or manage that PR.
+     job checks, review approval) — those apply to the PR as a whole once CI has actually
+     run remotely and a reviewer has approved, neither of which this local run can confirm
+     (see step 8 for this skill's PR handling).
    - If a test fails or a checklist item can't be verified, stop here: report what failed,
      leave the plan.md group's status as `In progress` (not `Complete`) and leave the
      validation.md item unchecked. Fix-and-retry within this same run is fine; silently
@@ -118,11 +121,38 @@ it creates or modifies external account resources.
    - Test/verification results, and which validation.md items got checked off.
    - That `plan.md` now points at the next incomplete group (name it) for the next
      `feature-implement` run.
-   - That committing/pushing is a separate step requiring explicit go-ahead in this
-     conversation (per the hard rules above) — ask if the user wants that now, don't do it
-     unprompted. State plainly what branch that commit would land on: if the current branch
-     is `main`, say so explicitly and say a new branch will be created first per the
-     never-commit-to-`main` hard rule — don't wait for the user to catch this themselves.
+   - That committing/pushing/opening-or-updating the PR is a separate step requiring
+     explicit go-ahead in this conversation (per the hard rules above) — ask if the user
+     wants that now, don't do it unprompted, and frame it as one combined step (not "push,
+     then separately ask about a PR"). State plainly what branch that commit would land on:
+     if the current branch is `main`, say so explicitly and say a new branch will be created
+     first per the never-commit-to-`main` hard rule — don't wait for the user to catch this
+     themselves.
+
+8. **Once given the go-ahead, commit, push, and open or update the task-group PR** — this
+   is one step, not three separate asks. Per tech-stack.md's PR practice:
+   - **Branch/base:** head is the current spec branch (e.g. `spec/YYYY-MM-DD-<slug>`), base
+     is `main`.
+   - **Check for an existing open PR** for this branch first (e.g. `gh pr list --head
+     <branch> --state open`). This repo's convention is one PR per task group, or a small
+     bundle of consecutive groups landed together (see prior PRs' titles/bodies for the
+     pattern) — if an open PR already covers this branch (e.g. a second `feature-implement`
+     run continuing the same PR), **update its description** rather than opening a
+     duplicate: fold this group's summary/test-plan into the existing body instead of
+     replacing what's already there.
+   - **If none exists, open one as a draft** (`gh pr create --draft`), titled
+     `Phase <N>, Group <M>[–<M2>]: <short description>` (match the phase number from
+     `specs/roadmap.md` and the group title(s) from `plan.md`), with a body containing:
+     - `## Summary` — bullet points of what changed, referencing the spec folder/group(s).
+     - `## Test plan` — a checklist mirroring this run's verification: check off what you
+       actually ran and confirmed locally (lint, typecheck, unit tests, build, any manual
+       check like hitting a health endpoint); leave CI, PR review, and any
+       Vercel-preview/real-device manual-verification items from validation.md **unchecked**
+       with a short note on why (they can't be verified from this local run).
+   - **Never mark the PR "ready for review" yourself.** Per tech-stack.md, that transition
+     only happens once GitHub Actions has run on the pushed branch and gone green — this
+     skill runs locally and can't observe that. Leave the PR in draft and tell the user to
+     mark it ready once CI is green and the test plan is fully filled in.
 
 ## Notes
 

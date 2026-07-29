@@ -13,12 +13,18 @@ export default defineConfig({
   },
   projects: [
     {
+      name: "setup",
+      testMatch: /global\.setup\.ts/,
+    },
+    {
       name: "Desktop Chrome",
       use: { ...devices["Desktop Chrome"] },
+      dependencies: ["setup"],
     },
     {
       name: "Mobile Chrome",
       use: { ...devices["Pixel 7"] },
+      dependencies: ["setup"],
     },
   ],
   webServer: {
