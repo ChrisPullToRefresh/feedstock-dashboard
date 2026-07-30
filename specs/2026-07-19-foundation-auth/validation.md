@@ -31,9 +31,9 @@ automatically and must pass before merge.
 - [x] Layout/nav shell component test passes (Group 5)
 - [x] Shell E2E test passes at both mobile-viewport and desktop-viewport
       Playwright device profiles (Group 5)
-- [ ] Commitlint config test passes: accepts well-formed Conventional
+- [x] Commitlint config test passes: accepts well-formed Conventional
       Commits messages, rejects malformed ones (Group 6)
-- [ ] Husky `commit-msg` hook blocks a malformed commit locally (Group 6,
+- [x] Husky `commit-msg` hook blocks a malformed commit locally (Group 6,
       manual/local check — not something CI can observe about itself)
 - [ ] GitHub Actions commit-message lint check is green on this phase's PR
       commit range (Group 6)

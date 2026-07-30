@@ -107,6 +107,8 @@ health-check function returns successfully against a test/dev database.
 
 ## 6. Commit-message linting (commitlint)
 
+**Status:** Complete
+
 - Install and configure `commitlint` with `@commitlint/config-conventional`.
 - Add a Husky `commit-msg` git hook so every local commit is linted before
   it's created.
