@@ -10,7 +10,8 @@ Cross-checks every planning doc in the repo against every other one and reports 
 drifted apart: the constitution (`mission.md`, `tech-stack.md`, `roadmap.md`) contradicting
 itself, a spec contradicting the constitution or another spec, a doc asserting something the
 rest of the repo shows is no longer true, or a spec doing more or less than its own stated
-scope. It's an audit, not a fixer — it reports, then asks before touching anything.
+scope. It's an audit, not a fixer — it walks through findings one at a time and asks before
+touching anything.
 
 **Hard rule: only run this skill when the user directly and explicitly invokes it by name**
 (e.g. `/align`, "run align") or explicitly asks to align/audit the project docs. General
@@ -18,11 +19,18 @@ requests like "check the docs" or "does this look right" are NOT automatically t
 use judgment, and if it's ambiguous, ask.
 
 **Hard rule: read-only unless and until the user asks for a fix.** This skill never edits
-`mission.md`, `tech-stack.md`, `roadmap.md`, or any file under `specs/*/` on its own. It
-produces a report; fixing individual findings afterward is ordinary spec-editing work the
-user opts into per finding (or in a batch), not something this skill does automatically —
-and any resulting commit/push still needs the user's explicit go-ahead per this repo's
-standing git rules.
+`mission.md`, `tech-stack.md`, `roadmap.md`, or any file under `specs/*/` on its own. Fixing
+a finding is ordinary spec-editing work the user opts into for that finding specifically, not
+something this skill does automatically — and any resulting commit/push still needs the
+user's explicit go-ahead per this repo's standing git rules.
+
+**Hard rule: present findings one at a time via `AskUserQuestion`, never as a single batch
+dump.** Compile the full set of findings first (steps 3–5), but don't print them all in one
+message followed by one blanket "which do you want to fix" question — that's the failure
+mode this rule exists to prevent. A one-line heads-up with the total count and category
+breakdown is fine up front (e.g., "Found 3 issues: 1 contradiction, 2 stale claims — let's go
+through them one at a time."); the findings themselves are delivered and decided on
+individually, most consequential first, per step 7.
 
 **Hard rule: every finding must cite concrete text on both sides of the conflict** (file +
 section/heading, quoted or closely paraphrased) — a vague sense that something seems off
@@ -72,17 +80,23 @@ makes the report actionable instead of noise.
    - A phase's `roadmap.md` checklist and its spec's `requirements.md` "In scope" list
      covering different sets of items, in either direction.
 
-6. **Report**, grouped by category (Contradictions, Stale Claims, Scope Drift), most
-   consequential first within each group. Each finding: a one-line summary, the two citations
-   it's built on (file + section), and why they conflict. If a category is empty, say so
-   explicitly ("No contradictions found") rather than omitting the section — a clean bill of
-   health is a result, not silence. Close with a count summary (e.g. "3 contradictions, 1
-   stale claim, 2 scope-drift items across 2 spec folders").
+6. **Compile findings** across all three categories (Contradictions, Stale Claims, Scope
+   Drift) and rank them most consequential first overall. If every category is empty, say so
+   directly — e.g. "No contradictions, stale claims, or scope drift found across N spec
+   folders" — and stop; there's nothing to walk through.
 
-7. **Ask which findings, if any, to fix now.** Don't fix anything unprompted. If the user
-   picks findings to fix, treat each as normal spec-editing work in the relevant file(s) —
-   this skill's job ends at the report and that follow-up conversation, not a separate
-   fix-mode workflow.
+7. **Walk through findings one at a time.** Give the one-line heads-up (total count + category
+   breakdown per the hard rule above), then for each finding in ranked order:
+   - State it: a one-line summary, the two citations it's built on (file + section, quoted or
+     closely paraphrased), and why they conflict.
+   - Use `AskUserQuestion` to ask what to do with this specific finding — options along the
+     lines of "Fix now" and "Skip for now" (the tool always offers a free-form "Other" too).
+   - If the answer is to fix it, do that fix now as ordinary spec-editing work in the
+     relevant file(s), then move to the next finding. If it's to skip, move on without
+     changing anything for that finding.
+   - Don't proceed to the next finding until the current one is resolved one way or the
+     other. Never fall back to listing several findings in one message with a single combined
+     question — one finding, one question, one resolution, then the next.
 
 ## Notes
 
