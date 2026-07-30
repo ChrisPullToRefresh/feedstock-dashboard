@@ -1,8 +1,10 @@
+import { connection } from "next/server";
 import Link from "next/link";
 import { list } from "@/lib/producers";
 import { ProducerList } from "@/components/ProducerList";
 
 export default async function ProducersPage() {
+  await connection();
   const producers = await list();
 
   return (
