@@ -27,11 +27,11 @@ commit-message lint) automatically and must pass before merge.
 **Goal:** Support managing the two reference lists that weight entries
 depend on.
 
-- [ ] Data model for feedstock producers
-- [ ] Data model for sequestration sites
-- [ ] Dedicated page to create a new feedstock producer
-- [ ] Dedicated page to create a new sequestration site
-- [ ] List views for existing producers and sites
+- [x] Data model for feedstock producers
+- [x] Data model for sequestration sites
+- [x] Dedicated page to create a new feedstock producer
+- [x] Dedicated page to create a new sequestration site
+- [x] List views for existing producers and sites
 
 **Success criteria:** An admin can create and view feedstock producers and
 sequestration sites, which then populate dropdown lists.

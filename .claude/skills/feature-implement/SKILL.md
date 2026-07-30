@@ -143,12 +143,37 @@ it creates or modifies external account resources.
 
 6. **Mark the group `Complete` in `plan.md`** only after step 5 passes clean.
 
+6a. **If that was the last incomplete task group, sync `specs/roadmap.md`.**
+   - Check whether every task group in `plan.md` is now `Complete`. If any group is still
+     `Not started` or `In progress`, skip this step — roadmap.md stays untouched until the
+     whole spec is done.
+   - If the whole spec is now complete, find this phase's section in `specs/roadmap.md`
+     (match it via `requirements.md`'s "Goal" line, which cites the phase name/number) and
+     check off `- [ ]` → `- [x]` for every checklist item listed in `requirements.md`'s "In
+     scope" section — those are the roadmap items this spec's `plan.md` was built to cover.
+   - Only check off items `requirements.md`'s "In scope" list actually names. If the phase's
+     roadmap checklist has an item that section doesn't cover, leave it unchecked and flag
+     it to the user in step 7's report — that's a sign the phase isn't fully done yet, not
+     something to silently check off.
+   - This keeps `roadmap.md` from silently drifting out of sync with a spec's real
+     completion status — previously this required a separate `/align` run to catch (e.g.
+     Phase 2's checkboxes staying unchecked after all 3 of its task groups had already
+     shipped). It's a working-tree edit like the `plan.md`/`validation.md` status updates
+     elsewhere in this step: no separate go-ahead beyond what already governs this skill's
+     non-git file edits, and still subject to the same commit go-ahead in step 8 before it's
+     committed.
+
 7. **Report**, without committing anything:
    - Which spec folder and task group were worked.
-   - Files changed (code + the two spec files' status updates).
+   - Files changed (code + the two spec files' status updates, plus `specs/roadmap.md` if
+     step 6a fired).
    - Test/verification results, and which validation.md items got checked off.
+   - If step 6a fired, say so explicitly and name which roadmap.md items got checked (or, if
+     any in-scope item didn't have a matching roadmap checklist entry, flag that mismatch
+     instead of silently resolving it).
    - That `plan.md` now points at the next incomplete group (name it) for the next
-     `feature-implement` run.
+     `feature-implement` run — or, if step 6a fired, that this spec's phase is fully done and
+     roadmap.md now reflects it.
    - That committing/pushing/opening-or-updating the PR is a separate step requiring
      explicit go-ahead in this conversation (per the hard rules above) — ask if the user
      wants that now, don't do it unprompted, and frame it as one combined step (not "push,
@@ -199,9 +224,10 @@ it creates or modifies external account resources.
 
 ## Notes
 
-- This skill doesn't touch `specs/roadmap.md` — marking a roadmap phase's checklist done is
-  a judgment call across the whole phase (all its task groups, its manual verification, its
-  merge gates), not something a single task-group run should decide.
+- This skill only touches `specs/roadmap.md` via step 6a, and only at the moment a spec's
+  final task group completes — matching `requirements.md`'s recorded "In scope" items to
+  that phase's checklist. It never touches roadmap.md mid-phase (a single task-group
+  completion doesn't imply the phase is done) or for phases with no active spec.
 - If `requirements.md`, `plan.md`, or `validation.md` is missing or looks incomplete (e.g.
   no task groups, or a group with no paired test task), say so and stop rather than
   inventing the missing structure — that's a sign the spec itself needs fixing via
