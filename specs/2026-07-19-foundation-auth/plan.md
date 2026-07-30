@@ -90,6 +90,8 @@ health-check function returns successfully against a test/dev database.
 
 ## 5. Base mobile-friendly layout/navigation shell
 
+**Status:** Complete
+
 - Build a minimal authenticated layout: header/nav shell, responsive
   breakpoints (mobile-first per mission.md), empty content area.
 - Wire the shell as the landing point after sign-in.
