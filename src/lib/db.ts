@@ -1,4 +1,4 @@
-import { Pool } from "pg";
+import { Pool, type QueryResultRow } from "pg";
 import { attachDatabasePool } from "@vercel/functions";
 
 // Created lazily on first use (not at module load) so importing this module
@@ -23,4 +23,11 @@ function getPool(): Pool {
 export async function healthCheck(): Promise<boolean> {
   const result = await getPool().query("SELECT 1");
   return result.rowCount === 1;
+}
+
+export async function query<T extends QueryResultRow>(
+  text: string,
+  params?: unknown[]
+) {
+  return getPool().query<T>(text, params);
 }

@@ -6,7 +6,7 @@ be built against it.
 
 ## 1. Data models for producers & sequestration sites
 
-**Status:** Not started
+**Status:** Complete
 
 - Add a Neon migration creating `producers` (`id`, `name`, `created_at`) and
   `sequestration_sites` (`id`, `name`, `created_at`) tables, per requirements.md's minimal
