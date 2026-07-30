@@ -22,18 +22,22 @@ going through this skill's workflow or its plan.md/validation.md bookkeeping.
 creation/switching, opening/updating a PR) without the user's explicit go-ahead in this
 specific conversation.** This skill edits code and spec-tracking files in the working tree;
 it does not commit, push, or open/update a PR on its own, regardless of any git permission
-granted earlier in the conversation or in a prior run. Once the user gives that go-ahead,
+granted earlier in the conversation or in a prior run. Branch creation happens *before*
+implementation (see workflow step 1a), on its own go-ahead — it is not bundled with the
+later commit/push/PR step. Once the user separately gives go-ahead for that later step,
 treat commit + push + open-or-update-the-task-group-PR as one step per tech-stack.md's PR
 practice (see workflow step 8) — don't stop after pushing and make the user ask separately
 for the PR.
 
-**Hard rule: never commit or push to `main`, under any circumstance, for any reason —
-including an explicit user instruction to do so.** If the current branch is `main` (or
-whatever this repo's default branch is) when it's time to commit, that is a stop condition:
-do not run `git commit` yet. Instead, tell the user the working tree is on `main` and create
-a new branch first — following this repo's existing convention (e.g. `spec/YYYY-MM-DD-<slug>`
-for spec-folder work), confirming the branch name with the user if it's not obvious — then
-commit and push that branch, not `main`. A bare "commit this" or "push it" from the user
+**Hard rule: never commit — or implement a task group's code — directly on `main`, under
+any circumstance, for any reason, including an explicit user instruction to do so.** If the
+current branch is `main` (or whatever this repo's default branch is) when you're about to
+start step 4's implementation, that is a stop condition: do not write any code yet, and do
+not wait until commit time to deal with it. See workflow step 1a — create and switch to the
+spec branch first, with the user's go-ahead, before any file changes. This is a change from
+this skill's earlier behavior of creating the branch only at commit time; that let a full
+task group get implemented on `main` before the branch question ever came up, which is
+confusing and easy to implement-then-forget. A bare "commit this" or "push it" from the user
 authorizes committing/pushing *a feature branch*; it is never authorization to commit or push
 `main` directly, no matter how plainly the user says it, because `main` has no branch
 protection in this repo and Vercel's GitHub integration deploys automatically on anything
@@ -64,16 +68,40 @@ it creates or modifies external account resources.
 1. **Locate the active spec directory.**
    - List folders under `specs/` that contain all three of `requirements.md`, `plan.md`,
      `validation.md`.
-   - If the current git branch matches `spec/YYYY-MM-DD-<slug>`, prefer the folder with the
-     matching date/slug. If that folder's plan.md has no incomplete task groups (see step
-     3), say so rather than silently picking a different folder.
+   - If the current git branch matches `spec/YYYY-MM-DD-<slug>-group-<N>`, prefer the folder
+     with the matching date/slug (the `-group-<N>` suffix also tells you which task group
+     that branch was created for — see step 3). If that folder's plan.md has no incomplete
+     task groups (see step 3), say so rather than silently picking a different folder.
    - Otherwise, narrow to folders whose `plan.md` still has an incomplete task group. If
      exactly one qualifies, use it. If more than one qualifies, ask the user which one via
      AskUserQuestion (options = phase names/folder names) rather than guessing. If none
      qualify, tell the user every spec is fully implemented and stop.
-   - If the current branch doesn't correspond to the folder you're about to work from, flag
-     the mismatch and confirm before proceeding — implementing against the wrong branch is
-     easy to do silently and hard to untangle after the fact.
+   - If the current branch doesn't correspond to the folder you're about to work from —
+     including the common case where it's `main` because a prior task group's branch was
+     already merged and deleted — this is not just a flag-and-continue: go to step 1a below
+     before touching any file.
+
+1a. **Create (or switch to) the task group's branch before implementing anything**, if the
+   current branch isn't already it.
+   - Branch naming is per task group, not per phase/spec-folder:
+     `spec/YYYY-MM-DD-<slug>-group-<N>` (spec folder name plus `-group-<N>` for the group
+     number being implemented, e.g. `spec/2026-07-29-producers-sequestration-sites-group-2`).
+     This matters because branches get deleted per task group as each one's PR merges — a
+     phase-wide branch name (no `-group-<N>`) is easy to confuse with a still-open or
+     already-deleted branch from a *different* group in the same phase. Never reuse a bare
+     `spec/YYYY-MM-DD-<slug>` branch across groups.
+   - Post a standalone message — not folded into other narration — stating: which spec
+     folder and task group (number/title) you're about to implement, what branch you're
+     currently on, and the exact branch name you intend to create.
+   - Wait for the user's explicit go-ahead on that message.
+   - Once given, create the branch off the current tip of `main` and switch to it
+     (`git checkout -b spec/YYYY-MM-DD-<slug>-group-<N>`) — this is the one exception to
+     "don't create branches without go-ahead": the go-ahead you just got *is* that
+     authorization, scoped only to creating/switching this branch, not to committing or
+     pushing.
+   - Only after switching does step 4's implementation begin. If the branch already existed
+     (e.g. a second `feature-implement` run continuing the same group's work), just switch to
+     it — no need to re-ask.
 
 2. **Read `requirements.md` first, in full.** Its "Scope" (in/out) and "Key decisions"
    sections are binding: implement only what's in scope, follow the recorded decisions
@@ -124,15 +152,16 @@ it creates or modifies external account resources.
    - That committing/pushing/opening-or-updating the PR is a separate step requiring
      explicit go-ahead in this conversation (per the hard rules above) — ask if the user
      wants that now, don't do it unprompted, and frame it as one combined step (not "push,
-     then separately ask about a PR"). State plainly what branch that commit would land on:
-     if the current branch is `main`, say so explicitly and say a new branch will be created
-     first per the never-commit-to-`main` hard rule — don't wait for the user to catch this
-     themselves.
+     then separately ask about a PR"). State plainly what branch that commit would land on
+     (the spec branch created in step 1a) — this should already be the current branch by
+     this point, not a decision still pending.
 
 8. **Once given the go-ahead, commit, push, and open or update the task-group PR** — this
-   is one step, not three separate asks. Per tech-stack.md's PR practice:
-   - **Branch/base:** head is the current spec branch (e.g. `spec/YYYY-MM-DD-<slug>`), base
-     is `main`.
+   is one step, not three separate asks. The branch already exists and is checked out from
+   step 1a, so this step is commit/push/PR only, not branch creation. Per tech-stack.md's PR
+   practice:
+   - **Branch/base:** head is the current task-group branch (e.g.
+     `spec/YYYY-MM-DD-<slug>-group-<N>`), base is `main`.
    - **Check for an existing open PR** for this branch first (e.g. `gh pr list --head
      <branch> --state open`). This repo's convention is one PR per task group, or a small
      bundle of consecutive groups landed together (see prior PRs' titles/bodies for the
