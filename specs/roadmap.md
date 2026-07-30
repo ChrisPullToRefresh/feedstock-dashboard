@@ -9,12 +9,12 @@ facility data to be entered.
 - [x] Neon Postgres database provisioned and connected
 - [x] Clerk auth integrated with roles (e.g. scale operator vs. admin); no
       public self-serve sign-up — admin-issued invitations only
-- [ ] Base mobile-friendly layout/navigation shell
+- [x] Base mobile-friendly layout/navigation shell
 - [x] Vitest + React Testing Library configured for unit/component tests
 - [x] Playwright configured for E2E tests
 - [x] GitHub Actions CI pipeline (lint + typecheck, unit tests, E2E tests,
       production build) required on every PR
-- [ ] Commit-message linting (Conventional Commits via commitlint) enforced
+- [x] Commit-message linting (Conventional Commits via commitlint) enforced
       both locally (Husky `commit-msg` hook) and in CI
 
 **Success criteria:** A logged-in user can reach an empty authenticated

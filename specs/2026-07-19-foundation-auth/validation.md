@@ -9,13 +9,17 @@ automatically and must pass before merge.
 
 ## Merge gates (tech-stack.md, required verbatim)
 
-- [ ] Lint + typecheck check green
-- [ ] Unit/component tests (Vitest + React Testing Library) check green
-- [ ] E2E tests (Playwright) check green
-- [ ] Production build (`next build`) check green
-- [ ] Commit-message lint (commitlint, Conventional Commits) check green
-- [ ] At least one review approval (CI green alone is not sufficient to
-      merge)
+Per tech-stack.md, these apply to every PR. This phase shipped as one PR per task group
+(five PRs, covering Groups 1, 3, 4, 5, and 6) rather than a single PR spanning the whole
+phase, so each PR was independently required to satisfy all gates below before merging:
+
+- Lint + typecheck check green
+- Unit/component tests (Vitest + React Testing Library) check green
+- E2E tests (Playwright) check green
+- Production build (`next build`) check green
+- Commit-message lint (commitlint, Conventional Commits) check green — required from Group
+  6's PR onward, once commitlint was wired up; not applicable to the earlier PRs
+- At least one review approval (CI green alone is not sufficient to merge)
 
 ## Automated coverage checklist
 
@@ -35,7 +39,7 @@ automatically and must pass before merge.
       Commits messages, rejects malformed ones (Group 6)
 - [x] Husky `commit-msg` hook blocks a malformed commit locally (Group 6,
       manual/local check — not something CI can observe about itself)
-- [ ] GitHub Actions commit-message lint check is green on this phase's PR
+- [x] GitHub Actions commit-message lint check is green on this phase's PR
       commit range (Group 6)
 
 ## Manual verification (this phase's validation answer)
@@ -56,6 +60,6 @@ automatically and must pass before merge.
 
 ## Ready-for-review criteria
 
-Per tech-stack.md: the PR stays in draft until all merge gates above are
-green and this validation checklist's automated coverage is filled in with
-actual results, then it's marked ready for review.
+Per tech-stack.md: each of this phase's PRs stays in draft until all merge gates above are
+green for that PR and this validation checklist's automated coverage for the task group(s)
+it covers is filled in with actual results, then it's marked ready for review.
