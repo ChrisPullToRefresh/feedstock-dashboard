@@ -183,6 +183,20 @@ it creates or modifies external account resources.
      skill runs locally and can't observe that. Leave the PR in draft and tell the user to
      mark it ready once CI is green and the test plan is fully filled in.
 
+9. **After pushing, monitor CI until it finishes — don't just push and move on.** Watch the
+   checks on the pushed branch (e.g. `gh pr checks <branch> --watch`, or `gh run watch
+   --exit-status` on the run the push triggered) instead of telling the user to go check
+   GitHub later themselves.
+   - **If every check goes green:** tell the user CI passed and that the PR is ready for
+     them to flip to "ready for review" — this skill still never flips that switch itself
+     (see the rule above).
+   - **If any check fails:** pull the failure detail (e.g. `gh run view <run-id>
+     --log-failed`), report which check(s) failed and why, and leave the PR in draft. Stop
+     there — don't silently retry, don't push a fix without the user's direction, and don't
+     tell the user CI is "probably fine" or otherwise soften a real failure.
+   - This step applies whether step 8 opened a new PR or updated an existing one — either
+     way, the push just happened and its CI run is what gets watched.
+
 ## Notes
 
 - This skill doesn't touch `specs/roadmap.md` — marking a roadmap phase's checklist done is
