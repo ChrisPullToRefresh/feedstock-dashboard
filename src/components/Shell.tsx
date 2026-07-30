@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
 import styles from "./Shell.module.css";
 
@@ -8,6 +9,7 @@ export function Shell({ children }: { children: ReactNode }) {
       <header className={styles.header}>
         <span className={styles.brand}>Feedstock Dashboard</span>
         <nav aria-label="Main" className={styles.nav}>
+          <Link href="/producers">Producers</Link>
           <UserButton />
         </nav>
       </header>
