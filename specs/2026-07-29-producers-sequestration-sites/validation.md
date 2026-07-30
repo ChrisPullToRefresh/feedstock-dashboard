@@ -22,8 +22,8 @@ so each PR is independently required to satisfy all gates below before merging:
 
 ## Automated coverage checklist
 
-- [ ] Producer data-access unit tests pass: `create` and `list` (Group 1)
-- [ ] Sequestration site data-access unit tests pass: `create` and `list` (Group 1)
+- [x] Producer data-access unit tests pass: `create` and `list` (Group 1)
+- [x] Sequestration site data-access unit tests pass: `create` and `list` (Group 1)
 - [ ] Producer creation form component test passes (Group 2)
 - [ ] Producer list view component test passes (Group 2)
 - [ ] Producer E2E test passes: create a producer via the form, confirm it appears on the

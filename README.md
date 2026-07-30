@@ -20,6 +20,18 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Database migrations
+
+SQL migration files live in `migrations/`, applied in order against `DATABASE_URL`:
+
+```bash
+npm run db:migrate
+```
+
+This isn't run in CI (no `DATABASE_URL` secret is configured there — CI's unit tests mock
+the `pg` driver instead), so apply new migrations by hand against each Neon branch/environment
+you're using (local, preview, production) after pulling changes that add one.
+
 ## Manual setup steps
 
 Some setup can't be scripted and has to be done by hand in each provider's dashboard.
