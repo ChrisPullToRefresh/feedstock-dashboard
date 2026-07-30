@@ -52,6 +52,28 @@ Each test/dev user's role is set via `publicMetadata.role` (`"admin"` or `"opera
 either in the Clerk dashboard's Users page or via `clerk api /users/<id>/metadata -X
 PATCH -d '{"public_metadata":{"role":"operator"}}'`.
 
+## Commit message conventions
+
+Commits follow [Conventional Commits](https://www.conventionalcommits.org/):
+`type(scope): summary`, imperative mood, summary line ≤72 characters. Scope is optional
+but encouraged.
+
+Allowed types: `feat`, `fix`, `chore`, `docs`, `test`, `refactor`, `ci`, `build`, `perf`.
+
+Examples:
+
+```
+feat(auth): add Clerk sign-in flow
+fix(shell): correct nav landmark label
+docs(readme): document commit conventions
+```
+
+Enforced in two places:
+- **Locally**, via a Husky `commit-msg` hook that runs `commitlint` on every commit.
+- **In CI**, which re-lints the PR's full commit range as a required check — this catches
+  commits made with `--no-verify`, from a machine without the hook installed, or
+  edited/added through GitHub's web UI.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
