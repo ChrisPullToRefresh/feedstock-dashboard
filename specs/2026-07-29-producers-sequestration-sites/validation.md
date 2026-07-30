@@ -24,9 +24,9 @@ so each PR is independently required to satisfy all gates below before merging:
 
 - [x] Producer data-access unit tests pass: `create` and `list` (Group 1)
 - [x] Sequestration site data-access unit tests pass: `create` and `list` (Group 1)
-- [ ] Producer creation form component test passes (Group 2)
-- [ ] Producer list view component test passes (Group 2)
-- [ ] Producer E2E test passes: create a producer via the form, confirm it appears on the
+- [x] Producer creation form component test passes (Group 2)
+- [x] Producer list view component test passes (Group 2)
+- [x] Producer E2E test passes: create a producer via the form, confirm it appears on the
       list view (Group 2)
 - [ ] Sequestration site creation form component test passes (Group 3)
 - [ ] Sequestration site list view component test passes (Group 3)

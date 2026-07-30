@@ -17,6 +17,10 @@ describe("Shell", () => {
     expect(screen.getByRole("banner")).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "Main" })).toBeInTheDocument();
     expect(screen.getByText("Feedstock Dashboard")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Producers" })).toHaveAttribute(
+      "href",
+      "/producers"
+    );
 
     const main = screen.getByRole("main");
     expect(main).toBeInTheDocument();

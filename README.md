@@ -28,9 +28,11 @@ SQL migration files live in `migrations/`, applied in order against `DATABASE_UR
 npm run db:migrate
 ```
 
-This isn't run in CI (no `DATABASE_URL` secret is configured there — CI's unit tests mock
-the `pg` driver instead), so apply new migrations by hand against each Neon branch/environment
-you're using (local, preview, production) after pulling changes that add one.
+This isn't run automatically in CI, so apply new migrations by hand against each Neon
+branch/environment you're using (local, preview, production) after pulling changes that add
+one. A `DATABASE_URL` secret is configured in CI for the E2E test job, which exercises real
+database-backed flows (e.g. creating a producer) against the dev Neon database — unit tests
+still mock the `pg` driver instead of hitting it.
 
 ## Manual setup steps
 

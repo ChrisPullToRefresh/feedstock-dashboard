@@ -21,7 +21,7 @@ producers and sequestration sites.
 
 ## 2. Feedstock producer management UI
 
-**Status:** Not started
+**Status:** Complete
 
 - Dedicated creation page (e.g. `/producers/new`) inside Phase 1's `(app)` route group: a
   form with a `name` field that calls the Group 1 data-access module to insert a producer,
