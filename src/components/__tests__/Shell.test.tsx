@@ -21,6 +21,9 @@ describe("Shell", () => {
       "href",
       "/producers"
     );
+    expect(
+      screen.getByRole("link", { name: "Sequestration sites" })
+    ).toHaveAttribute("href", "/sites");
 
     const main = screen.getByRole("main");
     expect(main).toBeInTheDocument();

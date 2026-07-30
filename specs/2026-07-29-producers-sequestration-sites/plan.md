@@ -39,7 +39,7 @@ producers and sequestration sites.
 
 ## 3. Sequestration site management UI
 
-**Status:** Not started
+**Status:** Complete
 
 - Dedicated creation page (e.g. `/sites/new`) inside the `(app)` route group, mirroring
   Group 2's producer creation page but backed by the sequestration site data-access module.

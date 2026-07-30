@@ -10,6 +10,7 @@ export function Shell({ children }: { children: ReactNode }) {
         <span className={styles.brand}>Feedstock Dashboard</span>
         <nav aria-label="Main" className={styles.nav}>
           <Link href="/producers">Producers</Link>
+          <Link href="/sites">Sequestration sites</Link>
           <UserButton />
         </nav>
       </header>
