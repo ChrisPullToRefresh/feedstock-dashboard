@@ -6,7 +6,7 @@ import { SequestrationSiteForm } from "@/components/SequestrationSiteForm";
 export default async function NewSitePage() {
   const role = await getUserRole();
   if (role !== "admin") {
-    redirect("/sites");
+    redirect("/sites?forbidden=1");
   }
 
   async function createSite(name: string) {
