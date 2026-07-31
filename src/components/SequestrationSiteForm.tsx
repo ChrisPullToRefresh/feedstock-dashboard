@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { unstable_rethrow } from "next/navigation";
 
 export function SequestrationSiteForm({
   onCreate,
@@ -8,19 +9,26 @@ export function SequestrationSiteForm({
   onCreate: (name: string) => Promise<void>;
 }) {
   const [name, setName] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [fieldError, setFieldError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const trimmed = name.trim();
     if (!trimmed) {
-      setError("Name is required");
+      setFieldError("Name is required");
       return;
     }
-    setError(null);
+    setFieldError(null);
+    setSubmitError(null);
     startTransition(async () => {
-      await onCreate(trimmed);
+      try {
+        await onCreate(trimmed);
+      } catch (err) {
+        unstable_rethrow(err);
+        setSubmitError("Something went wrong — try again");
+      }
     });
   }
 
@@ -32,8 +40,15 @@ export function SequestrationSiteForm({
         name="name"
         value={name}
         onChange={(event) => setName(event.target.value)}
+        aria-invalid={fieldError ? true : undefined}
+        aria-describedby={fieldError ? "site-name-error" : undefined}
       />
-      {error && <p role="alert">{error}</p>}
+      {fieldError && (
+        <p id="site-name-error" role="alert">
+          {fieldError}
+        </p>
+      )}
+      {submitError && <p role="alert">{submitError}</p>}
       <button type="submit" disabled={isPending}>
         Create site
       </button>

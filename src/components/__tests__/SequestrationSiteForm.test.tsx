@@ -9,13 +9,15 @@ describe("SequestrationSiteForm", () => {
     expect(screen.getByLabelText("Name")).toBeInTheDocument();
   });
 
-  it("rejects submission with an empty name", () => {
+  it("rejects submission with an empty name, with the error on the name field", () => {
     const onCreate = vi.fn();
     render(<SequestrationSiteForm onCreate={onCreate} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Create site" }));
 
-    expect(screen.getByRole("alert")).toHaveTextContent("Name is required");
+    expect(screen.getByLabelText("Name")).toHaveAccessibleDescription(
+      "Name is required"
+    );
     expect(onCreate).not.toHaveBeenCalled();
   });
 
@@ -30,6 +32,22 @@ describe("SequestrationSiteForm", () => {
 
     await waitFor(() => {
       expect(onCreate).toHaveBeenCalledWith("Deep Well Site");
+    });
+  });
+
+  it("surfaces a submit-failure message when onCreate rejects", async () => {
+    const onCreate = vi.fn().mockRejectedValue(new Error("db unavailable"));
+    render(<SequestrationSiteForm onCreate={onCreate} />);
+
+    fireEvent.change(screen.getByLabelText("Name"), {
+      target: { value: "Deep Well Site" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Create site" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Something went wrong — try again"
+      );
     });
   });
 });

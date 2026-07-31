@@ -20,7 +20,7 @@ describe("OutgoingEntryForm", () => {
     ).toBeInTheDocument();
   });
 
-  it("rejects submission when weight is empty", () => {
+  it("rejects submission when weight is empty, with the error on the weight field", () => {
     const onSubmit = vi.fn();
     render(<OutgoingEntryForm sites={sites} onSubmit={onSubmit} />);
 
@@ -31,13 +31,13 @@ describe("OutgoingEntryForm", () => {
       screen.getByRole("button", { name: "Record outgoing feedstock" })
     );
 
-    expect(screen.getByRole("alert")).toHaveTextContent(
+    expect(screen.getByLabelText("Weight (kg)")).toHaveAccessibleDescription(
       "Weight is required and must be a number"
     );
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it("rejects submission when weight is non-numeric", () => {
+  it("rejects submission when weight is non-numeric, with the error on the weight field", () => {
     const onSubmit = vi.fn();
     render(<OutgoingEntryForm sites={sites} onSubmit={onSubmit} />);
 
@@ -51,13 +51,33 @@ describe("OutgoingEntryForm", () => {
       screen.getByRole("button", { name: "Record outgoing feedstock" })
     );
 
-    expect(screen.getByRole("alert")).toHaveTextContent(
+    expect(screen.getByLabelText("Weight (kg)")).toHaveAccessibleDescription(
       "Weight is required and must be a number"
     );
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it("rejects submission when no site is selected", () => {
+  it("rejects submission when weight is zero or negative, with the error on the weight field", () => {
+    const onSubmit = vi.fn();
+    render(<OutgoingEntryForm sites={sites} onSubmit={onSubmit} />);
+
+    fireEvent.change(screen.getByLabelText("Weight (kg)"), {
+      target: { value: "0" },
+    });
+    fireEvent.change(screen.getByLabelText("Sequestration site"), {
+      target: { value: "1" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Record outgoing feedstock" })
+    );
+
+    expect(screen.getByLabelText("Weight (kg)")).toHaveAccessibleDescription(
+      "Weight must be greater than zero"
+    );
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it("rejects submission when no site is selected, with the error on the site field", () => {
     const onSubmit = vi.fn();
     render(<OutgoingEntryForm sites={sites} onSubmit={onSubmit} />);
 
@@ -68,7 +88,9 @@ describe("OutgoingEntryForm", () => {
       screen.getByRole("button", { name: "Record outgoing feedstock" })
     );
 
-    expect(screen.getByRole("alert")).toHaveTextContent("Site is required");
+    expect(screen.getByLabelText("Sequestration site")).toHaveAccessibleDescription(
+      "Site is required"
+    );
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
@@ -88,6 +110,27 @@ describe("OutgoingEntryForm", () => {
 
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith({ weightKg: 98.25, siteId: 2 });
+    });
+  });
+
+  it("surfaces a submit-failure message when onSubmit rejects", async () => {
+    const onSubmit = vi.fn().mockRejectedValue(new Error("db unavailable"));
+    render(<OutgoingEntryForm sites={sites} onSubmit={onSubmit} />);
+
+    fireEvent.change(screen.getByLabelText("Weight (kg)"), {
+      target: { value: "98.25" },
+    });
+    fireEvent.change(screen.getByLabelText("Sequestration site"), {
+      target: { value: "2" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Record outgoing feedstock" })
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Something went wrong — try again"
+      );
     });
   });
 });

@@ -1,8 +1,14 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { unstable_rethrow } from "next/navigation";
 import type { Producer } from "@/lib/producers";
 import styles from "./EntryForm.module.css";
+
+type FieldErrors = {
+  weight?: string;
+  producer?: string;
+};
 
 export function IncomingEntryForm({
   producers,
@@ -13,26 +19,39 @@ export function IncomingEntryForm({
 }) {
   const [weight, setWeight] = useState("");
   const [producerId, setProducerId] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    const errors: FieldErrors = {};
     const trimmedWeight = weight.trim();
     const weightKg = Number(trimmedWeight);
     if (!trimmedWeight || Number.isNaN(weightKg)) {
-      setError("Weight is required and must be a number");
-      return;
+      errors.weight = "Weight is required and must be a number";
+    } else if (weightKg <= 0) {
+      errors.weight = "Weight must be greater than zero";
     }
     if (!producerId) {
-      setError("Producer is required");
+      errors.producer = "Producer is required";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
       return;
     }
 
-    setError(null);
+    setFieldErrors({});
+    setSubmitError(null);
     startTransition(async () => {
-      await onSubmit({ weightKg, producerId: Number(producerId) });
+      try {
+        await onSubmit({ weightKg, producerId: Number(producerId) });
+      } catch (err) {
+        unstable_rethrow(err);
+        setSubmitError("Something went wrong — try again");
+      }
     });
   }
 
@@ -51,7 +70,16 @@ export function IncomingEntryForm({
           className={styles.input}
           value={weight}
           onChange={(event) => setWeight(event.target.value)}
+          aria-invalid={fieldErrors.weight ? true : undefined}
+          aria-describedby={
+            fieldErrors.weight ? "incoming-weight-error" : undefined
+          }
         />
+        {fieldErrors.weight && (
+          <p id="incoming-weight-error" role="alert">
+            {fieldErrors.weight}
+          </p>
+        )}
       </div>
       <div className={styles.field}>
         <label className={styles.label} htmlFor="incoming-producer">
@@ -63,6 +91,10 @@ export function IncomingEntryForm({
           className={styles.select}
           value={producerId}
           onChange={(event) => setProducerId(event.target.value)}
+          aria-invalid={fieldErrors.producer ? true : undefined}
+          aria-describedby={
+            fieldErrors.producer ? "incoming-producer-error" : undefined
+          }
         >
           <option value="">Select a producer</option>
           {producers.map((producer) => (
@@ -71,8 +103,13 @@ export function IncomingEntryForm({
             </option>
           ))}
         </select>
+        {fieldErrors.producer && (
+          <p id="incoming-producer-error" role="alert">
+            {fieldErrors.producer}
+          </p>
+        )}
       </div>
-      {error && <p role="alert">{error}</p>}
+      {submitError && <p role="alert">{submitError}</p>}
       <button type="submit" className={styles.submit} disabled={isPending}>
         Record incoming feedstock
       </button>

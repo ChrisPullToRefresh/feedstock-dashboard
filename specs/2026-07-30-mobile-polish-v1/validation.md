@@ -30,10 +30,10 @@ To be checked off as each task group's implementation lands:
       (Group 1)
 - [x] Role-gating E2E test passes: admin reaches `/producers/new` and `/sites/new` and can
       submit; operator is redirected away from both (Group 1)
-- [ ] Per-form component tests pass: field-level errors render against the correct field,
+- [x] Per-form component tests pass: field-level errors render against the correct field,
       zero/negative weight rejected, submit failure surfaces a message (Group 2, all four
       forms)
-- [ ] Extended E2E specs pass: `producers.spec.ts`, `sites.spec.ts`, `incoming-entry.spec.ts`,
+- [x] Extended E2E specs pass: `producers.spec.ts`, `sites.spec.ts`, `incoming-entry.spec.ts`,
       `outgoing-entry.spec.ts` each confirm inline field-error display on invalid input
       (Group 2)
 - [ ] `Shell` nav component test passes: reworked structure renders correct roles/labels, all

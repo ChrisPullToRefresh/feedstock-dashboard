@@ -21,3 +21,23 @@ test("signed-in user creates a sequestration site and sees it on the site list",
   await expect(page).toHaveURL(/\/sites$/);
   await expect(page.getByText(siteName)).toBeVisible();
 });
+
+test("shows an inline field error when submitting without a name", async ({
+  page,
+}) => {
+  await setupClerkTestingToken({ page });
+
+  await page.goto("/sign-in");
+  await clerk.signIn({
+    page,
+    emailAddress: process.env.E2E_CLERK_USER_EMAIL!,
+  });
+
+  await page.goto("/sites/new");
+  await page.getByRole("button", { name: "Create site" }).click();
+
+  await expect(page).toHaveURL(/\/sites\/new$/);
+  await expect(page.getByLabel("Name")).toHaveAccessibleDescription(
+    "Name is required"
+  );
+});
