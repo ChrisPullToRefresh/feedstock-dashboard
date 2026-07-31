@@ -35,9 +35,9 @@ To be checked off as each task group's implementation lands:
       validation rejects bad input (Group 3)
 - [x] Incoming-entry E2E test passes: submitted entry appears on the transaction history view
       (Group 3)
-- [ ] Outgoing-entry form component test passes: site dropdown renders, baseline validation
+- [x] Outgoing-entry form component test passes: site dropdown renders, baseline validation
       rejects bad input (Group 4)
-- [ ] Outgoing-entry E2E test passes: submitted entry appears on the transaction history view
+- [x] Outgoing-entry E2E test passes: submitted entry appears on the transaction history view
       (Group 4)
 
 ## Manual verification

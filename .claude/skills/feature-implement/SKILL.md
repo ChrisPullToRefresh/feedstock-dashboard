@@ -202,7 +202,10 @@ it creates or modifies external account resources.
        actually ran and confirmed locally (lint, typecheck, unit tests, build, any manual
        check like hitting a health endpoint); leave CI, PR review, and any
        Vercel-preview/real-device manual-verification items from validation.md **unchecked**
-       with a short note on why (they can't be verified from this local run).
+       with a short note on why (they can't be verified from this local run). Don't give
+       commit-message lint its own checklist line — it's just one of several CI-only jobs
+       this local run can't confirm, not a gate significant enough to call out individually;
+       fold it into whichever "still pending in CI" line already covers the rest.
    - **Never mark the PR "ready for review" yourself.** Per tech-stack.md, that transition
      only happens once GitHub Actions has run on the pushed branch and gone green — this
      skill runs locally and can't observe that. Leave the PR in draft and tell the user to

@@ -64,7 +64,7 @@ descending.
 
 ## 4. Record outgoing processed feedstock entry
 
-**Status:** Not started
+**Status:** Complete
 
 - Dedicated entry page (e.g. `/transactions/new/out`) inside the `(app)` route group,
   mirroring Group 3's incoming form but with a sequestration site dropdown (sourced from

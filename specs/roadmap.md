@@ -41,11 +41,11 @@ sequestration sites, which then populate dropdown lists.
 **Goal:** Enable the core field workflow — recording feedstock in and
 processed feedstock out.
 
-- [ ] Record incoming feedstock: weight (kg) + producer selected from dropdown
-- [ ] Record outgoing processed feedstock: weight (kg) + sequestration site
+- [x] Record incoming feedstock: weight (kg) + producer selected from dropdown
+- [x] Record outgoing processed feedstock: weight (kg) + sequestration site
       selected from dropdown
-- [ ] Transaction history view (raw list of recorded entries)
-- [ ] Mobile-optimized entry forms (fast, low-friction, usable in the field)
+- [x] Transaction history view (raw list of recorded entries)
+- [x] Mobile-optimized entry forms (fast, low-friction, usable in the field)
 
 **Success criteria:** A scale operator can record an incoming or outgoing
 weight transaction end-to-end from a mobile device in under a few taps.
