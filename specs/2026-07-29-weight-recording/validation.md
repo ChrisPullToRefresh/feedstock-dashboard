@@ -31,9 +31,9 @@ To be checked off as each task group's implementation lands:
       empty state (Group 2)
 - [x] Transaction history E2E test passes: seeded `'in'` and `'out'` transactions both render
       correctly (Group 2)
-- [ ] Incoming-entry form component test passes: producer dropdown renders, baseline
+- [x] Incoming-entry form component test passes: producer dropdown renders, baseline
       validation rejects bad input (Group 3)
-- [ ] Incoming-entry E2E test passes: submitted entry appears on the transaction history view
+- [x] Incoming-entry E2E test passes: submitted entry appears on the transaction history view
       (Group 3)
 - [ ] Outgoing-entry form component test passes: site dropdown renders, baseline validation
       rejects bad input (Group 4)
