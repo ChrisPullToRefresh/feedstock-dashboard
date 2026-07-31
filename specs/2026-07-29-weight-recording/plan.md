@@ -43,7 +43,7 @@ descending.
 
 ## 3. Record incoming feedstock entry
 
-**Status:** Not started
+**Status:** Complete
 
 - Dedicated entry page (e.g. `/transactions/new/in`) inside the `(app)` route group: a
   mobile-optimized form with a numeric weight (kg) input (numeric keyboard on mobile, large

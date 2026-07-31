@@ -12,6 +12,7 @@ export function Shell({ children }: { children: ReactNode }) {
           <Link href="/producers">Producers</Link>
           <Link href="/sites">Sequestration sites</Link>
           <Link href="/transactions">Transactions</Link>
+          <Link href="/transactions/new/in">Record incoming</Link>
           <UserButton />
         </nav>
       </header>
