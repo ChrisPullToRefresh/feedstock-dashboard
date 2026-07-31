@@ -60,7 +60,7 @@ data layer before UI.
 
 ## 3. Mobile UX pass on entry forms and navigation
 
-**Status:** Not started
+**Status:** Complete
 
 - Rework `Shell.tsx`/`Shell.module.css`'s nav, which has grown to five links (Producers,
   Sequestration sites, Transactions, Record incoming, Record outgoing) with no grouping —

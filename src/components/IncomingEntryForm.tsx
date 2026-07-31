@@ -76,7 +76,7 @@ export function IncomingEntryForm({
           }
         />
         {fieldErrors.weight && (
-          <p id="incoming-weight-error" role="alert">
+          <p id="incoming-weight-error" role="alert" className={styles.fieldError}>
             {fieldErrors.weight}
           </p>
         )}
@@ -104,12 +104,20 @@ export function IncomingEntryForm({
           ))}
         </select>
         {fieldErrors.producer && (
-          <p id="incoming-producer-error" role="alert">
+          <p
+            id="incoming-producer-error"
+            role="alert"
+            className={styles.fieldError}
+          >
             {fieldErrors.producer}
           </p>
         )}
       </div>
-      {submitError && <p role="alert">{submitError}</p>}
+      {submitError && (
+        <p role="alert" className={styles.submitError}>
+          {submitError}
+        </p>
+      )}
       <button type="submit" className={styles.submit} disabled={isPending}>
         Record incoming feedstock
       </button>
