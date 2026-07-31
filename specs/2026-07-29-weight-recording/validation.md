@@ -27,9 +27,9 @@ satisfy all gates below before merging:
 To be checked off as each task group's implementation lands:
 
 - [x] Transactions data-access unit tests pass: `create` (both directions) and `list` (Group 1)
-- [ ] Transaction history view component test passes: renders both directions correctly, plus
+- [x] Transaction history view component test passes: renders both directions correctly, plus
       empty state (Group 2)
-- [ ] Transaction history E2E test passes: seeded `'in'` and `'out'` transactions both render
+- [x] Transaction history E2E test passes: seeded `'in'` and `'out'` transactions both render
       correctly (Group 2)
 - [ ] Incoming-entry form component test passes: producer dropdown renders, baseline
       validation rejects bad input (Group 3)

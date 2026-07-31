@@ -24,7 +24,7 @@ descending.
 
 ## 2. Transaction history view
 
-**Status:** Not started
+**Status:** Complete
 
 - List view page (e.g. `/transactions`) inside the `(app)` route group, rendering all
   transactions via Group 1's `list()`: direction, weight (kg), the linked producer name (for

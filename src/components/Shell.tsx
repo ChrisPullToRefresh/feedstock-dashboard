@@ -11,6 +11,7 @@ export function Shell({ children }: { children: ReactNode }) {
         <nav aria-label="Main" className={styles.nav}>
           <Link href="/producers">Producers</Link>
           <Link href="/sites">Sequestration sites</Link>
+          <Link href="/transactions">Transactions</Link>
           <UserButton />
         </nav>
       </header>

@@ -24,6 +24,10 @@ describe("Shell", () => {
     expect(
       screen.getByRole("link", { name: "Sequestration sites" })
     ).toHaveAttribute("href", "/sites");
+    expect(screen.getByRole("link", { name: "Transactions" })).toHaveAttribute(
+      "href",
+      "/transactions"
+    );
 
     const main = screen.getByRole("main");
     expect(main).toBeInTheDocument();
