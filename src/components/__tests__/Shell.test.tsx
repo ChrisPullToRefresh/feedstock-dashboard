@@ -31,6 +31,9 @@ describe("Shell", () => {
     expect(
       screen.getByRole("link", { name: "Record incoming" })
     ).toHaveAttribute("href", "/transactions/new/in");
+    expect(
+      screen.getByRole("link", { name: "Record outgoing" })
+    ).toHaveAttribute("href", "/transactions/new/out");
 
     const main = screen.getByRole("main");
     expect(main).toBeInTheDocument();
