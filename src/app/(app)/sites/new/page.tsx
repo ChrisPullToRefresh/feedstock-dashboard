@@ -1,10 +1,19 @@
 import { redirect } from "next/navigation";
 import { create } from "@/lib/sequestrationSites";
+import { getUserRole } from "@/lib/roles";
 import { SequestrationSiteForm } from "@/components/SequestrationSiteForm";
 
-export default function NewSitePage() {
+export default async function NewSitePage() {
+  const role = await getUserRole();
+  if (role !== "admin") {
+    redirect("/sites");
+  }
+
   async function createSite(name: string) {
     "use server";
+    if ((await getUserRole()) !== "admin") {
+      throw new Error("Only admins can create sequestration sites");
+    }
     await create(name);
     redirect("/sites");
   }

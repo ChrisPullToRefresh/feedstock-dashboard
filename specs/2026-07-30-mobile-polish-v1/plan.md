@@ -9,7 +9,7 @@ data layer before UI.
 
 ## 1. Role-based access checks for producer/site creation
 
-**Status:** Not started
+**Status:** Complete
 
 - Add `src/lib/roles.ts` exporting `getUserRole()`, reading the `x-user-role` header
   `src/proxy.ts` (Phase 1) already forwards via `next/headers()`, returning
