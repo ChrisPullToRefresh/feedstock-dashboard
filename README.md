@@ -57,6 +57,10 @@ Clerk application:
 5. Click **Save**.
 
 No restart or redeploy needed. Notes:
+- If the editor rejects the claim with "Expected a JSON object, array or literal" even
+  though the JSON looks correct, delete the field and retype the quotes directly in the
+  editor rather than pasting — copy-pasting from chat apps/notes often substitutes smart
+  ("curly") quotes for straight ones, which look identical at a glance but aren't valid JSON.
 - Custom claims refresh roughly every 60 seconds, so a role change can take up to a
   minute to show up in a live session.
 - Keep total custom claims under ~1.2KB — session tokens are stored in a cookie, and

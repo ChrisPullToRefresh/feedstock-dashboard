@@ -26,9 +26,9 @@ all gates below before merging:
 
 To be checked off as each task group's implementation lands:
 
-- [ ] `getUserRole()` unit test passes: returns the header's role, `undefined` when missing
+- [x] `getUserRole()` unit test passes: returns the header's role, `undefined` when missing
       (Group 1)
-- [ ] Role-gating E2E test passes: admin reaches `/producers/new` and `/sites/new` and can
+- [x] Role-gating E2E test passes: admin reaches `/producers/new` and `/sites/new` and can
       submit; operator is redirected away from both (Group 1)
 - [ ] Per-form component tests pass: field-level errors render against the correct field,
       zero/negative weight rejected, submit failure surfaces a message (Group 2, all four
