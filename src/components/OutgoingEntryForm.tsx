@@ -76,7 +76,7 @@ export function OutgoingEntryForm({
           }
         />
         {fieldErrors.weight && (
-          <p id="outgoing-weight-error" role="alert">
+          <p id="outgoing-weight-error" role="alert" className={styles.fieldError}>
             {fieldErrors.weight}
           </p>
         )}
@@ -104,12 +104,16 @@ export function OutgoingEntryForm({
           ))}
         </select>
         {fieldErrors.site && (
-          <p id="outgoing-site-error" role="alert">
+          <p id="outgoing-site-error" role="alert" className={styles.fieldError}>
             {fieldErrors.site}
           </p>
         )}
       </div>
-      {submitError && <p role="alert">{submitError}</p>}
+      {submitError && (
+        <p role="alert" className={styles.submitError}>
+          {submitError}
+        </p>
+      )}
       <button type="submit" className={styles.submit} disabled={isPending}>
         Record outgoing feedstock
       </button>

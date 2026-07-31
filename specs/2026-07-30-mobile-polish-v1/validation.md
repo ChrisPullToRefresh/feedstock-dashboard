@@ -36,9 +36,9 @@ To be checked off as each task group's implementation lands:
 - [x] Extended E2E specs pass: `producers.spec.ts`, `sites.spec.ts`, `incoming-entry.spec.ts`,
       `outgoing-entry.spec.ts` each confirm inline field-error display on invalid input
       (Group 2)
-- [ ] `Shell` nav component test passes: reworked structure renders correct roles/labels, all
+- [x] `Shell` nav component test passes: reworked structure renders correct roles/labels, all
       five destination links present and correctly `href`-ed (Group 3)
-- [ ] Mobile nav E2E test passes on the `Mobile Chrome` project: toggle (if added)
+- [x] Mobile nav E2E test passes on the `Mobile Chrome` project: toggle (if added)
       opens/closes, every destination reachable (Group 3)
 
 ## Manual verification
