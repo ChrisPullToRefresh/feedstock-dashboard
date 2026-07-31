@@ -40,6 +40,9 @@ To be checked off as each task group's implementation lands:
       five destination links present and correctly `href`-ed (Group 3)
 - [x] Mobile nav E2E test passes on the `Mobile Chrome` project: toggle (if added)
       opens/closes, every destination reachable (Group 3)
+- [x] Extended `role-gating.spec.ts` passes: operator sees no "New producer"/"New site" link
+      on `/producers`/`/sites`, and a direct visit to `/producers/new` or `/sites/new`
+      redirects with a visible forbidden message rather than a silent bounce (Group 4)
 
 ## Manual verification
 
@@ -49,8 +52,9 @@ than Playwright's emulated mobile viewport, covering every core flow now shipped
 
 - [ ] Create a feedstock producer, signed in as the admin test account
 - [ ] Create a sequestration site, signed in as the admin test account
-- [ ] Confirm a non-admin (operator) account is redirected away from both `/producers/new`
-      and `/sites/new`
+- [ ] Confirm a non-admin (operator) account sees no "New producer"/"New site" link, and that
+      directly visiting `/producers/new` or `/sites/new` redirects with a visible message
+      explaining why, not a silent bounce
 - [ ] Record an incoming feedstock transaction end-to-end
 - [ ] Record an outgoing processed feedstock transaction end-to-end
 - [ ] View the transaction history and confirm both recorded entries appear correctly

@@ -19,6 +19,9 @@ test("admin can reach and submit /producers/new and /sites/new", async ({
   await page.getByRole("button", { name: "Create producer" }).click();
   await expect(page).toHaveURL(/\/producers$/);
   await expect(page.getByText(producerName)).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "New producer" })
+  ).toBeVisible();
 
   const siteName = `Test Site ${Date.now()}`;
   await page.goto("/sites/new");
@@ -27,9 +30,10 @@ test("admin can reach and submit /producers/new and /sites/new", async ({
   await page.getByRole("button", { name: "Create site" }).click();
   await expect(page).toHaveURL(/\/sites$/);
   await expect(page.getByText(siteName)).toBeVisible();
+  await expect(page.getByRole("link", { name: "New site" })).toBeVisible();
 });
 
-test("operator is redirected away from /producers/new and /sites/new", async ({
+test("operator sees no creation links and gets a visible message if the gate is reached directly", async ({
   page,
 }) => {
   await setupClerkTestingToken({ page });
@@ -40,9 +44,23 @@ test("operator is redirected away from /producers/new and /sites/new", async ({
     emailAddress: process.env.E2E_CLERK_OPERATOR_EMAIL!,
   });
 
+  await page.goto("/producers");
+  await expect(
+    page.getByRole("link", { name: "New producer" })
+  ).not.toBeVisible();
+
+  await page.goto("/sites");
+  await expect(page.getByRole("link", { name: "New site" })).not.toBeVisible();
+
   await page.goto("/producers/new");
-  await expect(page).toHaveURL(/\/producers$/);
+  await expect(page).toHaveURL(/\/producers\?forbidden=1$/);
+  await expect(
+    page.getByText("You don't have permission to create producers.")
+  ).toBeVisible();
 
   await page.goto("/sites/new");
-  await expect(page).toHaveURL(/\/sites$/);
+  await expect(page).toHaveURL(/\/sites\?forbidden=1$/);
+  await expect(
+    page.getByText("You don't have permission to create sites.")
+  ).toBeVisible();
 });

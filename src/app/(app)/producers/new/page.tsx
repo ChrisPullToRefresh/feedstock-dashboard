@@ -6,7 +6,7 @@ import { ProducerForm } from "@/components/ProducerForm";
 export default async function NewProducerPage() {
   const role = await getUserRole();
   if (role !== "admin") {
-    redirect("/producers");
+    redirect("/producers?forbidden=1");
   }
 
   async function createProducer(name: string) {

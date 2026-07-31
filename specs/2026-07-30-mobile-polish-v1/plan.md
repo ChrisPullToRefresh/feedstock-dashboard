@@ -80,16 +80,34 @@ data layer before UI.
 
 ## 4. Real-device QA pass across core flows
 
-**Status:** Not started
+**Status:** In progress
 
-- This group has no feature code of its own — unlike Groups 1–3, its deliverable *is* the
-  verification, run after Groups 1–3 have landed. On an actual phone (not Playwright's
-  emulated viewport), execute and confirm: create a producer (admin), create a sequestration
-  site (admin), a non-admin is redirected away from both creation pages, record an incoming
-  transaction, record an outgoing transaction, view transaction history, and confirm the
-  reworked mobile nav from Group 3 is usable throughout.
-- Record the outcome directly in this spec's validation.md manual-verification checklist
-  (see below) rather than as a separate code change.
+- Fix a UX gap surfaced by an early pass of this group's manual QA: a non-admin visiting
+  `/producers/new` or `/sites/new` gets bounced back to `/producers`/`/sites` with zero
+  explanation — indistinguishable from a broken form ("the screen blinks and no form
+  appears"). Two changes, without loosening the admins-only gate itself (the
+  page-level-redirect-plus-server-action-recheck boundary from Group 1 is unchanged):
+  - `producers/page.tsx`/`sites/page.tsx`: only render the "New producer"/"New site" link
+    when `getUserRole() === "admin"`, so a non-admin is never offered an action they can't
+    complete.
+  - `producers/new/page.tsx`/`sites/new/page.tsx`: carry a `?forbidden=1` query param on the
+    redirect; the list pages read it (via the `searchParams` prop) and render a visible
+    message ("You don't have permission to create producers/sites.") for the case where a
+    non-admin still reaches the gate directly (bookmark, typed URL, stale link).
+- This group's remaining deliverable is still the real-device verification pass, run after
+  the fix above and Groups 1–3 have landed. On an actual phone (not Playwright's emulated
+  viewport), execute and confirm: create a producer (admin), create a sequestration site
+  (admin), a non-admin sees no creation links and is redirected with a visible message if
+  they reach the gate directly, record an incoming transaction, record an outgoing
+  transaction, view transaction history, and confirm the reworked mobile nav from Group 3 is
+  usable throughout.
+- Record the manual-pass outcome directly in this spec's validation.md manual-verification
+  checklist (see below) rather than as a separate code change.
+
+**Test task:**
+- Extend `e2e/role-gating.spec.ts`: signed in as the operator test account, `/producers` and
+  `/sites` render without a "New producer"/"New site" link, and visiting `/producers/new` or
+  `/sites/new` directly redirects to the list page with the visible forbidden message.
 
 **Test task:** None — this group's task is itself the manual verification requirement in
 validation.md's "Manual verification" section, not a new automated test.
