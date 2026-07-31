@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { Pool } from "pg";
@@ -13,15 +13,17 @@ async function main() {
     throw new Error("DATABASE_URL environment variable is not set");
   }
 
-  const sql = readFileSync(
-    path.join(migrationsDir, "0001_producers_and_sequestration_sites.sql"),
-    "utf8"
-  );
+  const migrationFiles = readdirSync(migrationsDir)
+    .filter((file) => file.endsWith(".sql"))
+    .sort();
 
   const pool = new Pool({ connectionString });
   try {
-    await pool.query(sql);
-    console.log("Migration applied: 0001_producers_and_sequestration_sites.sql");
+    for (const file of migrationFiles) {
+      const sql = readFileSync(path.join(migrationsDir, file), "utf8");
+      await pool.query(sql);
+      console.log(`Migration applied: ${file}`);
+    }
   } finally {
     await pool.end();
   }

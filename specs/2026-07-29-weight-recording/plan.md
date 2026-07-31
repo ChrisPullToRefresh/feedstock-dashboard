@@ -7,7 +7,7 @@ mirroring how Phase 1 sequenced tooling before the work that depends on it.
 
 ## 1. Data model & transactions data-access module
 
-**Status:** Not started
+**Status:** Complete
 
 - Add a Neon migration creating a `transactions` table: `id`, `direction` (`'in' | 'out'`),
   `weight_kg`, `producer_id` (nullable FK to `producers`, set only when `direction = 'in'`),
