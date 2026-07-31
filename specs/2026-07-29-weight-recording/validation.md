@@ -26,7 +26,7 @@ satisfy all gates below before merging:
 
 To be checked off as each task group's implementation lands:
 
-- [ ] Transactions data-access unit tests pass: `create` (both directions) and `list` (Group 1)
+- [x] Transactions data-access unit tests pass: `create` (both directions) and `list` (Group 1)
 - [ ] Transaction history view component test passes: renders both directions correctly, plus
       empty state (Group 2)
 - [ ] Transaction history E2E test passes: seeded `'in'` and `'out'` transactions both render
