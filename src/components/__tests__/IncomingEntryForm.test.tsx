@@ -18,7 +18,7 @@ describe("IncomingEntryForm", () => {
     expect(screen.getByRole("option", { name: "Green Co" })).toBeInTheDocument();
   });
 
-  it("rejects submission when weight is empty", () => {
+  it("rejects submission when weight is empty, with the error on the weight field", () => {
     const onSubmit = vi.fn();
     render(<IncomingEntryForm producers={producers} onSubmit={onSubmit} />);
 
@@ -29,13 +29,13 @@ describe("IncomingEntryForm", () => {
       screen.getByRole("button", { name: "Record incoming feedstock" })
     );
 
-    expect(screen.getByRole("alert")).toHaveTextContent(
+    expect(screen.getByLabelText("Weight (kg)")).toHaveAccessibleDescription(
       "Weight is required and must be a number"
     );
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it("rejects submission when weight is non-numeric", () => {
+  it("rejects submission when weight is non-numeric, with the error on the weight field", () => {
     const onSubmit = vi.fn();
     render(<IncomingEntryForm producers={producers} onSubmit={onSubmit} />);
 
@@ -49,13 +49,33 @@ describe("IncomingEntryForm", () => {
       screen.getByRole("button", { name: "Record incoming feedstock" })
     );
 
-    expect(screen.getByRole("alert")).toHaveTextContent(
+    expect(screen.getByLabelText("Weight (kg)")).toHaveAccessibleDescription(
       "Weight is required and must be a number"
     );
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it("rejects submission when no producer is selected", () => {
+  it("rejects submission when weight is zero or negative, with the error on the weight field", () => {
+    const onSubmit = vi.fn();
+    render(<IncomingEntryForm producers={producers} onSubmit={onSubmit} />);
+
+    fireEvent.change(screen.getByLabelText("Weight (kg)"), {
+      target: { value: "-5" },
+    });
+    fireEvent.change(screen.getByLabelText("Producer"), {
+      target: { value: "1" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Record incoming feedstock" })
+    );
+
+    expect(screen.getByLabelText("Weight (kg)")).toHaveAccessibleDescription(
+      "Weight must be greater than zero"
+    );
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it("rejects submission when no producer is selected, with the error on the producer field", () => {
     const onSubmit = vi.fn();
     render(<IncomingEntryForm producers={producers} onSubmit={onSubmit} />);
 
@@ -66,7 +86,7 @@ describe("IncomingEntryForm", () => {
       screen.getByRole("button", { name: "Record incoming feedstock" })
     );
 
-    expect(screen.getByRole("alert")).toHaveTextContent(
+    expect(screen.getByLabelText("Producer")).toHaveAccessibleDescription(
       "Producer is required"
     );
     expect(onSubmit).not.toHaveBeenCalled();
@@ -88,6 +108,27 @@ describe("IncomingEntryForm", () => {
 
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith({ weightKg: 120.5, producerId: 2 });
+    });
+  });
+
+  it("surfaces a submit-failure message when onSubmit rejects", async () => {
+    const onSubmit = vi.fn().mockRejectedValue(new Error("db unavailable"));
+    render(<IncomingEntryForm producers={producers} onSubmit={onSubmit} />);
+
+    fireEvent.change(screen.getByLabelText("Weight (kg)"), {
+      target: { value: "120.5" },
+    });
+    fireEvent.change(screen.getByLabelText("Producer"), {
+      target: { value: "2" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Record incoming feedstock" })
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Something went wrong — try again"
+      );
     });
   });
 });

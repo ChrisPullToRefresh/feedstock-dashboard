@@ -36,7 +36,7 @@ data layer before UI.
 
 ## 2. Validation and error handling for entry forms
 
-**Status:** Not started
+**Status:** Complete
 
 - Replace the single shared `role="alert"` paragraph in `ProducerForm`, `SequestrationSiteForm`,
   `IncomingEntryForm`, and `OutgoingEntryForm` with per-field error state, associating each

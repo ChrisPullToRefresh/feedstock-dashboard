@@ -28,3 +28,26 @@ test("signed-in user records an outgoing feedstock entry and sees it on the tran
   await expect(row).toContainText("out");
   await expect(row).toContainText("98.25 kg");
 });
+
+test("shows an inline field error when submitting a non-positive weight", async ({
+  page,
+}) => {
+  await setupClerkTestingToken({ page });
+
+  await page.goto("/sign-in");
+  await clerk.signIn({
+    page,
+    emailAddress: process.env.E2E_CLERK_USER_EMAIL!,
+  });
+
+  await page.goto("/transactions/new/out");
+  await page.getByLabel("Weight (kg)").fill("-1");
+  await page
+    .getByRole("button", { name: "Record outgoing feedstock" })
+    .click();
+
+  await expect(page).toHaveURL(/\/transactions\/new\/out$/);
+  await expect(page.getByLabel("Weight (kg)")).toHaveAccessibleDescription(
+    "Weight must be greater than zero"
+  );
+});
