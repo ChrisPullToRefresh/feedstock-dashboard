@@ -3,9 +3,9 @@
 | Concern | Choice | Rationale |
 |---|---|---|
 | Application framework | Next.js (React, TypeScript) | Full-stack React framework with strong responsive/mobile support, fitting VISION.md's requirement that the app be mobile-friendly for both field data entry and mobile-primary data analysis. |
-| Database | Neon (Postgres, on Vercel) | Relational store for producers, sequestration sites, and weight transactions; supports the mass-balance/yield-style reporting implied by tying incoming and outgoing weights together. Pairs natively with Vercel hosting. |
+| Database | Neon (Postgres, on Vercel) | Relational store for feedstock suppliers, sequestration sites, and weight transactions; supports the mass-balance/yield-style reporting implied by tying incoming and outgoing weights together. Pairs natively with Vercel hosting. |
 | Hosting | Vercel | Native deploy target for Next.js; integrates directly with Neon for the database. |
-| Auth | Clerk, with roles stored in per-user metadata (not Clerk Organizations) | Individual accounts with roles (e.g. scale operator vs. admin) give auditability of who recorded each transaction, and support the future need to manage producer/site creation separately from day-to-day entry. |
+| Auth | Clerk, with roles stored in per-user metadata (not Clerk Organizations) | Individual accounts with roles (e.g. scale operator vs. admin) give auditability of who recorded each transaction, and support the future need to manage feedstock supplier/site creation separately from day-to-day entry. |
 | Unit/component testing | Vitest + React Testing Library | Fast, native ESM/TypeScript support with minimal config against the Next.js App Router; RTL exercises component behavior (e.g. entry forms) rather than implementation detail. |
 | End-to-end testing | Playwright | Cross-browser with real mobile-viewport emulation, first-class GitHub Actions support, and parallel runs — matches mission.md's mobile-first field entry flows better than the alternatives. |
 | CI/CD | GitHub Actions | Runs on every PR: lint + typecheck, unit/component tests, E2E tests, and a production build (`next build`), so every feature ships with automated coverage rather than relying on manual QA alone. Deploys via Vercel's native GitHub integration on merge to `main`. |
