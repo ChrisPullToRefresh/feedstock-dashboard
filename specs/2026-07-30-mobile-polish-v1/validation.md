@@ -50,17 +50,20 @@ Per this spec's validation answer — beyond the merge gates and automated cover
 this phase requires a real-device QA checklist (Group 4), executed on an actual phone rather
 than Playwright's emulated mobile viewport, covering every core flow now shipped:
 
-- [ ] Create a feedstock producer, signed in as the admin test account
-- [ ] Create a sequestration site, signed in as the admin test account
-- [ ] Confirm a non-admin (operator) account sees no "New producer"/"New site" link, and that
+- [x] Create a feedstock producer, signed in as the admin test account
+- [x] Create a sequestration site, signed in as the admin test account
+- [x] Confirm a non-admin (operator) account sees no "New producer"/"New site" link, and that
       directly visiting `/producers/new` or `/sites/new` redirects with a visible message
       explaining why, not a silent bounce
-- [ ] Record an incoming feedstock transaction end-to-end
-- [ ] Record an outgoing processed feedstock transaction end-to-end
-- [ ] View the transaction history and confirm both recorded entries appear correctly
-- [ ] Confirm the reworked mobile nav (Group 3) is usable one-handed throughout the above —
+- [x] Record an incoming feedstock transaction end-to-end
+- [x] Record an outgoing processed feedstock transaction end-to-end
+- [x] View the transaction history and confirm both recorded entries appear correctly
+- [x] Confirm the reworked mobile nav (Group 3) is usable one-handed throughout the above —
       touch targets, numeric keyboard behavior, and nav reachability all feel field-usable,
       not just functionally correct
+
+Confirmed complete by the user (2026-07-31) on an actual phone against the deployed app,
+following Group 4's role-fix landing.
 
 This supersedes Phase 3's narrower single-flow entry-speed spot-check with the comprehensive
 pass roadmap.md's Phase 4 item explicitly calls for.

@@ -54,10 +54,10 @@ weight transaction end-to-end from a mobile device in under a few taps.
 
 **Goal:** Harden the mobile field experience and ship version 1.0.
 
-- [ ] Mobile UX pass on entry forms and navigation (field-usability focus)
-- [ ] Validation and error handling for entry forms
-- [ ] Role-based access checks across producer/site creation vs. entry
-- [ ] Basic QA pass across core flows on real mobile devices
+- [x] Mobile UX pass on entry forms and navigation (field-usability focus)
+- [x] Validation and error handling for entry forms
+- [x] Role-based access checks across producer/site creation vs. entry
+- [x] Basic QA pass across core flows on real mobile devices
 
 **Success criteria:** Facility staff can reliably use the app in the field
 for day-to-day intake and outflow recording. This marks version 1.0.
