@@ -80,7 +80,7 @@ data layer before UI.
 
 ## 4. Real-device QA pass across core flows
 
-**Status:** In progress
+**Status:** Complete
 
 - Fix a UX gap surfaced by an early pass of this group's manual QA: a non-admin visiting
   `/producers/new` or `/sites/new` gets bounced back to `/producers`/`/sites` with zero
