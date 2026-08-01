@@ -62,11 +62,11 @@ health-check function returns successfully against a test/dev database.
 **Status:** Complete
 
 - Integrate Clerk into the Next.js app (provider, sign-in route).
-- Add Next.js middleware that reads `auth()` and requires a signed-in user
-  for all routes except sign-in.
+- Add a Next.js proxy (`src/proxy.ts`) that reads `auth()` and requires a
+  signed-in user for all routes except sign-in.
 - Set each test/dev user's role via `publicMetadata.role` (`"admin"` or
   `"operator"`) in the Clerk dashboard; read the role off
-  `sessionClaims.metadata.role` in middleware so it's available for future
+  `sessionClaims.metadata.role` in the proxy so it's available for future
   gating (enforcement itself is Phase 4 scope, per requirements.md).
 - **No public sign-up.** There is no `/sign-up` route. New users are
   provisioned only by admins, via Clerk invitations (or, for scripted
@@ -76,7 +76,7 @@ health-check function returns successfully against a test/dev database.
   so it can't be reached even if someone finds/guesses the URL.
 
 **Test tasks:**
-- Vitest/RTL unit test for the middleware's redirect behavior (signed-out
+- Vitest/RTL unit test for the proxy's redirect behavior (signed-out
   user → sign-in page; signed-in user → allowed through; hitting `/sign-up`
   is treated as any other protected route, not a public one), mocking
   Clerk's `auth()`.

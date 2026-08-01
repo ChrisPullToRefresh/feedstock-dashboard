@@ -44,7 +44,7 @@ To be checked off as each task group's implementation lands:
 
 Per this spec's validation answer — beyond the merge gates above, this phase also requires:
 
-- [ ] **Real-device entry-speed spot-check:** on an actual phone (not just Playwright's
+- [x] **Real-device entry-speed spot-check:** on an actual phone (not just Playwright's
       emulated mobile viewport), record one incoming and one outgoing transaction end-to-end
       and confirm the flow is fast/low-friction per roadmap.md's stated success criterion
       ("under a few taps") — Playwright's emulated viewport proves layout and functional
@@ -52,6 +52,9 @@ Per this spec's validation answer — beyond the merge gates above, this phase a
       perceived speed). This is a lighter, entry-speed-focused check, distinct from Phase 4's
       later "Basic QA pass across core flows on real mobile devices," which is a comprehensive
       pass across all core flows and remains Phase 4's responsibility, not this phase's.
+
+Retroactively confirmed via `/align` (2026-08-01) — this item was left unchecked despite
+Phase 3 having already shipped and Phase 4 building on top of it as complete.
 
 ## Ready-for-review criteria
 

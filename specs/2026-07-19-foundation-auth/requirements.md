@@ -48,13 +48,13 @@ All eight Phase 1 checklist items from roadmap.md:
 
 ## Key decisions
 
-### Role modeling: Clerk `publicMetadata` + middleware checks
+### Role modeling: Clerk `publicMetadata` + proxy checks
 
 Roles (scale operator vs. admin) are stored in each Clerk user's
-`publicMetadata.role` field, set via the Clerk dashboard for now. Next.js
-middleware/route handlers read the role off the session claims
-(`auth().sessionClaims.metadata.role`) to make it available for gating
-later.
+`publicMetadata.role` field, set via the Clerk dashboard for now. The
+Next.js proxy (`src/proxy.ts`)/route handlers read the role off the
+session claims (`auth().sessionClaims.metadata.role`) to make it available
+for gating later.
 
 **Rationale:**
 - No new Postgres table is needed — Clerk remains the single source of
