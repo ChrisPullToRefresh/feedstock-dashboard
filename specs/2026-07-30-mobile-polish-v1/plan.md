@@ -109,5 +109,6 @@ data layer before UI.
   `/sites` render without a "New producer"/"New site" link, and visiting `/producers/new` or
   `/sites/new` directly redirects to the list page with the visible forbidden message.
 
-**Test task:** None — this group's task is itself the manual verification requirement in
-validation.md's "Manual verification" section, not a new automated test.
+The remainder of this group (the real-device manual pass) has no automated test task of its
+own — it's itself the manual verification requirement in validation.md's "Manual
+verification" section.
