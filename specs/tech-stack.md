@@ -21,6 +21,12 @@ Decisions below are binding for v0.1. See `specs/mission.md` for scope and
   measures 3.67:1 on white, below AA's 4.5:1 — and is reserved for non-text roles such as
   focus rings and borders, where the bar is 3:1. Phase 0 shipped `emerald-600`
   throughout; `specs/roadmap.md` Phase 1 carries the replacement.
+- **Theme:** light and dark, chosen by the operating system through
+  `prefers-color-scheme`. v0.1 has no in-app toggle and stores no per-user preference, so
+  there is nothing to persist and no flash of the wrong palette to guard against. Both
+  palettes are the same neutral grays and the same single accent; only the shade differs,
+  per the accent entry above. Every color decision has to hold in both, which is why the
+  accent is specified as a pair.
 - **Aesthetic:** clean and minimal, consistent spacing, generous whitespace, Tailwind's
   default type scale, rounded corners, subtle shadows.
 - **Responsive strategy:** mobile-first. Movement entry is designed for a phone at the

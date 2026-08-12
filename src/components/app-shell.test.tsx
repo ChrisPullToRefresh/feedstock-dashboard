@@ -51,6 +51,22 @@ describe("AppShell", () => {
     expect(current[0]).toHaveAccessibleName("Producers");
   });
 
+  it("points the skip link at the main region", () => {
+    render(
+      <AppShell>
+        <p>Facility</p>
+      </AppShell>,
+    );
+
+    // The mobile tab bar precedes the content in the DOM, so this link is the
+    // only way past it with a keyboard. A renamed id would break it silently.
+    const skipLink = screen.getByRole("link", { name: "Skip to content" });
+    const target = screen.getByRole("main");
+
+    expect(target.id).not.toBe("");
+    expect(skipLink).toHaveAttribute("href", `#${target.id}`);
+  });
+
   it("renders its children in the main region", () => {
     render(
       <AppShell>
