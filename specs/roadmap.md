@@ -43,6 +43,12 @@ found too late to ship in Phase 0 — see `specs/2026-08-12-foundation/plan.md`
   `specs/tech-stack.md` — `emerald-700` in light, `emerald-500` in dark, with
   `--primary-foreground` flipped to match — across `--primary` and `--sidebar-primary`,
   and re-run the shell's color check at both themes
+- Give the active navigation destination a cue that is not color, in the same pull
+  request as the accent change above. `text-primary` against `text-muted-foreground`
+  differs by 1.30:1 in relative luminance today and by 1.13:1 once the accent becomes
+  `emerald-700`, and the desktop pill is `#f5f5f5` on `#ffffff` at 1.09:1 — so nothing
+  but hue marks the current tab, which WCAG 2.2 SC 1.4.1 does not allow. A weight change
+  on the active link is the smallest fix
 - Enforce the Conventional Commits rule in `specs/tech-stack.md` by machine: add a
   GitHub Actions job that checks the pull request title, make it a required check in
   `main`'s branch protection, and confirm a malformed title turns the run red and blocks
