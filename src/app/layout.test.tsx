@@ -13,6 +13,9 @@ const { interLoader } = vi.hoisted(() => ({
 
 vi.mock("next/font/google", () => ({ Inter: interLoader }));
 
+// The shell inside the layout reads the current path from the router.
+vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
+
 import RootLayout from "@/app/layout";
 
 describe("RootLayout", () => {
