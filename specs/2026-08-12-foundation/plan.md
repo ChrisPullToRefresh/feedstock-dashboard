@@ -53,12 +53,25 @@ the constitution change on 2026-08-12 and placed the work in Phase 1; `specs/roa
 carries the task. Phase 0's manual validation passed against `emerald-600`, so re-checking
 the shell's color belongs to Phase 1 and does not reopen this phase.
 
+**Vercel team: the company-owned team, settled before task 10.**
+
+`specs/tech-stack.md` § Hosting & deployment binds this project to the company-owned
+Vercel team. The target team was confirmed before task 10 connected the repository,
+because moving a project between teams after environment variables are wired is
+disruptive. This was carried as an open question while the phase was in flight and is
+closed by what shipped.
+
+**Bottom bar clearance: decided in Phase 0, inherited by Phase 4.**
+
+This was parked here for Phase 4 to own once real forms existed. Code review closed it
+inside Phase 0 instead. `main`'s bottom padding was a hardcoded `pb-24` against a bar
+that is `h-16` plus the safe-area inset, which left content behind the bar on a
+home-indicator phone; it now derives from the bar's own height and inset —
+`pb-[calc(4rem+env(safe-area-inset-bottom)+2rem)]` in `src/components/app-shell.tsx`.
+Phase 4 inherits that clearance rather than deciding it. What Phase 4 still owns is
+confirming a real submit button clears the bar on a phone.
+
 ## Open questions
 
-- **Which Vercel team.** `specs/tech-stack.md` says the company-owned Vercel team, but
-  the Vercel account in use for this work is a personal one. Confirm the target team
-  before task 10 connects the repository, since moving a project between teams after
-  environment variables are wired is disruptive.
-- **Bottom bar clearance on forms.** The fixed bottom tab bar will sit over the bottom of
-  scrolled pages. The padding and safe-area inset that keep it clear of Phase 4's submit
-  buttons are not decided here; Phase 4 owns that once real forms exist.
+None. Both questions this phase carried were answered by what shipped and are recorded
+under `## Decisions` above.

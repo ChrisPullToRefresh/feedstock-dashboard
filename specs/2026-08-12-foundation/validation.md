@@ -4,7 +4,7 @@
 
 ### Unit and component (Vitest + React Testing Library)
 
-Three automated tests, matching tasks 3, 4, 5, and 7 in `plan.md`:
+Four automated tests, matching tasks 3, 4, 5, and 7 in `plan.md`:
 
 1. **Runner sanity.** Renders a trivial component and asserts on its output. Its only
    job is to prove Vitest and React Testing Library both execute, in the terminal and in
@@ -75,6 +75,9 @@ places it in Phase 5. It is not part of this gate and no E2E check is claimed he
 
 The Vercel preview deployment must also succeed. It runs alongside the Actions run and
 is not one of its jobs.
+
+**Since shipped:** `.github/workflows/ci.yml` defines those three jobs, and Lint,
+Typecheck, and Test are required checks in `main`'s branch protection.
 
 ## Open questions
 

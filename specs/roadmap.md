@@ -32,6 +32,13 @@ Actions, gets a Vercel preview deployment, and cannot merge while red.
 **Done when:** an unauthenticated visitor is redirected to sign in, and a user
 provisioned via the Clerk Backend API can sign in and reach the app shell.
 
+The first two bullets are Phase 0 carry-overs, not auth work, and are parked here
+deliberately: both are corrections to what Phase 0 shipped, and both should land before
+more code is built on top of them. The accent replacement is the contrast fix code review
+found too late to ship in Phase 0 — see `specs/2026-08-12-foundation/plan.md`
+§ Decisions. The pull request title check is the fifth check `specs/tech-stack.md`
+§ CI/CD requires and Phase 0's workflow did not install.
+
 - Replace Phase 0's `emerald-600` accent with the theme-dependent pair in
   `specs/tech-stack.md` — `emerald-700` in light, `emerald-500` in dark, with
   `--primary-foreground` flipped to match — across `--primary` and `--sidebar-primary`,
