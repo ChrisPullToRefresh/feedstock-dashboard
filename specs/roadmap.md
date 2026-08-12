@@ -36,6 +36,11 @@ provisioned via the Clerk Backend API can sign in and reach the app shell.
   `specs/tech-stack.md` — `emerald-700` in light, `emerald-500` in dark, with
   `--primary-foreground` flipped to match — across `--primary` and `--sidebar-primary`,
   and re-run the shell's color check at both themes
+- Enforce the Conventional Commits rule in `specs/tech-stack.md` by machine: add a
+  GitHub Actions job that checks the pull request title, make it a required check in
+  `main`'s branch protection, and confirm a malformed title turns the run red and blocks
+  the merge button. The job must re-run when the title is edited, not only on push, or a
+  bad title stays green after being fixed
 - Install Clerk and wire the Next.js middleware to protect all app routes
 - Add sign-in and sign-out UI to the app shell, styled with shadcn/ui
 - Configure Clerk environment variables in Vercel and locally
