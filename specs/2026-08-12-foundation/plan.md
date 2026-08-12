@@ -38,6 +38,21 @@ one.
 The cost accepted: two navigation renderings to keep in sync, and a fixed bottom bar that
 later phases' forms must not collide with.
 
+**Accent shade: `emerald-600` ships in Phase 0, the replacement lands in Phase 1.**
+
+Code review measured `emerald-600` at 3.67:1 against white, below WCAG AA's 4.5:1 for
+normal text. It affects every default Button and the active navigation link. Measured
+against this theme's own tokens, no single emerald shade clears AA in both palettes:
+light needs `emerald-700` or darker (5.37:1), dark needs `emerald-600` or lighter
+(`emerald-500` at 8.03:1). The fix is therefore a pair, with `--primary-foreground`
+flipping alongside it.
+
+`specs/tech-stack.md` § Application named `emerald-600` and was binding on this phase, so
+Phase 0 built to it rather than quietly substituting a different color. The user directed
+the constitution change on 2026-08-12 and placed the work in Phase 1; `specs/roadmap.md`
+carries the task. Phase 0's manual validation passed against `emerald-600`, so re-checking
+the shell's color belongs to Phase 1 and does not reopen this phase.
+
 ## Open questions
 
 - **Which Vercel team.** `specs/tech-stack.md` says the company-owned Vercel team, but
