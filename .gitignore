@@ -6,6 +6,13 @@ node_modules/
 out/
 build/
 
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Test output
+coverage/
+
 # Environment
 .env
 .env*.local
