@@ -78,6 +78,9 @@ sequestration-site logins.
   2. Typecheck — `tsc --noEmit`
   3. Unit and component tests — Vitest
   4. E2E tests — Playwright
+  5. Commit convention — the pull request title is checked against Conventional Commits.
+     The title is what the squash merge writes onto `main`, so it is the thing worth
+     gating; branch commits are squashed away and are not checked.
 - **Merge gate:** green CI is a hard requirement. A pull request with any failing check
   does not merge, including a failing E2E job.
 - **Build:** Vercel builds each PR as a preview deployment alongside the Actions run.
@@ -96,6 +99,23 @@ sequestration-site logins.
 - **Review:** AI review first — run `/code-review` on the branch and address its findings
   — then the author self-merges. No second human approver is required.
 - **Merge style:** squash merge. `main`'s history is one commit per shipped pull request.
+- **Commit format:** Conventional Commits 1.0.0. Every commit message and **every pull
+  request title** is `<type>(<scope>): <subject>`.
+  - **Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`,
+    `chore`, `revert`. Anything that changes app behavior is `feat` or `fix`; everything
+    else describes the kind of work, not its importance.
+  - **Scope:** optional, lower case, naming the area touched — `shell`, `auth`, `schema`,
+    `movements`, `ci`. Omit it rather than invent one.
+  - **Subject:** imperative mood, lower case, no trailing period, 72 characters or fewer.
+    "add the inbound movement form", not "added" or "adds".
+  - **Breaking changes:** a `!` before the colon and a `BREAKING CHANGE:` footer
+    explaining the migration.
+  - **Trailers:** keep the `Co-Authored-By` trailer on agent-written commits.
+  - Pull request titles carry the same weight as commit messages because the repository
+    squashes with `PR_TITLE` as the commit subject and `PR_BODY` as the body. The title
+    you write is the message that lands on `main` and stays there; the per-commit messages
+    on the branch are squashed away. Write the pull request body as the commit body you
+    want in the history, not as notes to the reviewer.
 - **Branch protection:** enabled on `main`. Direct pushes are blocked and passing CI
   checks are required.
 - **Cleanup:** merged branches are deleted automatically.
