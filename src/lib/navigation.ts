@@ -25,5 +25,9 @@ export const NAV_DESTINATIONS: readonly NavDestination[] = [
 ];
 
 export function isActiveDestination(pathname: string, href: string): boolean {
-  return href === "/" ? pathname === "/" : pathname.startsWith(href);
+  if (href === "/") return pathname === "/";
+
+  // Match on a path boundary: a bare startsWith would light up /record for
+  // /records, and two links claiming aria-current fails silently.
+  return pathname === href || pathname.startsWith(`${href}/`);
 }

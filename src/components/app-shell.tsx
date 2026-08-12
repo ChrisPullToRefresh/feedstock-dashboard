@@ -17,6 +17,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-full flex-col md:pl-60">
+      {/*
+       * The nav precedes main in the DOM, which is right for the desktop
+       * sidebar but puts the mobile tab bar — rendered at the bottom of the
+       * screen — ahead of the content in focus order. One nav element cannot
+       * be in two places, so a skip link is the remedy.
+       */}
+      <a
+        href="#main-content"
+        className="focus:bg-background focus:ring-ring sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-60 focus:rounded-lg focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:ring-3"
+      >
+        Skip to content
+      </a>
+
       <nav
         aria-label="Main"
         className={cn(
@@ -57,7 +70,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </ul>
       </nav>
 
-      <main className="flex-1 px-6 py-8 pb-24 md:px-10 md:pb-8">
+      {/*
+       * Bottom padding derives from the bar's own height and inset rather
+       * than a hand-synced constant, so content never sits behind it.
+       */}
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="flex-1 px-6 py-8 pb-[calc(4rem+env(safe-area-inset-bottom)+2rem)] md:px-10 md:pb-8"
+      >
         {children}
       </main>
     </div>

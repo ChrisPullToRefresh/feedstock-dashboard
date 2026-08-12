@@ -4,6 +4,11 @@ on:
   pull_request:
     branches: [main]
 
+# npm ci runs lifecycle scripts from the pull request's own lockfile. Same-repo
+# pull requests would otherwise get the repository's default token scopes.
+permissions:
+  contents: read
+
 # A new push to a pull request supersedes the run already in flight.
 concurrency:
   group: ci-${{ github.ref }}
