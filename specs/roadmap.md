@@ -32,6 +32,10 @@ Actions, gets a Vercel preview deployment, and cannot merge while red.
 **Done when:** an unauthenticated visitor is redirected to sign in, and a user
 provisioned via the Clerk Backend API can sign in and reach the app shell.
 
+- Replace Phase 0's `emerald-600` accent with the theme-dependent pair in
+  `specs/tech-stack.md` — `emerald-700` in light, `emerald-500` in dark, with
+  `--primary-foreground` flipped to match — across `--primary` and `--sidebar-primary`,
+  and re-run the shell's color check at both themes
 - Install Clerk and wire the Next.js middleware to protect all app routes
 - Add sign-in and sign-out UI to the app shell, styled with shadcn/ui
 - Configure Clerk environment variables in Vercel and locally

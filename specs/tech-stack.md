@@ -14,8 +14,13 @@ Decisions below are binding for v0.1. See `specs/mission.md` for scope and
 - **Icons:** lucide-react, which ships with shadcn/ui.
 - **Font:** Inter, loaded from Google Fonts via `next/font`. Chosen for legibility on
   phones and for tabular numerals, so columns of weights align.
-- **Accent color:** Emerald (Tailwind `emerald-600`). This is the only accent. Every
-  other surface, border, and text color is neutral gray.
+- **Accent color:** Emerald. This is the only accent. Every other surface, border, and
+  text color is neutral gray. The shade differs by theme so both clear WCAG AA:
+  `emerald-700` in light with white on it (5.37:1), `emerald-500` in dark with near-black
+  on it (8.03:1). `emerald-600` is not used for text or for fills under text — it
+  measures 3.67:1 on white, below AA's 4.5:1 — and is reserved for non-text roles such as
+  focus rings and borders, where the bar is 3:1. Phase 0 shipped `emerald-600`
+  throughout; `specs/roadmap.md` Phase 1 carries the replacement.
 - **Aesthetic:** clean and minimal, consistent spacing, generous whitespace, Tailwind's
   default type scale, rounded corners, subtle shadows.
 - **Responsive strategy:** mobile-first. Movement entry is designed for a phone at the
