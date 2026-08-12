@@ -118,7 +118,12 @@ sequestration-site logins.
     want in the history, not as notes to the reviewer.
 - **Branch protection:** enabled on `main`. Direct pushes are blocked and passing CI
   checks are required.
-- **Cleanup:** merged branches are deleted automatically.
+- **Cleanup:** merged branches are deleted automatically on the remote. Locally, expect
+  `git branch -d` to refuse: a squash merge replays the branch as one new commit, so the
+  branch's own commits are never ancestors of `main` and the safety check cannot see them.
+  Confirm nothing is lost first with `git diff <branch> main --stat`, which must come back
+  empty, then delete with `git branch -D`. Never reach for `-D` without that diff — it
+  skips the check that just fired.
 
 ## Open questions
 
