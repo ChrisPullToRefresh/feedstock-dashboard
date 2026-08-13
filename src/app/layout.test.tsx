@@ -13,8 +13,8 @@ const { interLoader } = vi.hoisted(() => ({
 
 vi.mock("next/font/google", () => ({ Inter: interLoader }));
 
-// The shell inside the layout reads the current path from the router.
-vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
+// No `next/navigation` stub: the root layout no longer renders the shell, so
+// nothing under it reads the router. That absence is the point of the group.
 
 import RootLayout from "@/app/layout";
 
@@ -36,5 +36,18 @@ describe("RootLayout", () => {
 
     expect(document.body).toHaveClass("__inter_className");
     expect(document.documentElement).toHaveClass("__inter_variable");
+  });
+
+  it("renders no navigation, so routes outside the (app) group have none", () => {
+    // `/sign-in` renders through this layout and not the group's. If the shell
+    // ever moves back up here, a signed-out visitor gets a tab bar whose every
+    // destination redirects them back to signing in.
+    const { queryByRole } = render(
+      <RootLayout>
+        <p>Facility</p>
+      </RootLayout>,
+    );
+
+    expect(queryByRole("navigation")).not.toBeInTheDocument();
   });
 });
