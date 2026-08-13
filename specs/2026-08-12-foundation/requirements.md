@@ -19,7 +19,7 @@ workflow, the merge gate, and the Vercel connection.
 **The app shell.** A visitor to the deployed app sees an empty but themed application
 shell — Inter type, neutral gray surfaces, `emerald-600` as the only accent. Navigation
 is present and reachable but its destinations are placeholders; the pages behind them
-arrive in Phases 3 and 4.
+arrive in Phases 3 to 6.
 
 On a phone, navigation is a fixed bottom tab bar, within thumb reach. On desktop, the
 same destinations render as a persistent left sidebar. See `## Decisions` in `plan.md`
@@ -30,7 +30,7 @@ run that lints, typechecks, and runs the Vitest suite, and starts a Vercel previ
 deployment. A pull request whose Actions run is red cannot be merged. A commit pushed
 directly to `main` is rejected.
 
-**Nothing else.** No database, no auth, no data entry. Those are Phases 1, 2, and 4.
+**Nothing else.** No database, no auth, no data entry. Those are Phases 1, 2, and 5.
 
 ## Acceptance criteria
 
@@ -55,14 +55,14 @@ directly to `main` is rejected.
 
 ## Out of scope
 
-- Playwright and any E2E test. `specs/roadmap.md` places Playwright in Phase 5, and
+- Playwright and any E2E test. `specs/roadmap.md` places Playwright in Phase 7, and
   Phase 0's CI workflow runs lint, typecheck, and unit tests only.
 - Clerk, authentication, and route protection — Phase 1.
 - Neon, Prisma, and any schema — Phase 2.
-- Producer and sequestration site pages — Phase 3.
-- Movement forms, the movement table, and totals — Phase 4.
-- Promoting `main` to a production Vercel deployment — Phase 5.
-- Real navigation destinations. The shell's nav points at placeholders until Phases 3
+- Producer and sequestration site pages — Phases 3 and 4.
+- Movement forms, the movement table, and totals — Phases 5 and 6.
+- Promoting `main` to a production Vercel deployment — Phase 8.
+- Real navigation destinations. The shell's nav points at placeholders until Phases 3 to 6
   and 4 fill them in.
 
 ## Constraints inherited from the constitution

@@ -15,7 +15,7 @@ The app is gated by Clerk and only provisioned staff can reach it.
 
 Two corrections to what Phase 0 shipped ride along, for the reason the roadmap gives:
 the accent color and the active navigation cue are both wrong today, and every screen
-Phases 3 and 4 add would inherit them.
+Phases 3 to 6 add would inherit them.
 
 ## Behavior
 
@@ -84,11 +84,12 @@ turns CI red and cannot merge. Correcting the title re-runs the check.
   site operators (`specs/mission.md` § Non-goals).
 - Clerk's invitation flow, until the open support ticket resolves
   (`specs/tech-stack.md` § Auth).
-- Playwright and any end-to-end test — `specs/roadmap.md` places Playwright in Phase 5.
+- Playwright and any end-to-end test — `specs/roadmap.md` places Playwright in Phase 7.
 - Neon, Prisma, and any schema — Phase 2. No user record is mirrored into a database in
   this phase; Clerk holds the user list.
-- Producer and sequestration site pages — Phase 3. Movement forms and totals — Phase 4.
-- Promoting `main` to a production Vercel deployment — Phase 5.
+- Producer and sequestration site pages — Phases 3 and 4. Movement forms and totals —
+  Phases 5 and 6.
+- Promoting `main` to a production Vercel deployment — Phase 8.
 
 ## Constraints inherited from the constitution
 
@@ -124,5 +125,5 @@ turns CI red and cannot merge. Correcting the title re-runs the check.
   can only use development keys — so staff accounts provisioned against production cannot
   sign in to a preview. `plan.md` § Open questions carries the verified constraints,
   including the one that reaches past this phase: a Clerk production instance requires a
-  domain this project has not yet named, which Phase 5's production promotion also
+  domain this project has not yet named, which Phase 8's production promotion also
   depends on.

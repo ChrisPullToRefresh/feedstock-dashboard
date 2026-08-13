@@ -71,7 +71,7 @@ All three must be green, and all three must be marked as required checks in `mai
 branch protection, before this pull request leaves draft.
 
 Playwright is the fourth job `specs/tech-stack.md` requires, but `specs/roadmap.md`
-places it in Phase 5. It is not part of this gate and no E2E check is claimed here.
+places it in Phase 7. It is not part of this gate and no E2E check is claimed here.
 
 The Vercel preview deployment must also succeed. It runs alongside the Actions run and
 is not one of its jobs.

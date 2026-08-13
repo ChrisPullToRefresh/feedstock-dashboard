@@ -119,7 +119,7 @@ The Vercel preview deployment must also succeed. It runs alongside the Actions r
 not one of its jobs.
 
 Playwright is the remaining check `specs/tech-stack.md` § CI/CD names, and
-`specs/roadmap.md` places it in Phase 5. No end-to-end coverage is claimed here.
+`specs/roadmap.md` places it in Phase 7. No end-to-end coverage is claimed here.
 
 ## Open questions
 

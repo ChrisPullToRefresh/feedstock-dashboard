@@ -12,7 +12,7 @@ describe("isPublicRoute", () => {
   );
 
   it("protects a page that does not exist yet", () => {
-    // The rule is inverted deliberately: Phases 3 and 4 add pages, and none of
+    // The rule is inverted deliberately: Phases 3 to 6 add pages, and none of
     // them should need a middleware change to be protected.
     expect(isPublicRoute("/movements/new")).toBe(false);
   });

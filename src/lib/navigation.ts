@@ -14,7 +14,7 @@ export type NavDestination = {
 
 /**
  * The shell's destinations. The pages behind them are placeholders until
- * Phases 3 and 4 fill them in. One list feeds both the mobile tab bar and
+ * Phases 3 to 6 fill them in. One list feeds both the mobile tab bar and
  * the desktop sidebar, because they are the same nav at two widths.
  */
 export const NAV_DESTINATIONS: readonly NavDestination[] = [
