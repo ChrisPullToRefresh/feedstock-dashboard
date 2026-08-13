@@ -1,5 +1,5 @@
 /**
- * The shell's destinations are placeholders until Phases 3 and 4 build the
+ * The shell's destinations are placeholders until Phases 3 to 6 build the
  * pages behind them. This keeps every nav link resolving to something.
  */
 export function PlaceholderPage({

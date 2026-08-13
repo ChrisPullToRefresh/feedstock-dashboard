@@ -79,47 +79,66 @@ loads.
 - Add the Prisma client singleton for use in server code
 - Add unit tests over any weight or total calculation helpers
 
-## Phase 3 — Reference data
+## Phase 3 — Producers
 
-**Goal:** staff can manage the producer and sequestration site lists that the movement
-dropdowns read from.
+**Goal:** staff can manage the feedstock producer list that the inbound dropdown reads
+from.
 
-**Done when:** a producer and a sequestration site can each be created, edited, listed,
-and deleted in the deployed app.
+**Done when:** a producer can be created, edited, listed, and deleted in the deployed app.
 
 - List, create, edit, and delete pages for feedstock producers
+- Form validation with shadcn/ui form components
+- Component tests for the form's validation behavior
+
+## Phase 4 — Sequestration sites
+
+**Goal:** staff can manage the sequestration site list that the outbound dropdown reads
+from.
+
+**Done when:** a sequestration site can be created, edited, listed, and deleted in the
+deployed app.
+
+This phase exists to be small. Phase 3 establishes the pattern; this one follows it, and
+anything the two surfaces genuinely share is extracted here rather than duplicated.
+
 - List, create, edit, and delete pages for sequestration sites, reusing the producer
   patterns rather than duplicating them
-- Form validation with shadcn/ui form components on both surfaces
-- Component tests for each form's validation behavior
+- Form validation with shadcn/ui form components
+- Component tests for the form's validation behavior
 
-## Phase 4 — Movements
+## Phase 5 — Movement entry
 
-**Goal:** operators can record feedstock in and out on a phone, and managers can review
-every movement with running totals on desktop.
+**Goal:** operators can record feedstock in and out on a phone.
 
-**Done when:** an inbound and an outbound movement recorded on a phone appear in the
-desktop movement list and are reflected in the totals.
+**Done when:** an inbound movement and an outbound movement recorded on a phone are
+stored as append-only records.
 
 - Mobile-first inbound form: weight in kilograms plus a producer selected from a dropdown
 - Mobile-first outbound form: weight in kilograms plus a sequestration site from a
   dropdown, sharing structure with the inbound flow where it makes sense
 - Validate weights and require a counterparty on both forms
 - Write movements as append-only records
+- Component tests for both forms' validation and submission
+
+## Phase 6 — Movement list and totals
+
+**Goal:** managers can review every movement with running totals on desktop.
+
+**Done when:** the movements recorded in Phase 5 appear in the desktop movement list and
+are reflected in the totals.
+
 - Desktop-oriented movement table, newest first, filterable by direction, producer, and
   sequestration site, and still readable on a phone
 - Running totals: inbound and outbound weight overall, and broken down by producer and by
   sequestration site
-- Component tests for both forms' validation and submission, and unit tests over the
-  totals calculations
+- Unit tests over the totals calculations
 
-## Phase 5 — Ship
+## Phase 7 — End-to-end coverage
 
-**Goal:** v0.1 is fully covered by E2E tests, running in production, and demoable to
-Arin.
+**Goal:** v0.1 is fully covered by Playwright, running as a merge gate.
 
-**Done when:** the full Playwright suite passes in CI as a merge gate and the production
-deployment is live.
+**Done when:** the full Playwright suite passes in GitHub Actions and is a required check
+on `main`.
 
 - Install and configure Playwright against an ephemeral or preview database, never
   production
@@ -128,6 +147,20 @@ deployment is live.
 - Run at least one E2E pass at a mobile viewport
 - Add the Playwright job to the GitHub Actions pull request workflow and make it a
   required check
+
+## Phase 8 — Production launch
+
+**Goal:** v0.1 is running in production and demoable to Arin.
+
+**Done when:** the production deployment is live and Arin has been walked through it end
+to end.
+
+- Stand up a Clerk production instance, which needs a domain with DNS records we control —
+  no domain is named anywhere in this constitution yet, and there is no path to production
+  authentication until one is
+- Re-provision the staff accounts, including Arin's, against that production instance.
+  Phase 1's accounts live in Clerk's development instance, which backs preview deployments
+  only; see `specs/2026-08-13-auth/plan.md` § Open questions
 - Promote `main` to the production Vercel deployment
 - Verify the deployed app manually on a phone and on desktop
 - Walk Arin through recording an inbound movement, an outbound movement, reference data

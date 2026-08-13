@@ -43,6 +43,7 @@
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
   --color-primary: var(--primary);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
@@ -58,25 +59,35 @@
 }
 
 /*
- * Neutral gray surfaces with emerald-600 as the single accent, per
- * specs/tech-stack.md. The accent lives in --primary and the focus rings;
- * every other surface, border, and text token is achromatic (chroma 0).
- * --destructive stays red because it signals an error state rather than
- * acting as an accent, and nothing in the shell renders it.
+ * Neutral gray surfaces with emerald as the single accent, per
+ * specs/tech-stack.md. The accent is a pair rather than one shade, because no
+ * single emerald clears WCAG AA in both themes: emerald-700 in light,
+ * emerald-500 in dark, with --primary-foreground flipping to match. emerald-600
+ * is kept only for the focus rings, where the bar is 3:1. Every other surface,
+ * border, and text token is achromatic (chroma 0). --destructive stays red
+ * because it signals an error state rather than acting as an accent, and
+ * nothing in the shell renders it.
  */
 :root {
   /* Lets the browser paint its own widgets — scrollbars, form controls, the
    * caret — in whichever palette is active below. */
   color-scheme: light dark;
-  --accent-emerald: oklch(59.6% 0.145 163.225); /* Tailwind emerald-600 */
+  /* Tailwind emerald-600. Non-text roles only — focus rings and borders, where the
+   * bar is 3:1. It measures 3.67:1 on white and fails AA for text. */
+  --accent-emerald: oklch(59.6% 0.145 163.225);
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: var(--accent-emerald);
+  /* Tailwind emerald-700 — 5.37:1 with white on it. */
+  --primary: oklch(50.8% 0.118 165.612);
   --primary-foreground: oklch(1 0 0);
+  /* Tailwind emerald-800 — 7.61:1 with white on it. Hover darkens in light and
+   * lightens in dark: an alpha fill would wash toward the background instead,
+   * and `bg-primary/80` on white measured 3.72:1 under the label. */
+  --primary-hover: oklch(43.2% 0.095 166.913);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -95,7 +106,7 @@
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: var(--accent-emerald);
+  --sidebar-primary: oklch(50.8% 0.118 165.612); /* Tailwind emerald-700 */
   --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
@@ -111,8 +122,12 @@
     --card-foreground: oklch(0.985 0 0);
     --popover: oklch(0.205 0 0);
     --popover-foreground: oklch(0.985 0 0);
-    --primary: var(--accent-emerald);
-    --primary-foreground: oklch(1 0 0);
+    /* Tailwind emerald-500 — 8.03:1 against this theme's near-black, which is what
+     * sits on it. The pair inverts here: the accent lightens, its foreground darkens. */
+    --primary: oklch(69.6% 0.17 162.48);
+    --primary-foreground: oklch(0.145 0 0);
+    /* Tailwind emerald-400 — 10.21:1 with near-black on it. */
+    --primary-hover: oklch(76.5% 0.177 163.223);
     --secondary: oklch(0.269 0 0);
     --secondary-foreground: oklch(0.985 0 0);
     --muted: oklch(0.269 0 0);
@@ -130,8 +145,8 @@
     --chart-5: oklch(0.269 0 0);
     --sidebar: oklch(0.205 0 0);
     --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: var(--accent-emerald);
-    --sidebar-primary-foreground: oklch(1 0 0);
+    --sidebar-primary: oklch(69.6% 0.17 162.48); /* Tailwind emerald-500 */
+    --sidebar-primary-foreground: oklch(0.145 0 0);
     --sidebar-accent: oklch(0.269 0 0);
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(1 0 0 / 10%);

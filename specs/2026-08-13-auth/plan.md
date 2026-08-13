@@ -3,10 +3,13 @@
 Tasks run in order. Every feature task ships with its paired test task in the same
 pull request.
 
-The phase ships as three pull requests. Tasks 1–2 are the first, tasks 3–4 the second,
-tasks 5–13 the third. The order is the roadmap's: the corrections to Phase 0 land before
-any auth code is built on them, and the title gate is in place before the largest pull
-request of the phase is opened.
+The phase ships as one pull request, on the user's direction during implementation. It was
+planned as three — tasks 1–2, then 3–4, then 5–13 — and the headings below still carry
+that grouping, because it is the order the work is done in and the roadmap's reason for it
+holds: the corrections to Phase 0 land before any auth code is built on them.
+`specs/tech-stack.md` § Branching & pull request workflow allows this — one phase in one
+pull request is a coherent slice — and § Decisions records what the single pull request
+costs.
 
 ## Pull request 1 — Phase 0 carry-overs
 
@@ -115,7 +118,7 @@ project's README rather than a `docs/` file created for one page.
 
 The cost accepted: task 12 is larger than "write the provisioning steps". A README that
 covers only provisioning would be a strange front page, so the task also carries what
-the app is and how to run it locally. Phase 5's runbook has somewhere obvious to go
+the app is and how to run it locally. Phase 8's runbook has somewhere obvious to go
 afterwards.
 
 The alternative was `docs/provisioning.md` — smaller, but it invents a directory
@@ -137,7 +140,7 @@ page.
      edit.** It cannot be stood up on a `*.vercel.app` hostname. No domain is named in
      `specs/mission.md`, `specs/tech-stack.md`, or `specs/roadmap.md`, so v0.1 has no path
      to a production instance until one exists. That is a constitution-level gap, not a
-     Phase 1 one — it also governs Phase 5's production promotion.
+     Phase 1 one — it also governs Phase 8's production promotion.
      <https://clerk.com/docs/guides/development/deployment/production>
   3. **The Vercel Marketplace integration maps instances to environments automatically**
      — development instance to Vercel's development and preview environments, production
@@ -148,8 +151,13 @@ page.
      follow.
      <https://clerk.com/docs/guides/development/integrations/platforms/vercel-marketplace>
 
-  What follows for this plan: task 13's staff accounts live in whichever instance backs
-  previews, so on development keys they are not the accounts Arin uses in production.
-  Either task 13 provisions development-instance accounts now and Phase 5 re-provisions
-  against production, or task 13's verification moves to Phase 5. Decide that with task 10,
-  not at task 13.
+  **Settled during implementation.** The Vercel Marketplace integration was installed, so
+  the development instance backs Vercel's development and preview environments and a
+  production instance would back production. Task 13 provisions development-instance
+  accounts now, which is what makes validation steps 11 and 16 runnable; `specs/roadmap.md`
+  Phase 8 carries re-provisioning against production. Those accounts are therefore
+  throwaway, and Arin gets a second one in Phase 8.
+
+  Still open, and not this phase's to close: **no production domain is named**, so there is
+  no path to a Clerk production instance. It belongs in `specs/tech-stack.md` § Hosting &
+  deployment rather than here, because Phase 8's production promotion depends on it too.

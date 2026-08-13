@@ -1,7 +1,7 @@
+import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 
-import { AppShell } from "@/components/app-shell";
 import "./globals.css";
 
 // `variable` feeds Tailwind's --font-sans token; `className` is applied to
@@ -20,10 +20,16 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full antialiased`}>
-      <body className={`${inter.className} flex min-h-full flex-col`}>
-        <AppShell>{children}</AppShell>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" className={`${inter.variable} h-full antialiased`}>
+        {/*
+         * No shell here. It belongs to the `(app)` group, so routes outside it —
+         * `/sign-in` — render without navigation. See `src/app/(app)/layout.tsx`.
+         */}
+        <body className={`${inter.className} flex min-h-full flex-col`}>
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

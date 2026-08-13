@@ -67,8 +67,15 @@ branch `0-foundation` pairs with `specs/2026-08-12-foundation/`. The branch carr
 date; the folder does.
 
 - **On a phase branch with a matching folder:** that is the spec. Proceed.
-- **On `main`:** find the open draft pull request, check out its head branch, and pair it
-  the same way. If there is more than one, ask which with `AskUserQuestion`.
+- **On `main` with an open draft pull request:** check out its head branch and pair it the
+  same way. That draft is the phase's one pull request; the implementation lands on its
+  branch and it is the pull request you take out of draft. If there is more than one
+  draft, ask which with `AskUserQuestion`.
+- **On `main` with the spec already merged and no open pull request:** the phase's pull
+  request was spent on the spec alone, so the implementation cannot join it. Branch from
+  `main` and open a second one — then say plainly in step 9 that this phase took two pull
+  requests against `specs/tech-stack.md` § Branching & pull request workflow, and why.
+  Do not let it pass unremarked; the rule erodes one convenient exception at a time.
 - **No spec folder for this branch:** stop. Tell the user to run `/feature-spec` first.
   This skill implements a spec; it does not invent one.
 
@@ -196,8 +203,10 @@ Plain text:
 - Anything you found that contradicts the spec, and anything still parked under
   `## Open questions` in either file.
 
-If the spec deferred part of the phase to a follow-up, say so and say that the next slice
-needs its own `/feature-spec` run.
+The phase ships as one pull request — `specs/tech-stack.md` § Branching & pull request
+workflow — so there is no follow-up slice to hand on. A row you could not finish is a
+blocker to report by name, not a remainder for a later pull request, and the phase is not
+done while it stands.
 
 ## Writing style
 

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { SignOutControl } from "@/components/sign-out-control";
 import { cn } from "@/lib/utils";
 import { NAV_DESTINATIONS, isActiveDestination } from "@/lib/navigation";
 
@@ -56,8 +57,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     "flex h-16 flex-col items-center justify-center gap-1 text-xs font-medium",
                     "md:h-auto md:flex-row md:justify-start md:gap-3 md:rounded-lg md:px-3 md:py-2 md:text-sm",
                     "focus-visible:ring-ring focus-visible:ring-3 focus-visible:outline-none",
+                    // The weight, not the color, is what marks the current
+                    // destination. text-primary against text-muted-foreground
+                    // differs by 1.13:1 in relative luminance, so hue alone
+                    // leaves a colorblind operator unable to tell which tab is
+                    // current — WCAG 2.2 SC 1.4.1.
                     active
-                      ? "text-primary md:bg-muted"
+                      ? "text-primary md:bg-muted font-semibold"
                       : "text-muted-foreground hover:text-foreground md:hover:bg-muted",
                   )}
                 >
@@ -69,6 +75,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           })}
         </ul>
       </nav>
+
+      {/*
+       * The shell's first top chrome. Signing out is rare and deliberate, so
+       * the weakest one-handed reach zone is the right place for it — the same
+       * reasoning that kept primary navigation out of the top corner in Phase
+       * 0. Rendered once at every width rather than as a mobile copy and a
+       * desktop copy, so the control has exactly one accessible name.
+       */}
+      <header className="flex items-center justify-end px-6 pt-4 md:px-10">
+        <SignOutControl />
+      </header>
 
       {/*
        * Bottom padding derives from the bar's own height and inset rather

@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import AppError from "@/app/error";
+import AppError from "@/app/(app)/error";
 
 describe("AppError", () => {
   it("offers a retry that calls Next's reset", () => {

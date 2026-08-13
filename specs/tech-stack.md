@@ -20,7 +20,13 @@ Decisions below are binding for v0.1. See `specs/mission.md` for scope and
   on it (8.03:1). `emerald-600` is not used for text or for fills under text — it
   measures 3.67:1 on white, below AA's 4.5:1 — and is reserved for non-text roles such as
   focus rings and borders, where the bar is 3:1. Phase 0 shipped `emerald-600`
-  throughout; `specs/roadmap.md` Phase 1 carries the replacement.
+  throughout; Phase 1 replaced it with the pair above and left it on the focus rings
+  alone.
+- **Accent hover:** `emerald-800` in light (7.61:1 with white on it), `emerald-400` in
+  dark (10.21:1 with near-black on it), carried by `--primary-hover`. Hover moves the
+  fill away from the background — darker in light, lighter in dark. An alpha fill such as
+  `bg-primary/80` washes toward the background instead, which measured 3.72:1 under a
+  white label and failed AA.
 - **Theme:** light and dark, chosen by the operating system through
   `prefers-color-scheme`. v0.1 has no in-app toggle and stores no per-user preference, so
   there is nothing to persist and no flash of the wrong palette to guard against. Both
@@ -100,8 +106,12 @@ sequestration-site logins.
   `specs/roadmap.md`.
 - **Pull requests:** every change goes through a pull request. No exceptions, including
   documentation and configuration edits.
-- **Scope:** a phase may take several pull requests. Keep each one to a coherent slice of
-  a single phase — never span two phases in one pull request.
+- **Scope:** one pull request per phase. Every phase in `specs/roadmap.md` ships as
+  exactly one pull request — never two phases in one, and never one phase split across
+  two. A phase whose pull request is too large to review is a phase that was drawn too
+  large; the fix is to split the phase in `specs/roadmap.md`, not to split its pull
+  request. This keeps a phase's **Done when** line provable in one place, and keeps the
+  branch, the spec folder, and the pull request in one-to-one correspondence.
 - **Review:** AI review first — run `/code-review` on the branch and address its findings
   — then the author self-merges. No second human approver is required.
 - **Merge style:** squash merge. `main`'s history is one commit per shipped pull request.

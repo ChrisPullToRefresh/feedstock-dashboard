@@ -108,11 +108,15 @@ offer it as a way to avoid asking properly.
 Do not pad. A question whose options are all the same work in different words teaches
 the user to skim, and a skimmed question is worse than one you never asked.
 
-- **Scope** (`header: "Scope"`). The phase may be more than one pull request;
-  `specs/tech-stack.md` says to keep each one a coherent slice of a single phase. Ask
-  which slice this spec covers. Options are concrete task groupings drawn from the
-  phase's roadmap bullets — "all of it", or a named subset with the rest deferred to a
-  follow-up spec. Never offer a slice that spans two phases.
+- **Scope** (`header: "Scope"`). A spec covers exactly one phase, and that phase ships as
+  exactly one pull request — `specs/tech-stack.md` § Branching & pull request workflow.
+  So this question is not "which slice"; never offer a subset of a phase's bullets or a
+  follow-up spec for the remainder. Ask instead whether the phase you detected is the
+  right one and whether its bullets are still the work: list them back, and offer the
+  alternatives that actually exist — proceed with all of them, or the roadmap needs
+  changing first, because a phase too large for one reviewable pull request is a phase
+  drawn too large, and the fix is to split it in `specs/roadmap.md` before any spec is
+  written.
 
 - **Decisions** (`header: "Decisions"`). One question per open technical choice the
   constitution does not already make — a data-shape question, a library choice inside an
@@ -157,7 +161,8 @@ Never branch from a dirty tree. If `git status --short` is non-empty, stop and a
 # <Phase N> — <Feature Name> — Requirements
 
 **Phase:** <N> in `specs/roadmap.md`
-**Scope of this spec:** <the scope answer, and what it explicitly defers>
+**Scope of this spec:** <all of the phase's roadmap bullets — a spec covers one whole
+phase and defers none of it>
 
 ## Goal
 ## Behavior
@@ -242,13 +247,19 @@ Commit messages end with the project's `Co-Authored-By` trailer.
 gh pr create --draft --base main --title "Phase <N> — <Feature Name>" --body "<body>"
 ```
 
-The body contains: the goal, the scope and what it defers, the acceptance criteria as
+The body contains: the goal, the phase's bullets, the acceptance criteria as
 checkboxes, a link to the three spec files, and a **Merge gate** section listing the
 GitHub Actions job names read in step 1 — the real ones from `.github/workflows/`, not
 invented names.
 
 If no workflow files exist yet, say so explicitly in the body under **Merge gate**:
 name it as blocked on the phase that adds CI, and do not claim a gate that is not there.
+
+**This draft is the phase's pull request — the only one it gets.** `specs/tech-stack.md`
+§ Branching & pull request workflow gives each phase exactly one, and `/feature-implement`
+works the plan onto this same branch and marks this same pull request ready. Merging it
+before the implementation lands costs the phase its single pull request and forces a
+second one. Say so in the body, so nobody merges it out of tidiness.
 
 `specs/tech-stack.md` makes green CI a hard merge requirement and blocks direct pushes to
 `main`. The pull request stays **draft** — this skill scaffolds a spec, it does not ship a
@@ -258,8 +269,9 @@ phase. Do not mark it ready, and do not merge.
 
 Plain text: the branch, the three file paths, the pull request URL, every decision the
 user made and where it is recorded, every item parked under `## Open questions`, and the
-CI checks that gate the merge. If the scope answer deferred part of the phase, say what
-is left and that it needs its own spec later.
+CI checks that gate the merge. The spec covers the whole phase, so there is no remainder
+to hand to a later spec — if you found yourself wanting one, the phase is too large and
+`specs/roadmap.md` is what needs changing.
 
 Then say plainly whether anything in the spec is yours rather than theirs. If a choice
 got made without a question — because you missed it in step 2 — name it here rather than

@@ -61,14 +61,14 @@ because moving a project between teams after environment variables are wired is
 disruptive. This was carried as an open question while the phase was in flight and is
 closed by what shipped.
 
-**Bottom bar clearance: decided in Phase 0, inherited by Phase 4.**
+**Bottom bar clearance: decided in Phase 0, inherited by Phase 5.**
 
-This was parked here for Phase 4 to own once real forms existed. Code review closed it
+This was parked here for Phase 5 to own once real forms existed. Code review closed it
 inside Phase 0 instead. `main`'s bottom padding was a hardcoded `pb-24` against a bar
 that is `h-16` plus the safe-area inset, which left content behind the bar on a
 home-indicator phone; it now derives from the bar's own height and inset —
 `pb-[calc(4rem+env(safe-area-inset-bottom)+2rem)]` in `src/components/app-shell.tsx`.
-Phase 4 inherits that clearance rather than deciding it. What Phase 4 still owns is
+Phase 5 inherits that clearance rather than deciding it. What Phase 5 still owns is
 confirming a real submit button clears the bar on a phone.
 
 ## Open questions

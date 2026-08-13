@@ -5,6 +5,13 @@ const { usePathname } = vi.hoisted(() => ({ usePathname: vi.fn(() => "/") }));
 
 vi.mock("next/navigation", () => ({ usePathname }));
 
+// The shell's header carries the sign-out control, which reads Clerk's session.
+// These tests are about navigation, so the visitor is signed out and the
+// control renders nothing — its own behaviour lives in sign-out-control.test.
+vi.mock("@clerk/nextjs", () => ({
+  useAuth: () => ({ isSignedIn: false, signOut: vi.fn() }),
+}));
+
 import { AppShell } from "@/components/app-shell";
 import { NAV_DESTINATIONS } from "@/lib/navigation";
 
@@ -49,6 +56,32 @@ describe("AppShell", () => {
 
     expect(current).toHaveLength(1);
     expect(current[0]).toHaveAccessibleName("Producers");
+  });
+
+  it("marks the current destination by weight, not by color alone", () => {
+    usePathname.mockReturnValue("/producers");
+
+    render(
+      <AppShell>
+        <p>Facility</p>
+      </AppShell>,
+    );
+
+    // WCAG 2.2 SC 1.4.1: the accent against the inactive gray differs by
+    // 1.13:1 in relative luminance, so hue cannot be the only cue.
+    const links = within(
+      screen.getByRole("navigation", { name: "Main" }),
+    ).getAllByRole("link");
+
+    for (const link of links) {
+      const isCurrent = link.getAttribute("aria-current") === "page";
+      // The exact class, not a substring: `md:font-semibold` would satisfy a
+      // substring match while leaving the mobile tab bar — the primary form
+      // factor — marked by hue alone.
+      const classes = link.className.split(/\s+/);
+
+      expect(classes.includes("font-semibold")).toBe(isCurrent);
+    }
   });
 
   it("points the skip link at the main region", () => {
