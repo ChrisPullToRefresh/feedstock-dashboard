@@ -23,8 +23,11 @@ Matching the paired test tasks in `plan.md`:
    `/sites` are protected; `/sign-in`, `/_next/static/*`, and `/favicon.ico` are not.
 6. **The sign-in route is themed.** Asserts `<SignIn />` renders and receives the theme's
    CSS variables through `appearance`, with `@clerk/nextjs` mocked.
-7. **The sign-out control follows session state.** Renders for a signed-in user, absent
-   for a signed-out one, with Clerk's control components mocked.
+7. **The sign-out control follows session state, and there is exactly one of it.**
+   Asserts a single control named "Sign out" for a signed-in user, none for a signed-out
+   one, and that activating it calls `signOut`, with Clerk's hooks mocked. The count
+   matters: two copies for two viewports is the pattern Phase 0 avoided so that each
+   control has one accessible name.
 8. **The provisioning script validates its input.** With the Clerk client mocked, a valid
    email calls `createUser` once with that address; a missing or malformed argument exits
    non-zero without calling Clerk.
@@ -77,7 +80,9 @@ person or via the Vercel CLI — never by browser automation.
 11. Sign in with a provisioned account, one-handed on a phone. **Expect:** the app shell,
     with the bottom tab bar back.
 12. Find and use the sign-out control at a phone width, then again at a desktop width.
-    **Expect:** it is reachable in both, and signing out returns to `/sign-in`.
+    **Expect:** a slim header above the page content carries it, right-aligned, in both;
+    it does not appear on `/sign-in`; the bottom tab bar still holds four destinations and
+    no account item; and signing out returns to `/sign-in`.
 13. Press the browser's back button after signing out. **Expect:** `/sign-in` again, not a
     cached view of the shell.
 14. Run the provisioning script for a throwaway address. **Expect:** it prints the created

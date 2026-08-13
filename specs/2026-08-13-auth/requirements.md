@@ -30,7 +30,10 @@ accent, in whichever theme the operating system asks for. On success they land o
 app shell.
 
 **Signing out.** A signed-in user has a visible way to sign out from the app shell, on a
-phone and on desktop. Signing out returns them to `/sign-in`.
+phone and on desktop: a slim header above the page content, with the control
+right-aligned. It is the shell's first top chrome — Phase 0 shipped a bottom tab bar and
+a sidebar and nothing above the content. See `plan.md` § Decisions for why it goes there
+rather than into the tab bar. Signing out returns the user to `/sign-in`.
 
 **Getting an account.** Accounts are created by a script that calls the Clerk Backend
 API. There is no self-service sign-up and no invitation email —
@@ -115,9 +118,11 @@ turns CI red and cannot merge. Correcting the title re-runs the check.
 
 ## Open questions
 
-- **Which Clerk instance backs preview deployments.** Clerk separates development and
-  production instances, each with its own keys and its own user list. Whether previews
-  point at the development instance — meaning staff accounts provisioned for production
-  cannot sign in to a preview — is not decided here. It has to be settled before the
-  environment variables task, which is why `plan.md` places that task after the middleware
-  rather than first.
+- **How this project connects to Clerk.** Left to the session that implements the Clerk
+  tasks, on the user's instruction. Clerk separates development and production instances,
+  each with its own keys and its own user list, and preview deployments on `*.vercel.app`
+  can only use development keys — so staff accounts provisioned against production cannot
+  sign in to a preview. `plan.md` § Open questions carries the verified constraints,
+  including the one that reaches past this phase: a Clerk production instance requires a
+  domain this project has not yet named, which Phase 5's production promotion also
+  depends on.

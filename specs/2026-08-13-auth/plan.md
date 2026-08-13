@@ -30,7 +30,7 @@ request of the phase is opened.
 | 6  | The app shell moved out of the root layout into an `(app)` route group layout, with `/`, `/record`, `/producers`, and `/sites` inside it | RTL tests carried over from Phase 0 still pass against the new layout, plus an assertion that a page rendered outside the group renders no navigation |
 | 7  | `clerkMiddleware` in `src/middleware.ts` protecting every route except `/sign-in` and Next's static assets | Unit test over the route matcher: `/`, `/record`, `/producers`, `/sites` are protected; `/sign-in`, `/_next/static/*`, and `/favicon.ico` are not |
 | 8  | A `/sign-in` catch-all route rendering Clerk's `<SignIn />`, outside the `(app)` group, with `appearance` mapped to the theme's CSS variables | RTL test asserting the route renders the Clerk component and passes the theme variables through `appearance`, with `@clerk/nextjs` mocked |
-| 9  | A sign-out control in the app shell, reachable at a phone width and a desktop width, returning to `/sign-in` | RTL test asserting the control renders for a signed-in user and not for a signed-out one, with Clerk's control components mocked |
+| 9  | A slim header above `main` inside the `(app)` layout, carrying a right-aligned shadcn Button that calls Clerk's `signOut()` and returns to `/sign-in`. One rendering, not a mobile copy and a desktop copy | RTL test asserting exactly one control with the accessible name "Sign out" renders for a signed-in user, none for a signed-out one, and that clicking it calls `signOut`, with Clerk's hooks mocked |
 | 10 | Clerk publishable and secret keys configured in Vercel for each environment and in `.env.local`, with `.env.local` ignored by git | Manual: `vercel env ls` lists both keys in every environment, `git check-ignore .env.local` exits zero, and the app boots locally against the keys |
 | 11 | A provisioning script that creates a user through the Clerk Backend API, taking an email address and reporting the created user id | Unit test with the Clerk client mocked: a valid email calls `createUser` once with that address; a missing or malformed argument exits non-zero without calling Clerk. Plus one live run creating and then deleting a throwaway user |
 | 12 | `README.md` created — what the app is, how to run it locally, and a provisioning section covering how to run the script, who to run it for, and why invitations are not used | Manual: someone who has not read the script follows the README end to end to create and delete a throwaway user, and gets the app running locally from the same document |
@@ -70,6 +70,43 @@ move the shell down a level. `(app)` is a route group, so no URL changes.
 
 The cost accepted: page files move on disk, and the Phase 0 layout test moves with them.
 
+**Sign-out is a shadcn Button in a slim header, not Clerk's `<UserButton />`.**
+
+The user delegated this one — "use your best judgement on adding a slim top bar" — so it
+is recorded here as a judgement made on their instruction rather than an answer they
+gave.
+
+The Clerk exception above is justified by authentication being a protocol rather than a
+widget. Sign-out is not a protocol; it is one function call with no failure modes worth
+outsourcing. Stretching the exception to cover it would make the exception vaguer than
+it needs to be, so the control is a shadcn Button calling `signOut()` and the shell stays
+entirely shadcn and Tailwind, as `specs/tech-stack.md` § Application asks.
+
+It goes in a slim header above `main`, right-aligned, rendered once at every width.
+Placement was the harder half: the shell has no top chrome today, and the bottom tab bar
+holds destinations at `flex-1`. `specs/2026-08-12-foundation/plan.md` § Decisions
+rejected the top corner because it is the weakest one-handed reach zone — but it rejected
+it for *primary navigation*. A rare, deliberate action is what a weak reach zone is for,
+so a top-right control uses that reasoning rather than contradicting it.
+
+The alternatives and why not:
+
+- **A fifth tab in the bottom bar.** Puts a non-destination in the thumb zone and shrinks
+  each tab from roughly 93px to 75px at a 375px viewport.
+- **A header on mobile and a sidebar footer on desktop.** Two copies of one control, which
+  is what Phase 0 deliberately avoided for the nav so that each thing has exactly one
+  accessible name.
+- **Clerk's `<UserButton />`.** It earns its place only if account management belongs
+  inside the app. `specs/mission.md` does not ask for it, roles are not modeled, and it
+  adds a second Clerk surface to theme whose popover would anchor awkwardly above a fixed
+  bottom bar on a phone.
+- **A dropdown showing the signed-in email.** Useful when records are attributed to the
+  person who entered them. v0.1 does not attribute movements to users, so identity display
+  has no job yet.
+
+The cost accepted: Phase 1 adds top chrome to a shell Phase 0 shipped without any, and
+`main` gains a header above it that every later phase's pages sit beneath.
+
 **The provisioning path is documented in a new `README.md`.**
 
 The repository has no README today. Provisioning is the first thing a new person needs
@@ -87,11 +124,32 @@ page.
 
 ## Open questions
 
-- **Which Clerk instance backs preview deployments.** Carried from
-  `requirements.md` § Open questions. Task 10 cannot be finished without an answer, and
-  task 13 depends on which instance the staff accounts are created in. Settle it before
-  task 10 rather than at task 13, when accounts already exist in the wrong place.
-- **Whether the sign-out control is Clerk's `<UserButton />` or a shadcn Button calling
-  `signOut()`.** Both satisfy task 9 and the decision above; the second keeps the shell's
-  own chrome consistent while leaving the protocol to Clerk. Decide when the shell is in
-  front of you at a phone width, and record the answer here.
+- **How this project connects to Clerk.** Deliberately left to the session that
+  implements tasks 5–13, on the user's instruction. Three facts are settled and should be
+  read before that session starts, so they are not rediscovered at task 10:
+
+  1. **Preview deployments must use development keys.** Clerk states that production API
+     keys cannot be used with a host's provided preview domain, so `*.vercel.app` previews
+     take `pk_test_` / `sk_test_`. The escape — serving previews from a domain you own via
+     Vercel's Preview Deployment Suffix — needs a Vercel Pro or Enterprise plan.
+     <https://clerk.com/docs/deployments/set-up-preview-environment>
+  2. **A Clerk production instance requires a domain you own, with DNS records you can
+     edit.** It cannot be stood up on a `*.vercel.app` hostname. No domain is named in
+     `specs/mission.md`, `specs/tech-stack.md`, or `specs/roadmap.md`, so v0.1 has no path
+     to a production instance until one exists. That is a constitution-level gap, not a
+     Phase 1 one — it also governs Phase 5's production promotion.
+     <https://clerk.com/docs/guides/development/deployment/production>
+  3. **The Vercel Marketplace integration maps instances to environments automatically**
+     — development instance to Vercel's development and preview environments, production
+     instance to production — and syncs both keys into the project, which is how
+     `specs/tech-stack.md` § Data already provisions Neon. The catch: an existing Clerk
+     application cannot be connected to it, so taking this route means a new application,
+     and the open invitations support ticket in `specs/tech-stack.md` § Auth may not
+     follow.
+     <https://clerk.com/docs/guides/development/integrations/platforms/vercel-marketplace>
+
+  What follows for this plan: task 13's staff accounts live in whichever instance backs
+  previews, so on development keys they are not the accounts Arin uses in production.
+  Either task 13 provisions development-instance accounts now and Phase 5 re-provisions
+  against production, or task 13's verification moves to Phase 5. Decide that with task 10,
+  not at task 13.
