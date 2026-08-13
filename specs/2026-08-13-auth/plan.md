@@ -151,8 +151,13 @@ page.
      follow.
      <https://clerk.com/docs/guides/development/integrations/platforms/vercel-marketplace>
 
-  What follows for this plan: task 13's staff accounts live in whichever instance backs
-  previews, so on development keys they are not the accounts Arin uses in production.
-  Either task 13 provisions development-instance accounts now and Phase 5 re-provisions
-  against production, or task 13's verification moves to Phase 5. Decide that with task 10,
-  not at task 13.
+  **Settled during implementation.** The Vercel Marketplace integration was installed, so
+  the development instance backs Vercel's development and preview environments and a
+  production instance would back production. Task 13 provisions development-instance
+  accounts now, which is what makes validation steps 11 and 16 runnable; `specs/roadmap.md`
+  Phase 5 carries re-provisioning against production. Those accounts are therefore
+  throwaway, and Arin gets a second one in Phase 5.
+
+  Still open, and not this phase's to close: **no production domain is named**, so there is
+  no path to a Clerk production instance. It belongs in `specs/tech-stack.md` § Hosting &
+  deployment rather than here, because Phase 5's production promotion depends on it too.

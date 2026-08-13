@@ -128,6 +128,12 @@ deployment is live.
 - Run at least one E2E pass at a mobile viewport
 - Add the Playwright job to the GitHub Actions pull request workflow and make it a
   required check
+- Stand up a Clerk production instance, which needs a domain with DNS records we control —
+  no domain is named anywhere in this constitution yet, and there is no path to production
+  authentication until one is
+- Re-provision the staff accounts, including Arin's, against that production instance.
+  Phase 1's accounts live in Clerk's development instance, which backs preview deployments
+  only; see `specs/2026-08-13-auth/plan.md` § Open questions
 - Promote `main` to the production Vercel deployment
 - Verify the deployed app manually on a phone and on desktop
 - Walk Arin through recording an inbound movement, an outbound movement, reference data
