@@ -12,7 +12,7 @@ request of the phase is opened.
 
 | #  | Feature task | Paired test task |
 |----|--------------|------------------|
-| 1  | `--primary` and `--sidebar-primary` set to `emerald-700` in light and `emerald-500` in dark, with `--primary-foreground` flipped to white and near-black to match | A unit test that reads the token block in `src/app/globals.css`, converts each accent and its foreground to sRGB, and asserts both pairs compute at or above 4.5:1 — the constitution's numbers become an executable check rather than a comment |
+| 1  | `--primary` and `--sidebar-primary` set to `emerald-700` in light and `emerald-500` in dark, with `--primary-foreground` flipped to white and near-black to match | A unit test asserting those four tokens hold the exact `oklch` values the constitution names, in both the `:root` block and the `prefers-color-scheme: dark` block. The ratios stay in `specs/tech-stack.md` § Application, which already carries them |
 | 2  | The active navigation destination carries a non-color cue, a heavier font weight than the inactive ones | RTL test asserting the link with `aria-current="page"` renders the heavier weight and the others do not, so the cue cannot be deleted while the accent is retuned |
 
 ## Pull request 2 — Commit convention gate
@@ -33,7 +33,7 @@ request of the phase is opened.
 | 9  | A sign-out control in the app shell, reachable at a phone width and a desktop width, returning to `/sign-in` | RTL test asserting the control renders for a signed-in user and not for a signed-out one, with Clerk's control components mocked |
 | 10 | Clerk publishable and secret keys configured in Vercel for each environment and in `.env.local`, with `.env.local` ignored by git | Manual: `vercel env ls` lists both keys in every environment, `git check-ignore .env.local` exits zero, and the app boots locally against the keys |
 | 11 | A provisioning script that creates a user through the Clerk Backend API, taking an email address and reporting the created user id | Unit test with the Clerk client mocked: a valid email calls `createUser` once with that address; a missing or malformed argument exits non-zero without calling Clerk. Plus one live run creating and then deleting a throwaway user |
-| 12 | `docs/provisioning.md` describing how to run the script, who to run it for, and why invitations are not used | Manual: someone who has not read the script follows the document end to end to create and delete a throwaway user |
+| 12 | `README.md` created — what the app is, how to run it locally, and a provisioning section covering how to run the script, who to run it for, and why invitations are not used | Manual: someone who has not read the script follows the README end to end to create and delete a throwaway user, and gets the app running locally from the same document |
 | 13 | The initial staff accounts provisioned, including one for Arin | Manual: each account signs in on the pull request's Vercel preview and reaches the app shell |
 
 ## Decisions
@@ -70,11 +70,20 @@ move the shell down a level. `(app)` is a route group, so no URL changes.
 
 The cost accepted: page files move on disk, and the Phase 0 layout test moves with them.
 
-**The provisioning document lives at `docs/provisioning.md`.**
+**The provisioning path is documented in a new `README.md`.**
 
-The repository has no `README.md` and no `docs/` directory today. Creating one file for
-this is smaller than starting a README as a side effect of an auth phase, and it gives
-Phase 5's runbook somewhere to go.
+The repository has no README today. Provisioning is the first thing a new person needs
+and the front page is where they look for it, so the document that explains it is the
+project's README rather than a `docs/` file created for one page.
+
+The cost accepted: task 12 is larger than "write the provisioning steps". A README that
+covers only provisioning would be a strange front page, so the task also carries what
+the app is and how to run it locally. Phase 5's runbook has somewhere obvious to go
+afterwards.
+
+The alternative was `docs/provisioning.md` — smaller, but it invents a directory
+convention this project has not chosen and leaves the repository still without a front
+page.
 
 ## Open questions
 

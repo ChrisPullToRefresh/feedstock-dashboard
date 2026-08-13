@@ -6,11 +6,12 @@
 
 Matching the paired test tasks in `plan.md`:
 
-1. **The accent pair clears AA.** Reads the token block in `src/app/globals.css`,
-   converts `--primary` and `--primary-foreground` to sRGB in each theme, and asserts
-   both compute at or above 4.5:1. This is the check that would have caught
-   `emerald-600` in Phase 0. It fails if a later phase retunes the accent past the
-   threshold.
+1. **The accent tokens are what the constitution names.** Asserts `--primary`,
+   `--sidebar-primary`, and `--primary-foreground` hold the exact `oklch` values for
+   `emerald-700` / `emerald-500` and their foregrounds, in both the `:root` block and the
+   `prefers-color-scheme: dark` block. It fails loudly if a later phase retunes the
+   accent. The ratios themselves stay in `specs/tech-stack.md` § Application, which
+   already carries them measured; this test does not recompute them.
 2. **The active destination has a non-color cue.** Asserts the link carrying
    `aria-current="page"` renders the heavier font weight and the others do not.
 3. **The root layout provides Clerk.** Asserts children render inside `<ClerkProvider>`,
@@ -82,9 +83,9 @@ person or via the Vercel CLI — never by browser automation.
 14. Run the provisioning script for a throwaway address. **Expect:** it prints the created
     user id, the user appears in the Clerk dashboard, and that account can sign in on the
     preview. Delete the throwaway user afterwards.
-15. Hand `docs/provisioning.md` to someone who has not read the script and have them
-    create and delete a throwaway user from the document alone. **Expect:** they succeed
-    without asking a question the document should have answered.
+15. Hand `README.md` to someone who has not read the script and have them get the app
+    running locally, then create and delete a throwaway user, from the document alone.
+    **Expect:** they succeed without asking a question the README should have answered.
 16. Sign in as each provisioned staff account, including Arin's. **Expect:** each reaches
     the app shell.
 17. Open the browser console on the preview. **Expect:** no errors and no hydration
