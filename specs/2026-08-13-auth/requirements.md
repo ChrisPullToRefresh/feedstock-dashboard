@@ -1,13 +1,13 @@
 # Phase 1 — Auth — Requirements
 
 **Phase:** 1 in `specs/roadmap.md`
-**Scope of this spec:** all nine of Phase 1's roadmap bullets, shipped as three pull
-requests in the order `plan.md` sets out — the two Phase 0 carry-overs, then the commit
+**Scope of this spec:** all nine of Phase 1's roadmap bullets, shipped as one pull
+request, in the order `plan.md` sets out — the two Phase 0 carry-overs, then the commit
 convention check, then Clerk. Nothing is deferred to a follow-up spec.
-`specs/tech-stack.md` § Branching & pull request workflow allows a phase to take several
-pull requests as long as each is a coherent slice of one phase. The carry-overs go first
-because `specs/roadmap.md` Phase 1 says both should land before more code is built on
-top of them.
+`specs/tech-stack.md` § Branching & pull request workflow gives each phase exactly one
+pull request. The carry-overs are done first because `specs/roadmap.md` Phase 1 says both
+should land before more code is built on top of them — that is the order of the work, not
+a division of the pull request.
 
 ## Goal
 

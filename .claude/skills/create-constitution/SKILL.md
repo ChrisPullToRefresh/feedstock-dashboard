@@ -116,6 +116,13 @@ they actually want, then write down their answers — do not assume a house styl
 
 - Branch naming convention (`feature/*`, initials prefix, ticket ID, roadmap phase
   number, free-form)
+- **How a roadmap phase maps to pull requests** — one pull request per phase, or several.
+  Ask it explicitly; it is the item most often left unstated, and unstated it decays into
+  "as many as it takes". Recommend one per phase: it keeps branch, spec folder, and pull
+  request in one-to-one correspondence, keeps the phase's **Done when** line provable in
+  one place, and turns pull request size into pressure to split the *phase* rather than
+  pressure to split the review. Whatever they choose, write it down as a rule with its
+  consequence, not as a preference.
 - Whether every change goes through a pull request, or trivial fixes can skip one
 - Who reviews — solo project with self-merge, required teammate approval, or
   AI-assisted review before human approval

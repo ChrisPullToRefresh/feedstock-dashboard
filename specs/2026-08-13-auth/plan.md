@@ -3,10 +3,13 @@
 Tasks run in order. Every feature task ships with its paired test task in the same
 pull request.
 
-The phase ships as three pull requests. Tasks 1–2 are the first, tasks 3–4 the second,
-tasks 5–13 the third. The order is the roadmap's: the corrections to Phase 0 land before
-any auth code is built on them, and the title gate is in place before the largest pull
-request of the phase is opened.
+The phase ships as one pull request, on the user's direction during implementation. It was
+planned as three — tasks 1–2, then 3–4, then 5–13 — and the headings below still carry
+that grouping, because it is the order the work is done in and the roadmap's reason for it
+holds: the corrections to Phase 0 land before any auth code is built on them.
+`specs/tech-stack.md` § Branching & pull request workflow allows this — one phase in one
+pull request is a coherent slice — and § Decisions records what the single pull request
+costs.
 
 ## Pull request 1 — Phase 0 carry-overs
 

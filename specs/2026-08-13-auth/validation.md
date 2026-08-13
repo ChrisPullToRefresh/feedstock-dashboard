@@ -44,7 +44,7 @@ Run these against the pull request's Vercel preview deployment, not `localhost`.
 browser-automation Chrome profile are different accounts, so every step is done by a
 person or via the Vercel CLI — never by browser automation.
 
-**The accent and the active tab** (pull request 1)
+**The accent and the active tab**
 
 1. Open the preview on a desktop browser with the operating system set to light
    appearance. **Expect:** the accent reads as a deeper green than before, and body text
@@ -58,9 +58,9 @@ person or via the Vercel CLI — never by browser automation.
    **Expect:** the current destination is still identifiable. This is the check the
    1.4.1 finding asks for.
 
-**The title gate** (pull request 2)
+**The title gate**
 
-5. Open pull request 2 with the title `add the title check`. **Expect:** the
+5. Set this pull request's title to `add the title check`. **Expect:** the
    `Commit convention` job turns red and the merge button is disabled.
 6. Edit the title to `ci: check pull request titles against conventional commits`,
    pushing no new commit. **Expect:** the job re-runs on the edit alone and turns green.
@@ -68,7 +68,7 @@ person or via the Vercel CLI — never by browser automation.
    '.required_status_checks.contexts'`. **Expect:** four contexts — `Lint`, `Typecheck`,
    `Test`, and `Commit convention`.
 
-**Auth** (pull request 3)
+**Auth**
 
 8. Open the preview URL in a private window, signed out, at a phone width.
    **Expect:** a redirect to `/sign-in`, with no bottom tab bar on the page.
@@ -107,12 +107,13 @@ protection:
 2. **Typecheck** — `tsc --noEmit`
 3. **Test** — Vitest
 
-Pull request 2 adds a fourth, **Commit convention**, and makes it required. It gates
-pull request 3 but not the two before it, since it does not exist yet — pull request 2
-is the one that installs it, and it proves itself on itself through manual steps 5 and 6.
+This phase adds a fourth, **Commit convention**, and makes it required. It gates this
+pull request from the moment the workflow lands on the branch — the job runs from the
+head's own workflow file — so the phase's gate proves itself on itself, through manual
+steps 5 and 6.
 
-`main`'s protection requires branches to be up to date before merging, so each of the
-three pull requests must be updated onto `main` after the one before it merges.
+`main`'s protection requires branches to be up to date before merging, so this pull
+request must be updated onto `main` if anything else lands there first.
 
 The Vercel preview deployment must also succeed. It runs alongside the Actions run and is
 not one of its jobs.
