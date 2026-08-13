@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { SignOutControl } from "@/components/sign-out-control";
 import { cn } from "@/lib/utils";
 import { NAV_DESTINATIONS, isActiveDestination } from "@/lib/navigation";
 
@@ -74,6 +75,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           })}
         </ul>
       </nav>
+
+      {/*
+       * The shell's first top chrome. Signing out is rare and deliberate, so
+       * the weakest one-handed reach zone is the right place for it — the same
+       * reasoning that kept primary navigation out of the top corner in Phase
+       * 0. Rendered once at every width rather than as a mobile copy and a
+       * desktop copy, so the control has exactly one accessible name.
+       */}
+      <header className="flex items-center justify-end px-6 pt-4 md:px-10">
+        <SignOutControl />
+      </header>
 
       {/*
        * Bottom padding derives from the bar's own height and inset rather

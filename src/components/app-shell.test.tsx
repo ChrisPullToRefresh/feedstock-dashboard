@@ -5,6 +5,13 @@ const { usePathname } = vi.hoisted(() => ({ usePathname: vi.fn(() => "/") }));
 
 vi.mock("next/navigation", () => ({ usePathname }));
 
+// The shell's header carries the sign-out control, which reads Clerk's session.
+// These tests are about navigation, so the visitor is signed out and the
+// control renders nothing — its own behaviour lives in sign-out-control.test.
+vi.mock("@clerk/nextjs", () => ({
+  useAuth: () => ({ isSignedIn: false, signOut: vi.fn() }),
+}));
+
 import { AppShell } from "@/components/app-shell";
 import { NAV_DESTINATIONS } from "@/lib/navigation";
 
