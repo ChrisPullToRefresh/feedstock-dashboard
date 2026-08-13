@@ -18,7 +18,7 @@ manual check. The roadmap fixes what Phase 0 contains, not the order it is built
 | 7  | App shell with a fixed bottom tab bar on mobile widening to a persistent left sidebar on desktop | RTL test asserting the shell renders each navigation destination exactly once, each with an accessible name |
 | 8  | GitHub Actions workflow running lint, typecheck, and Vitest on every pull request | Manual: this pull request shows all three jobs running, and a temporary commit containing a failing test turns the run red |
 | 9  | Branch protection on `main` requiring the CI checks, with auto-delete of merged branches | Manual: a direct `git push origin main` is rejected, the merge button is disabled while checks are red, and a merged branch disappears from the branch list |
-| 10 | Repository connected to the Vercel team, with per-pull-request preview deployments | Manual: this pull request shows a Vercel preview URL, and opening it renders the app shell — verified by hand or the Vercel CLI, never by browser automation (see `specs/tech-stack.md` § Hosting & deployment) |
+| 10 | Repository connected to the Vercel team, with per-pull-request preview deployments | Manual: this pull request shows a Vercel preview URL, and opening it renders the app shell — verified by hand, in a signed-in browser, or via the Vercel CLI (see `specs/tech-stack.md` § Hosting & deployment) |
 
 ## Decisions
 

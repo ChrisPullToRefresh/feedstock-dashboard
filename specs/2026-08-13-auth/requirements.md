@@ -36,10 +36,9 @@ a sidebar and nothing above the content. See `plan.md` § Decisions for why it g
 rather than into the tab bar. Signing out returns the user to `/sign-in`.
 
 **Getting an account.** Accounts are created by a script that calls the Clerk Backend
-API. There is no self-service sign-up and no invitation email —
-`specs/tech-stack.md` § Auth records that Clerk's invitation flow is broken for this
-account with a support ticket open. Every authenticated user has the same access;
-roles are not modeled in v0.1.
+API. There is no self-service sign-up and no invitation email; `specs/tech-stack.md`
+§ Auth makes the Backend API the provisioning path. Every authenticated user has the
+same access; roles are not modeled in v0.1.
 
 **The accent, corrected.** The single accent becomes the theme-dependent pair
 `specs/tech-stack.md` § Application names — `emerald-700` in light with white on it,
@@ -82,7 +81,7 @@ turns CI red and cannot merge. Correcting the title re-runs the check.
   v0.1 and `specs/roadmap.md` defers them to After v0.1.
 - Self-service sign-up, and any external access for feedstock producers or sequestration
   site operators (`specs/mission.md` § Non-goals).
-- Clerk's invitation flow, until the open support ticket resolves
+- Clerk's invitation flow. It is not used and has not been tried on this application
   (`specs/tech-stack.md` § Auth).
 - Playwright and any end-to-end test — `specs/roadmap.md` places Playwright in Phase 7.
 - Neon, Prisma, and any schema — Phase 2. No user record is mirrored into a database in
@@ -113,9 +112,9 @@ turns CI red and cannot merge. Correcting the title re-runs the check.
   (`specs/tech-stack.md` § Testing).
 - Green CI is a hard merge requirement; `main` is branch-protected and takes no direct
   pushes (`specs/tech-stack.md` § CI/CD, § Branching & pull request workflow).
-- The Vercel account and the browser-automation Chrome profile are different accounts, so
-  preview deployments are verified by hand or via the Vercel CLI, never by browser
-  automation (`specs/tech-stack.md` § Hosting & deployment).
+- Preview deployments are SSO-protected: `curl` receives Vercel's login wall, while a
+  signed-in browser and the Vercel CLI reach them
+  (`specs/tech-stack.md` § Hosting & deployment).
 
 ## Open questions
 

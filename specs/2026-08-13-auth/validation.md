@@ -39,10 +39,10 @@ the middleware redirect and the sign-in flow are proven by hand below.
 
 ## Manual
 
-Run these against the pull request's Vercel preview deployment, not `localhost`. Per
-`specs/tech-stack.md` § Hosting & deployment the Vercel account and the
-browser-automation Chrome profile are different accounts, so every step is done by a
-person or via the Vercel CLI — never by browser automation.
+Run these against the pull request's Vercel preview deployment, not `localhost`.
+Preview deployments are SSO-protected, so `curl` receives Vercel's login wall; a
+signed-in browser reaches them, as does the Vercel CLI
+(`specs/tech-stack.md` § Hosting & deployment).
 
 **The accent and the active tab**
 

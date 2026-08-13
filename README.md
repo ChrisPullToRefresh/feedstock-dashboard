@@ -45,10 +45,10 @@ There is no sign-up page, and there will not be one. `specs/mission.md`
 § Non-goals limits this to internal staff, so every account is created
 deliberately, by someone who already has access to the Clerk instance.
 
-**Invitations are not used.** Clerk's invitation flow is broken for this
-account and a support ticket is open — `specs/tech-stack.md` § Auth. Until that
-resolves, accounts come from the Backend API instead. This is not a preference;
-re-check the ticket before assuming invitations are still unavailable.
+**Invitations are not used.** Accounts come from the Backend API instead, per
+`specs/tech-stack.md` § Auth. Clerk's invitation flow has not been tried on this
+application — if you want it, that is a fresh decision to make, not a blocked one to
+unblock.
 
 To create one:
 

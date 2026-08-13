@@ -146,9 +146,8 @@ page.
      — development instance to Vercel's development and preview environments, production
      instance to production — and syncs both keys into the project, which is how
      `specs/tech-stack.md` § Data already provisions Neon. The catch: an existing Clerk
-     application cannot be connected to it, so taking this route means a new application,
-     and the open invitations support ticket in `specs/tech-stack.md` § Auth may not
-     follow.
+     application cannot be connected to it, so taking this route means a new
+     application.
      <https://clerk.com/docs/guides/development/integrations/platforms/vercel-marketplace>
 
   **Settled during implementation.** The Vercel Marketplace integration was installed, so
