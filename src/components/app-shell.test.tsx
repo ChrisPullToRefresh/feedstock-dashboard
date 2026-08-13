@@ -68,8 +68,12 @@ describe("AppShell", () => {
 
     for (const link of links) {
       const isCurrent = link.getAttribute("aria-current") === "page";
+      // The exact class, not a substring: `md:font-semibold` would satisfy a
+      // substring match while leaving the mobile tab bar — the primary form
+      // factor — marked by hue alone.
+      const classes = link.className.split(/\s+/);
 
-      expect(link.className.includes("font-semibold")).toBe(isCurrent);
+      expect(classes.includes("font-semibold")).toBe(isCurrent);
     }
   });
 

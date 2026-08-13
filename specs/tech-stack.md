@@ -20,7 +20,13 @@ Decisions below are binding for v0.1. See `specs/mission.md` for scope and
   on it (8.03:1). `emerald-600` is not used for text or for fills under text — it
   measures 3.67:1 on white, below AA's 4.5:1 — and is reserved for non-text roles such as
   focus rings and borders, where the bar is 3:1. Phase 0 shipped `emerald-600`
-  throughout; `specs/roadmap.md` Phase 1 carries the replacement.
+  throughout; Phase 1 replaced it with the pair above and left it on the focus rings
+  alone.
+- **Accent hover:** `emerald-800` in light (7.61:1 with white on it), `emerald-400` in
+  dark (10.21:1 with near-black on it), carried by `--primary-hover`. Hover moves the
+  fill away from the background — darker in light, lighter in dark. An alpha fill such as
+  `bg-primary/80` washes toward the background instead, which measured 3.72:1 under a
+  white label and failed AA.
 - **Theme:** light and dark, chosen by the operating system through
   `prefers-color-scheme`. v0.1 has no in-app toggle and stores no per-user preference, so
   there is nothing to persist and no flash of the wrong palette to guard against. Both

@@ -18,14 +18,33 @@ const css = readFileSync(new URL("./globals.css", import.meta.url), "utf8");
 
 // Tailwind's own oklch values for the shades the constitution names.
 const EMERALD_700 = "oklch(50.8% 0.118 165.612)";
+const EMERALD_800 = "oklch(43.2% 0.095 166.913)";
 const EMERALD_500 = "oklch(69.6% 0.17 162.48)";
+const EMERALD_400 = "oklch(76.5% 0.177 163.223)";
 const WHITE = "oklch(1 0 0)";
 const NEAR_BLACK = "oklch(0.145 0 0)";
 
-/** The declarations of the first `:root` block at or after `from`. */
-function rootBlockAfter(from: number): Record<string, string> {
+/**
+ * The declarations of the first `:root` block at or after `anchor`, or the
+ * file's first `:root` block when `anchor` is empty.
+ *
+ * The missing-anchor case throws rather than asserting. `indexOf` treats a
+ * negative `fromIndex` as 0, so a vanished anchor would otherwise hand back the
+ * light block labelled as the dark one — passing for every token the two
+ * themes happen to share. The comment at the top of `globals.css` anticipates
+ * a later phase moving back to the `.dark` class form, which is exactly when
+ * that would bite.
+ */
+function rootBlockAfter(anchor: string): Record<string, string> {
+  const from = anchor === "" ? 0 : css.indexOf(anchor);
+  if (from === -1) {
+    throw new Error(`globals.css no longer contains \`${anchor}\``);
+  }
+
   const start = css.indexOf(":root {", from);
-  expect(start, "no :root block found").toBeGreaterThan(-1);
+  if (start === -1) {
+    throw new Error(`globals.css has no :root block after \`${anchor}\``);
+  }
 
   const end = css.indexOf("}", start);
   const block = css.slice(start, end);
@@ -47,8 +66,8 @@ function rootBlockAfter(from: number): Record<string, string> {
 // dark));` mentions the same query higher up the file and is not a rule.
 const DARK_BLOCK = "@media (prefers-color-scheme: dark) {";
 
-const light = rootBlockAfter(0);
-const dark = rootBlockAfter(css.indexOf(DARK_BLOCK));
+const light = rootBlockAfter("");
+const dark = rootBlockAfter(DARK_BLOCK);
 
 describe("accent tokens", () => {
   it("uses emerald-700 with white on it in light", () => {
@@ -65,12 +84,27 @@ describe("accent tokens", () => {
     expect(dark["--sidebar-primary-foreground"]).toBe(NEAR_BLACK);
   });
 
+  it("moves the hover fill away from the background, not toward it", () => {
+    // An alpha fill washes toward the background and loses contrast under the
+    // label: `bg-primary/80` on white measured 3.72:1, below AA. The hover
+    // shade darkens in light and lightens in dark instead.
+    expect(light["--primary-hover"]).toBe(EMERALD_800);
+    expect(dark["--primary-hover"]).toBe(EMERALD_400);
+  });
+
   it("keeps emerald-600 out of every text role", () => {
-    // The constitution reserves it for focus rings and borders, where the bar
-    // is 3:1 rather than 4.5:1.
+    // `specs/tech-stack.md` § Application reserves it for non-text roles —
+    // focus rings and borders — where the bar is 3:1 rather than 4.5:1. Those
+    // are exempt here; anything that can end up under text is not.
+    const nonText = (token: string) =>
+      token === "--accent-emerald" ||
+      token.endsWith("-ring") ||
+      token.endsWith("-border") ||
+      token === "--input";
+
     for (const theme of [light, dark]) {
       for (const [token, value] of Object.entries(theme)) {
-        if (token.endsWith("-ring") || token === "--accent-emerald") continue;
+        if (nonText(token)) continue;
 
         expect(value, `${token} must not carry the accent`).not.toContain(
           "--accent-emerald",
