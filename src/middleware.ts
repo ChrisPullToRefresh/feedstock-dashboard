@@ -11,8 +11,17 @@ const isPublicRoute = createRouteMatcher([...PUBLIC_ROUTES]);
  * only, so an omission must fail closed.
  */
 export default clerkMiddleware(async (auth, request) => {
-  if (!isPublicRoute(request)) {
-    await auth.protect();
+  if (isPublicRoute(request)) return;
+
+  const { userId, redirectToSignIn } = await auth();
+
+  // Not `auth.protect()`. That answers an unauthenticated page request with a
+  // 404 when it cannot resolve a sign-in URL of its own, which reads as "no
+  // such page" rather than "sign in first" — and `specs/2026-08-13-auth`
+  // requires the visitor to arrive at /sign-in. Redirecting explicitly also
+  // carries them back to the page they asked for once they are signed in.
+  if (!userId) {
+    return redirectToSignIn({ returnBackUrl: request.url });
   }
 });
 
