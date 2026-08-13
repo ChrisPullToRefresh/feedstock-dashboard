@@ -3,6 +3,9 @@ name: CI
 on:
   pull_request:
     branches: [main]
+    # `edited` is what makes the title check re-run after a bad title is fixed.
+    # Without it a corrected title stays red until someone pushes a commit.
+    types: [opened, edited, reopened, synchronize]
   # main itself, after a squash merge. Two pull requests that were each green
   # against an older main can still land a red main between them, and nothing
   # else runs there — Vercel deploys production from this branch.
@@ -20,6 +23,49 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # The pull request title is what a squash merge writes onto main — the branch's
+  # own commit messages are squashed away — so the title is the thing worth
+  # gating. specs/tech-stack.md § Branching & pull request workflow is the rule
+  # this enforces; the grammar below is Conventional Commits 1.0.0.
+  commit-convention:
+    name: Commit convention
+    # `push` events carry no pull request, so there is no title to check.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the pull request title
+        # Through the environment, never interpolated into the script: a title
+        # is attacker-controlled text and `${{ }}` inside `run` is executed.
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          types='feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert'
+
+          if ! printf '%s' "$TITLE" | grep -Eq "^($types)(\([a-z0-9-]+\))?!?: .+$"; then
+            echo "::error::Title must be '<type>(<scope>): <subject>'. Types: $types"
+            echo "Got: $TITLE"
+            exit 1
+          fi
+
+          subject=${TITLE#*: }
+
+          if printf '%s' "$subject" | grep -Eq '^[A-Z]'; then
+            echo "::error::Subject must be lower case. Got: $subject"
+            exit 1
+          fi
+
+          if printf '%s' "$subject" | grep -q '\.$'; then
+            echo "::error::Subject must not end with a period. Got: $subject"
+            exit 1
+          fi
+
+          if [ "${#subject}" -gt 72 ]; then
+            echo "::error::Subject must be 72 characters or fewer, got ${#subject}."
+            exit 1
+          fi
+
+          echo "Title is a valid Conventional Commit: $TITLE"
+
   lint:
     name: Lint
     runs-on: ubuntu-latest
