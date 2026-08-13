@@ -28,12 +28,22 @@ session picks up.
 `specs/tech-stack.md`, and `specs/roadmap.md` are binding. Nothing in the spec you write
 may contradict them. Where they already decide something, quote them — never re-ask.
 
-**Exactly one AskUserQuestion call, carrying exactly three questions**, in this order:
-scope, key decisions, validation. Not two rounds, not four questions. Everything you
-need from the user has to fit that one call, which means reading the constitution
-carefully enough to know what is genuinely undecided.
+**Ask about every choice the constitution does not already settle.** There is no cap on
+how many questions you ask or how many `AskUserQuestion` calls it takes. Ask them in
+this order — scope, then decisions, then validation — batching up to four per call
+because that is the tool's limit, and opening the next call once the previous is
+answered. Stop when nothing consequential is left unasked, not when you have hit a
+number.
 
-**Nothing is written to disk before the user answers.** No branch, no files, no commit.
+**A choice you make yourself is a guess, whatever you call it.** If the constitution
+does not settle it and you did not ask, it does not go in `## Decisions` with a
+rationale attached. It goes under `## Open questions`, or you ask. This is the rule the
+rest of the skill exists to protect: a spec's authority comes from the user having
+chosen, and a well-argued paragraph is exactly what makes an unasked choice hard to
+spot later.
+
+**Nothing is written to disk until the questions are answered.** No branch, no files, no
+commit.
 
 **Every feature task pairs with a test task.** This is the plan's structural invariant,
 enforced in step 5.
@@ -62,7 +72,7 @@ phase number plus a short kebab-case description, e.g. `2-schema-and-migrations`
 
 If the lowest-numbered unstarted phase looks partially done — a branch exists but no spec
 folder, or a merged pull request covers only some of its tasks — say so plainly in the
-question text of Q1 rather than guessing. The user redirects you with "Other" if you
+scope question's text rather than guessing. The user redirects you with "Other" if you
 picked wrong.
 
 Also read `.github/workflows/*.yml` if any exist, and note the job names. You need them
@@ -72,39 +82,57 @@ in step 7.
 
 Work out what you would write with no further input: the phase's tasks from the roadmap,
 the stack decisions that constrain them, the acceptance criteria implied by the phase's
-**Done when** line. The three questions exist to resolve what that draft *cannot*
-settle — not to make the user restate the roadmap.
+**Done when** line.
 
-### 3. Ask the three questions
+Then list every point where that draft had to choose and the constitution did not choose
+for it — where a file lands, how a route renders, what a test asserts, which of two
+libraries inside the already-chosen stack. That list is your question list. It is
+usually longer than it first appears, because the choices that feel obvious while
+drafting are the ones that get written down as decisions without anyone agreeing to
+them. The questions exist to resolve what the draft cannot settle — not to make the user
+restate the roadmap.
 
-One `AskUserQuestion` call. Three questions. Name the detected phase and its **Goal**
-line in the first question's text so a wrong detection is obvious immediately.
+### 3. Ask
 
-Rules for all three: 2–4 options each, your recommendation first and labeled
+Work through the list from step 2 in this order: scope first, then every decision, then
+validation. Four questions per `AskUserQuestion` call; open the next call once the
+previous is answered. Name the detected phase and its **Goal** line in the first
+question's text so a wrong detection is obvious immediately.
+
+Rules for every question: 2–4 options, your recommendation first and labeled
 `(Recommended)`, and a description on every option saying what it means and what it
-costs. Lead with the option the constitution points at.
+costs. Lead with the option the constitution points at. Offer "park it as an open
+question" wherever the honest answer is that nobody needs to decide yet — but do not
+offer it as a way to avoid asking properly.
 
-- **Q1 — Scope** (`header: "Scope"`). The phase may be more than one pull request;
+Do not pad. A question whose options are all the same work in different words teaches
+the user to skim, and a skimmed question is worse than one you never asked.
+
+- **Scope** (`header: "Scope"`). The phase may be more than one pull request;
   `specs/tech-stack.md` says to keep each one a coherent slice of a single phase. Ask
   which slice this spec covers. Options are concrete task groupings drawn from the
   phase's roadmap bullets — "all of it", or a named subset with the rest deferred to a
   follow-up spec. Never offer a slice that spans two phases.
 
-- **Q2 — Key decisions** (`header: "Decisions"`). The one open technical choice this
-  phase turns on that the constitution does not already make — a data-shape question, a
-  library choice inside an already-chosen stack, a UI pattern, a migration strategy.
-  Pick the decision that would be most expensive to reverse after the code exists. If
-  the constitution genuinely settles everything, ask instead about the riskiest
-  assumption in your draft and offer the alternatives.
+- **Decisions** (`header: "Decisions"`). One question per open technical choice the
+  constitution does not already make — a data-shape question, a library choice inside an
+  already-chosen stack, a UI pattern, a migration strategy, where a new file lands, what
+  a paired test actually asserts. Order them by how expensive they are to reverse once
+  the code exists, most expensive first, so the questions that matter get a fresh reader.
 
-- **Q3 — Validation** (`header: "Validation"`). What proves this phase done, beyond the
+  Ask about the small ones too. "Which directory" and "what does this test assert" feel
+  beneath a question while you are drafting and read as unilateral once they are in the
+  file. If the constitution settles it, quote it and move on; if it does not, it is a
+  question.
+
+- **Validation** (`header: "Validation"`). What proves this phase done, beyond the
   roadmap's **Done when** line. Options span the test levels `specs/tech-stack.md`
   defines — Vitest unit, React Testing Library component, Playwright E2E, manual
   device check — as combinations, not a menu of one. Respect the roadmap's own timing:
   do not propose E2E for a phase that lands before Playwright exists.
 
 Anything the user declines to decide goes under `## Open questions` in the file it
-belongs to. A guess never gets dressed up as a decision.
+belongs to, in their words, not recast as a decision you would have made.
 
 ### 4. Create the branch
 
@@ -129,7 +157,7 @@ Never branch from a dirty tree. If `git status --short` is non-empty, stop and a
 # <Phase N> — <Feature Name> — Requirements
 
 **Phase:** <N> in `specs/roadmap.md`
-**Scope of this spec:** <the Q1 answer, and what it explicitly defers>
+**Scope of this spec:** <the scope answer, and what it explicitly defers>
 
 ## Goal
 ## Behavior
@@ -155,10 +183,14 @@ pull request.
 | 1 | <outcome>    | <the test that proves it> |
 
 ## Decisions
-<the Q2 answer and its rationale>
+<every decision the user made, with the rationale and the rejected alternatives>
 
 ## Open questions
 ```
+
+`## Decisions` records answers, never inferences. Before you write an entry, name the
+question the user answered to produce it. If you cannot, it belongs under
+`## Open questions` instead.
 
 The table is the invariant: **no row may have an empty right column.** If a task
 genuinely cannot be tested — a config change, a dashboard click-through, a credential
@@ -169,7 +201,7 @@ has both columns filled.
 Name tasks for the outcome they produce (`Check in the initial migration`), never for an
 activity (`do the migration work`). Keep the table flat — no sub-tasks, no nesting.
 
-**`validation.md`** — how the phase gets proven, from the Q3 answer:
+**`validation.md`** — how the phase gets proven, from the validation answers:
 
 ```markdown
 # <Phase N> — <Feature Name> — Validation
@@ -224,10 +256,14 @@ phase. Do not mark it ready, and do not merge.
 
 ### 8. Report
 
-Plain text: the branch, the three file paths, the pull request URL, the decisions the
-user made in the three questions, every item parked under `## Open questions`, and the
-CI checks that gate the merge. If you deferred part of the phase in Q1, say what is left
-and that it needs its own spec later.
+Plain text: the branch, the three file paths, the pull request URL, every decision the
+user made and where it is recorded, every item parked under `## Open questions`, and the
+CI checks that gate the merge. If the scope answer deferred part of the phase, say what
+is left and that it needs its own spec later.
+
+Then say plainly whether anything in the spec is yours rather than theirs. If a choice
+got made without a question — because you missed it in step 2 — name it here rather than
+letting the user find it in the file.
 
 ## Writing style
 
