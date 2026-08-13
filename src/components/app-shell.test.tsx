@@ -51,6 +51,28 @@ describe("AppShell", () => {
     expect(current[0]).toHaveAccessibleName("Producers");
   });
 
+  it("marks the current destination by weight, not by color alone", () => {
+    usePathname.mockReturnValue("/producers");
+
+    render(
+      <AppShell>
+        <p>Facility</p>
+      </AppShell>,
+    );
+
+    // WCAG 2.2 SC 1.4.1: the accent against the inactive gray differs by
+    // 1.13:1 in relative luminance, so hue cannot be the only cue.
+    const links = within(
+      screen.getByRole("navigation", { name: "Main" }),
+    ).getAllByRole("link");
+
+    for (const link of links) {
+      const isCurrent = link.getAttribute("aria-current") === "page";
+
+      expect(link.className.includes("font-semibold")).toBe(isCurrent);
+    }
+  });
+
   it("points the skip link at the main region", () => {
     render(
       <AppShell>
