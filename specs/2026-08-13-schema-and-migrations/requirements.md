@@ -61,9 +61,9 @@ themselves at build time, so a preview is usable the moment it finishes building
       attempts it
 - [ ] `npm run seed` run twice against the same database leaves the same rows
 - [ ] The `Database` CI job migrates an empty database, seeds it twice with identical row
-      counts, and is a required check on `main`; and the preview deployment migrates its
-      own empty Neon branch — together these prove the **Done when** line, per
-      `plan.md` § Decisions
+      counts, and is a required check on `main`. Migrating from empty *against Neon* is
+      proven once by hand and by no automated check — `plan.md` § Decisions records the
+      gap
 - [ ] `Lint`, `Typecheck`, and `Test` stay green on a clean clone with no manual
       `prisma generate`
 - [ ] Weight parsing, formatting, and totals are covered by Vitest unit tests

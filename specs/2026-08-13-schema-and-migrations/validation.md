@@ -55,11 +55,11 @@ On every pull request, against a Postgres service container that starts empty:
 2. Runs `npm run seed`, then records the row counts
 3. Runs `npm run seed` a second time and fails if the row counts moved
 
-The other half — that it works *against Neon* — is proven by the Vercel preview
-deployment, which migrates its own empty Neon branch at build time because
-branch-per-preview is enabled and `vercel-build` runs `prisma migrate deploy`. Neither
-check covers the whole line on its own; `plan.md` § Decisions records why, and what that
-costs.
+The other half — that it works *against Neon* — is **not** covered by this job, and is
+not covered by any automated check. It was proven once during implementation by
+`prisma migrate reset` against the Neon database, which dropped the schema and re-applied
+every migration from empty. `plan.md` § Decisions records why it could not be automated
+and what that leaves unguarded.
 
 ### End-to-end (Playwright)
 
@@ -109,11 +109,19 @@ involved.
 11. **Archiving is the removal path.** Run `UPDATE producers SET is_active = false WHERE
     id = '<the producer from step 4>';`. It succeeds, the row remains, and the movement in
     step 4 still resolves to it.
-12. **The preview deployment migrated itself.** Open this pull request's Vercel preview in
-    a signed-in browser and confirm it built green. Its Neon branch holds the migrated
-    tables and no seed data — in that branch's SQL Editor,
-    `SELECT tablename FROM pg_tables WHERE schemaname = 'public';` lists the three tables
-    and `SELECT count(*) FROM producers;` returns 0.
+12. **The preview deployment built against Neon.** Open this pull request's Vercel preview
+    in a signed-in browser and confirm it built green, and that the build log shows
+    `prisma migrate deploy` running before `next build`.
+
+    Expect it to report **"No pending migrations to apply"**, not "Applying migration".
+    Neon's preview branches are copy-on-write clones of the parent, so a preview branch
+    arrives already carrying the schema and the seed rows — `SELECT count(*) FROM
+    producers;` returns the seeded **6**, not 0. An earlier version of this step expected
+    an empty branch and 0 producers; that was wrong about how Neon branching works.
+
+    This step confirms the deployment reaches Neon and the migration is a no-op against an
+    already-migrated branch. It does **not** prove a migration applies from empty on Neon
+    — `plan.md` § Decisions covers what does, and what is left unguarded.
 13. **Branch protection includes the new job.** Run `gh api
     repos/{owner}/{repo}/branches/main/protection --jq
     '.required_status_checks.contexts'`. It returns `Database` alongside
@@ -139,3 +147,9 @@ migration applied.
 - **Nothing guards the immutability trigger between pull requests.** Steps 8 and 9 prove
   it once. See `plan.md` § Decisions for the choice and § Open questions for when to
   revisit.
+- **Nothing re-proves that migrations apply from empty against Neon.** Proven once by
+  hand; see `plan.md` § Decisions. The cheapest continuous substitute would be a CI step
+  running `prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma`
+  against the Neon database and failing on any drift — which needs the connection string
+  in GitHub Actions secrets rather than a Neon API key, and so is reachable. It proves
+  the Neon schema matches the migrations, not that they apply from empty. Not decided.

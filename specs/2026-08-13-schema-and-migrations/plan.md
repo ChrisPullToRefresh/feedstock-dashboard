@@ -17,7 +17,7 @@ pull request.
 | 10 | `src/lib/totals.ts` — pure functions over arrays of movement records returning inbound total, outbound total, total by producer, and total by sequestration site | Vitest tests: an empty array totals zero; mixed directions are separated correctly; grouping keys off the counterparty that matches each movement's direction; summing values that would drift as binary floats stays exact |
 | 11 | `prisma/seed.ts` upserting a realistic set of feedstock producers and sequestration sites on `name`, wired to `npm run seed` | The `Database` CI job runs the seed twice against the fresh branch and asserts the row counts are identical after each run |
 | 12 | A `vercel-build` script running `prisma migrate deploy` before `next build` | Manual: this pull request's Vercel preview deploys green, and its Neon branch holds the migrated tables and no seed data |
-| 13 | A `Database` job in `.github/workflows/ci.yml` that applies migrations to an empty Postgres service container and seeds it twice, requiring identical row counts. The Neon half of the **Done when** line is proven by the preview deployment, which migrates its own empty Neon branch — see § Decisions | The job's own run on this pull request, green — and the preview deployment's build log showing `prisma migrate deploy` applying to its Neon branch |
+| 13 | A `Database` job in `.github/workflows/ci.yml` that applies migrations to an empty Postgres service container and seeds it twice, requiring identical row counts. The Neon half of the **Done when** line is proven once by hand, not by this job — see § Decisions | The job's own run on this pull request, green |
 | 14 | `Database` added to `main`'s required status checks | Manual: `gh api repos/{owner}/{repo}/branches/main/protection --jq '.required_status_checks.contexts'` returns it alongside `Commit convention`, `Lint`, `Typecheck`, and `Test` |
 
 ## Decisions
@@ -183,20 +183,31 @@ diff, drifting whenever someone edits the schema without regenerating.
 The cost accepted: every install pays the generation time, and a broken schema fails at
 install rather than at a named step.
 
-**A required `Database` CI job proves the Done-when line, and the preview deployment
-proves the Neon half.**
+**A required `Database` CI job proves migration-from-empty per pull request; the Neon
+half is proven once, by hand.**
 
 `specs/roadmap.md` Phase 2's **Done when** is "migrations run clean against Neon from a
 fresh database and seed data loads". That is two claims — the migration applies to an
-empty database and the seed loads, and it happens against Neon — and they are proven
-separately, because nothing available proves both at once.
+empty database and the seed loads, and it happens against Neon — and nothing available
+proves both at once.
 
 The `Database` job applies the checked-in migration to an empty Postgres service
 container, seeds it, seeds it again, and fails if the row counts moved. Deterministic,
-free, and on every pull request. The Vercel preview deployment covers Neon: with
-branch-per-preview enabled, each pull request gets its own empty Neon branch, and
-`vercel-build` runs `prisma migrate deploy` against it before building. A migration that
-will not apply to Neon fails the deployment.
+free, and on every pull request.
+
+Against Neon, it was proven once during implementation: `prisma migrate reset` dropped
+the schema on the Neon database and re-applied every migration from empty, then the seed
+loaded. That is real evidence, and it is a one-off. **Nothing re-proves it per pull
+request, and nothing turns red if it stops being true.**
+
+An earlier version of this decision claimed the Vercel preview deployment covered the
+Neon half, on the reasoning that branch-per-preview gives each pull request its own empty
+Neon branch for `vercel-build` to migrate. That was wrong, and the build log disproved
+it: the preview reported "No pending migrations to apply". Neon's preview branches are
+copy-on-write clones of the parent, so they arrive already carrying its schema and its
+rows — `prisma migrate deploy` finds the migration recorded and does nothing. The preview
+deployment proves the application builds and runs against Neon. It proves nothing about
+applying a migration to an empty database there.
 
 This decision was rewritten during implementation and replaces the original, which had
 the job create and delete a Neon branch per run through the Neon API. That needed a Neon
@@ -207,11 +218,9 @@ Vercel-managed accounts and CLI access requires an API key, which leaves no way 
 bootstrap one. Waiting on Neon support was offered and declined; shipping with the job
 unverified was offered and declined.
 
-The rewrite is not purely a concession. The original decision rejected a service
-container as proving "nothing about Neon", and that reasoning predated preview branching
-being switched on — the preview deployment now provides the Neon evidence the container
-cannot. It also removes a credential from CI, and a class of failure where a killed
-runner leaks a branch.
+It does remove a credential from CI, and a class of failure where a killed runner leaks a
+branch. It is still a concession: the original decision rejected a service container as
+proving "nothing about Neon", and that objection stands.
 
 A long-lived `ci` branch was rejected, as before, because concurrent pull requests would
 collide on it. The job stays a required check on `main`, because `specs/tech-stack.md`
@@ -220,11 +229,12 @@ exactly what should block a merge. A `paths` filter was rejected: GitHub treats 
 required check as pending, so it would block the merge button on documentation pull
 requests rather than speed them up.
 
-The cost accepted, and stated plainly: no single check proves the **Done when** line
-end to end. If preview deployments stop running, or branch-per-preview is switched off,
-the Neon half goes unproven and nothing turns red to say so. The container also runs
-stock Postgres rather than Neon's build, so a divergence between them would surface in
-the preview deployment rather than in CI.
+The cost accepted, and stated plainly: **no check proves the Neon half.** The container
+runs stock Postgres rather than Neon's build, so any divergence between them — a version
+difference, an extension, a permission — would not surface here. What guards against that
+in practice is that every deployment runs `prisma migrate deploy` against Neon, so a
+migration Neon rejects fails the deploy; that is a weaker claim than the **Done when**
+line makes, and it is the gap this phase ships with.
 
 **The immutability trigger is proven by hand, once.**
 
