@@ -8,6 +8,22 @@ import { afterEach } from "vitest";
 process.env.DATABASE_URL ??=
   "postgresql://user:pw@localhost:5432/placeholder-never-connected";
 
+// jsdom implements no media queries. Sonner reads one on mount to follow the
+// operating system's colour scheme, so without this every test that renders
+// the app shell throws. `matches: false` is the light palette, which is what
+// a headless run should assume.
+if (typeof window !== "undefined" && window.matchMedia === undefined) {
+  window.matchMedia = (query: string) =>
+    ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }) as unknown as MediaQueryList;
+}
+
 afterEach(() => {
   cleanup();
 });

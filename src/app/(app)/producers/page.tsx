@@ -1,4 +1,7 @@
+import { Suspense } from "react";
+
 import { ProducerList, ProducerListHeader } from "@/components/producer-list";
+import { ProducerToast } from "@/components/producer-toast";
 import { listActiveProducers } from "@/lib/producers";
 
 export default async function ProducersPage() {
@@ -6,6 +9,11 @@ export default async function ProducersPage() {
 
   return (
     <section className="mx-auto max-w-3xl">
+      {/* Reads the search parameters the actions redirect with, which Next
+          requires a boundary around. It renders nothing. */}
+      <Suspense>
+        <ProducerToast />
+      </Suspense>
       <ProducerListHeader />
       <ProducerList producers={producers} />
     </section>

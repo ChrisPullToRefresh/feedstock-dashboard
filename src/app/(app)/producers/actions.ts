@@ -28,6 +28,19 @@ export type ProducerFormState =
 
 export const IDLE: ProducerFormState = { status: "idle" };
 
+/**
+ * Back to the list, carrying what just happened so the page can say so.
+ *
+ * Archiving especially needs saying: the row simply disappears, which looks
+ * identical to a click that did nothing — `plan.md` § Decisions.
+ */
+function redirectWithToast(
+  event: "created" | "renamed" | "archived" | "restored",
+  name: string,
+): never {
+  redirect(`/producers?${new URLSearchParams({ toast: event, name })}`);
+}
+
 /** Postgres refused the write because a name is already taken. */
 function isUniqueViolation(error: unknown): boolean {
   return (
@@ -82,7 +95,7 @@ export async function createProducer(
   }
 
   revalidatePath("/producers");
-  redirect("/producers");
+  redirectWithToast("created", name);
 }
 
 export async function renameProducer(
@@ -118,7 +131,7 @@ export async function renameProducer(
   }
 
   revalidatePath("/producers");
-  redirect("/producers");
+  redirectWithToast("renamed", name);
 }
 
 /**
@@ -126,15 +139,21 @@ export async function renameProducer(
  * The row stays, so every movement that references it stays resolvable.
  */
 export async function archiveProducer(id: string): Promise<void> {
-  await db.producer.update({ where: { id }, data: { isActive: false } });
+  const archived = await db.producer.update({
+    where: { id },
+    data: { isActive: false },
+  });
 
   revalidatePath("/producers");
-  redirect("/producers");
+  redirectWithToast("archived", archived.name);
 }
 
 export async function restoreProducer(id: string): Promise<void> {
-  await db.producer.update({ where: { id }, data: { isActive: true } });
+  const restored = await db.producer.update({
+    where: { id },
+    data: { isActive: true },
+  });
 
   revalidatePath("/producers");
-  redirect("/producers");
+  redirectWithToast("restored", restored.name);
 }
