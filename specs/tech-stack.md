@@ -54,7 +54,8 @@ Decisions below are binding for v0.1. See `specs/mission.md` for scope and
 - **Units:** weights are stored in kilograms. See the constraint in
   `specs/mission.md`.
 - **Immutability:** movement records are append-only. Producers and sequestration sites
-  are editable.
+  are editable, and archived rather than deleted — deletion is soft everywhere, so no row
+  a movement references can be removed.
 
 ## Auth
 

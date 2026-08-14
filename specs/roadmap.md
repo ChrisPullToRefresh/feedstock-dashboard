@@ -84,9 +84,11 @@ loads.
 **Goal:** staff can manage the feedstock producer list that the inbound dropdown reads
 from.
 
-**Done when:** a producer can be created, edited, listed, and deleted in the deployed app.
+**Done when:** a producer can be created, edited, listed, and archived in the deployed app.
 
-- List, create, edit, and delete pages for feedstock producers
+- List, create, edit, and archive pages for feedstock producers. Deletion is soft:
+  archiving clears `isActive`, which drops the producer from the inbound dropdown while
+  its record and its movement history stay intact. Nothing removes a producer row
 - Narrow the middleware matcher in `src/middleware.ts` before the first dynamic route
   exists. It currently skips any path whose last segment contains a dot, so with a
   `/producers/[id]` route in place, `/producers/acme.co` is served to an unauthenticated
@@ -102,14 +104,14 @@ from.
 **Goal:** staff can manage the sequestration site list that the outbound dropdown reads
 from.
 
-**Done when:** a sequestration site can be created, edited, listed, and deleted in the
+**Done when:** a sequestration site can be created, edited, listed, and archived in the
 deployed app.
 
 This phase exists to be small. Phase 3 establishes the pattern; this one follows it, and
 anything the two surfaces genuinely share is extracted here rather than duplicated.
 
-- List, create, edit, and delete pages for sequestration sites, reusing the producer
-  patterns rather than duplicating them
+- List, create, edit, and archive pages for sequestration sites, reusing the producer
+  patterns rather than duplicating them. Deletion is soft here too
 - Form validation with shadcn/ui form components
 - Component tests for the form's validation behavior
 
@@ -179,8 +181,8 @@ to end.
       from a dropdown
 - [ ] Outbound movements are recorded with a weight in kilograms and a sequestration site
       selected from a dropdown
-- [ ] Feedstock producers have full CRUD pages
-- [ ] Sequestration sites have full CRUD pages
+- [ ] Feedstock producers can be created, edited, listed, and archived
+- [ ] Sequestration sites can be created, edited, listed, and archived
 - [ ] The movement list shows every movement, filterable, with running totals by producer
       and by sequestration site
 - [ ] Movement entry is usable one-handed on a phone; review is comfortable on desktop

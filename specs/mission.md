@@ -11,7 +11,9 @@ facility.
   weight in kilograms and the sequestration site it went to.
 - Producers and sequestration sites are selected from dropdown lists when recording a
   movement.
-- Producers and sequestration sites each have their own CRUD pages.
+- Producers and sequestration sites each have their own pages for creating, editing,
+  listing, and archiving. Deletion is soft — archiving retires a record from the
+  dropdowns and never removes it.
 - A movement list with running totals gives desktop users a filterable record of every
   inbound and outbound movement, with totals by producer and by sequestration site.
 
@@ -64,6 +66,9 @@ v0.1 will not do these things. People will ask for them anyway.
 - **Movements are immutable once recorded.** A mistake is corrected by recording a new
   adjusting entry, never by editing or deleting history. Producers and sequestration
   sites remain editable.
+- **Nothing is ever hard-deleted.** Producers and sequestration sites are archived, not
+  removed, so every movement's counterparty stays resolvable for the life of the record.
+  A producer created in error is corrected by editing it.
 - **Aesthetic is fixed by VISION.md.** Clean and minimal, consistent spacing, neutral
   palette, generous whitespace, Tailwind's default type scale, rounded corners, subtle
   shadows. See `specs/tech-stack.md` for the accent color and font.
