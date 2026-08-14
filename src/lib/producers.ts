@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+import type { Producer } from "@/generated/prisma/client";
+import { db } from "@/lib/db";
+
 /**
  * What a feedstock producer's name may be, and how to read the list.
  *
@@ -26,3 +29,40 @@ export const producerNameSchema = z
 export const producerSchema = z.object({ name: producerNameSchema });
 
 export type ProducerInput = z.infer<typeof producerSchema>;
+
+/**
+ * The producers the list shows: active only, by name.
+ *
+ * Archived producers appear on no screen — `plan.md` § Decisions — so this is
+ * the only listing the app has.
+ */
+export function listActiveProducers(): Promise<Producer[]> {
+  return db.producer.findMany({
+    where: { isActive: true },
+    orderBy: { name: "asc" },
+  });
+}
+
+export function findProducer(id: string): Promise<Producer | null> {
+  return db.producer.findUnique({ where: { id } });
+}
+
+/**
+ * Finds a producer by name ignoring case, archived ones included — which is
+ * what makes the restore offer possible.
+ *
+ * Matched through `lower(name)` rather than Prisma's `mode: "insensitive"`,
+ * which compiles to `ILIKE`: a producer named `50% Farm` would then match
+ * names it should not. This also reads the unique index the migration added.
+ */
+export async function findProducerByName(
+  name: string,
+): Promise<Producer | null> {
+  const rows = await db.$queryRaw<{ id: string }[]>`
+    SELECT id FROM producers WHERE lower(name) = lower(${name}) LIMIT 1
+  `;
+
+  const id = rows[0]?.id;
+
+  return id === undefined ? null : findProducer(id);
+}
