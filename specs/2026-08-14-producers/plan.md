@@ -10,8 +10,8 @@ The middleware fix is task 1 because this phase introduces the first dynamic rou
 |----|--------------|------------------|
 | 1  | `src/middleware.ts` matcher narrowed to Clerk's documented form, excluding a named extension list rather than any path segment containing a dot | Vitest test over `config.matcher`: `/producers/acme.co` and `/producers/acme` are matched, `/favicon.ico` and a `/_next/static/…` asset are skipped |
 | 2  | A case-insensitive unique index on `producers.name`, hand-written as `CREATE UNIQUE INDEX … ON producers (lower(name))` in a checked-in migration | Vitest test reading the checked-in migration SQL and asserting the index is still there — the guard the counterparty check constraint already uses. The task also records, in this file, whether `prisma migrate diff` reports the index as drift |
-| 3  | `src/lib/producers.ts` exporting the zod schema for a producer name: required, trimmed, 1–100 characters | Vitest tests: empty, whitespace-only, and 101-character names are rejected; a padded name parses to its trimmed value; a 100-character name is accepted |
-| 4  | `src/lib/producers.ts` query helpers — list active producers by name, find one by id, find one by case-insensitive name | Manual: `validation.md` § Manual steps 2–9 exercise every helper through the app. No database test harness exists before `specs/roadmap.md` Phase 7 |
+| 3  | `src/lib/producers.ts` exporting the zod schema for a producer name: required, trimmed, 1–100 characters — and nothing server-only, because the client form imports it | Vitest tests: empty, whitespace-only, and 101-character names are rejected; a padded name parses to its trimmed value; a 100-character name is accepted |
+| 4  | `src/lib/producer-queries.ts` query helpers — list active producers by name, find one by id, find one by case-insensitive name | Manual: `validation.md` § Manual steps 2–9 exercise every helper through the app. No database test harness exists before `specs/roadmap.md` Phase 7 |
 | 5  | Server Actions in `src/app/(app)/producers/actions.ts` to create, rename, archive and restore a producer, each re-validating with the task 3 schema | Manual: `validation.md` § Manual steps 2–9, plus the rejection paths in steps 10–11 |
 | 6  | `src/components/producer-form.tsx` — one shadcn/ui Form used by both create and edit | React Testing Library tests: an empty name is refused, a whitespace-only name is refused, a 101-character name is refused, and a valid name submits |
 | 7  | `/producers` list — active producers only, ordered by name, stacked rows on mobile and a shadcn/ui Table at desktop width, with an empty state that links to the create form | React Testing Library tests: producers render in name order, an archived producer is absent, and an empty list renders the explanation and the create link |
@@ -116,10 +116,14 @@ Prisma 7 gates behind an experimental config flag. A normalized lowercase compan
 column was offered and declined as a second column to keep in step on every write, where
 a wrong write silently permits a duplicate.
 
-The cost accepted, and it is a real one: Prisma models indexes, unlike the check
-constraint and trigger it ignores, so this index may read as drift. **Task 2 must
-establish whether it does and record the answer here.** If it does, a regenerated
-migration could drop it, and the guard test is the only thing that would notice.
+The cost accepted: the index is invisible to `prisma/schema.prisma`, so only the guard
+test stands between a migration regenerated from the schema and a lost constraint.
+
+Task 2 settled the drift question it was given. `prisma migrate diff` reports **no
+drift** in either direction against a database carrying the index — Prisma ignores an
+expression index the same way it ignores the check constraint and the trigger. So no
+routine command will try to drop it, and the guard test covers the remaining case:
+someone recreating the migration history from the schema.
 
 **A producer name is required, trimmed, and 1–100 characters.**
 
@@ -179,9 +183,21 @@ The cost accepted: two presentations of the same list to keep in step.
 **Files follow the repository's existing flat layout.**
 
 Server Actions in `src/app/(app)/producers/actions.ts`, next to the routes that use them;
-the zod schema and Prisma queries in `src/lib/producers.ts`; the shared form in
-`src/components/producer-form.tsx`. Consistent with `navigation.ts`, `routes.ts`,
-`weight.ts` and the flat components already in `src/components/`.
+the zod schema in `src/lib/producers.ts`; the Prisma queries in
+`src/lib/producer-queries.ts`; the shared form in `src/components/producer-form.tsx`.
+Consistent with `navigation.ts`, `routes.ts`, `weight.ts` and the flat components already
+in `src/components/`.
+
+The schema and the queries were specified as one file and had to be split during
+implementation. The form is a client component and imports the schema, so a single module
+pulled `db.ts` and the Postgres driver into the browser bundle and the build failed on
+`Can't resolve 'dns'`. Tests did not catch it — Vitest resolves Node modules happily — and
+only `next build` did. Keeping one file was possible only by dropping client-side
+validation or duplicating the rules, and both were offered and declined, because each
+undoes the one-schema-on-both-sides decision above.
+
+The cost accepted: two modules where the plan named one, and a rule that is invisible
+until it is broken — anything importing `db` must stay out of `producers.ts`.
 
 A `src/features/producers/` folder was offered and declined as a second organising
 principle alongside the flat layout the repository already uses. Putting everything in
@@ -201,10 +217,8 @@ guess about what Phase 6 wants. `requirements.md` § Open questions carries that
 
 ## Open questions
 
-- **Whether the expression index reads as drift to Prisma.** Task 2 answers it. Recorded
-  here rather than guessed, because the answer decides whether the guard test is a
-  formality or the only thing standing between a regenerated migration and a lost
-  constraint.
+- ~~**Whether the expression index reads as drift to Prisma.**~~ Answered by task 2: it
+  does not, in either direction. Recorded in § Decisions.
 - **Whether archived producers ever need a screen.** Carried in `requirements.md`
   § Open questions.
 - **Whether the detail page earns its place before Phase 6.** Carried in

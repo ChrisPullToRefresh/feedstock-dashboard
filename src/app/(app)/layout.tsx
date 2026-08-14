@@ -1,4 +1,5 @@
 import { AppShell } from "@/components/app-shell";
+import { Toaster } from "@/components/ui/sonner";
 
 /**
  * Everything behind authentication renders inside the shell. The shell sat in
@@ -9,5 +10,12 @@ import { AppShell } from "@/components/app-shell";
  * no URL changes.
  */
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  return <AppShell>{children}</AppShell>;
+  return (
+    <AppShell>
+      {children}
+      {/* One Toaster for everything behind authentication, so a page only has
+          to raise a toast rather than mount somewhere to show one. */}
+      <Toaster />
+    </AppShell>
+  );
 }

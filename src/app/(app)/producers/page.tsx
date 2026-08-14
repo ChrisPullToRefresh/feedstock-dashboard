@@ -1,10 +1,21 @@
-import { PlaceholderPage } from "@/components/placeholder-page";
+import { Suspense } from "react";
 
-export default function ProducersPage() {
+import { ProducerList, ProducerListHeader } from "@/components/producer-list";
+import { ProducerToast } from "@/components/producer-toast";
+import { listActiveProducers } from "@/lib/producer-queries";
+
+export default async function ProducersPage() {
+  const producers = await listActiveProducers();
+
   return (
-    <PlaceholderPage
-      title="Producers"
-      description="Manage the feedstock producers the inbound dropdown reads from. Arrives in Phase 3."
-    />
+    <section className="mx-auto max-w-3xl">
+      {/* Reads the search parameters the actions redirect with, which Next
+          requires a boundary around. It renders nothing. */}
+      <Suspense>
+        <ProducerToast />
+      </Suspense>
+      <ProducerListHeader />
+      <ProducerList producers={producers} />
+    </section>
   );
 }

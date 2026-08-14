@@ -27,9 +27,20 @@ export default clerkMiddleware(async (auth, request) => {
 
 export const config = {
   matcher: [
-    // Skip Next's build output and anything with a file extension, then run on
-    // everything else, API routes included.
-    "/((?!_next|[^?]*\\.[^?/]+$).*)",
+    // Skip Next's build output and static assets, then run on everything else.
+    //
+    // The exclusion names the extensions it skips rather than skipping any
+    // path segment containing a dot. The earlier pattern did the latter, which
+    // meant a producer id with a dot in it — `/producers/acme.co` — read as a
+    // static file and was served without a session. Named extensions still
+    // skip `/favicon.ico` while leaving every application route protected.
+    //
+    // The trailing `$` is load-bearing and is not in Clerk's published
+    // pattern. Without it the extension can match anywhere in the path, so
+    // `/producers/x.svg/edit` counts as a static file and is served with no
+    // session — the same silent hole in a new place.
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)$).*)",
+    // Always run on API routes.
     "/(api|trpc)(.*)",
   ],
 };
