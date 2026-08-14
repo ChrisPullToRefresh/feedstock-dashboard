@@ -119,17 +119,28 @@ sequestration-site logins.
   trail, so never borrow one for work that does not belong to that phase.
 - **Pull requests:** every change goes through a pull request. No exceptions, including
   documentation and configuration edits.
-- **Scope:** one pull request per phase. Every phase in `specs/roadmap.md` ships as
-  exactly one pull request — never two phases in one, and never one phase split across
-  two. A phase whose pull request is too large to review is a phase that was drawn too
-  large; the fix is to split the phase in `specs/roadmap.md`, not to split its pull
-  request. This keeps a phase's **Done when** line provable in one place, and keeps the
-  branch, the spec folder, and the pull request in one-to-one correspondence.
+- **Scope:** a phase ships in two pull requests — its spec, then its implementation.
 
-  A maintenance pull request traces to no phase and does not consume a phase's single
-  pull request. It must not carry phase work: a change that implements a roadmap bullet
-  belongs in that phase's pull request. If maintenance keeps accumulating feature work,
-  that work belongs on the roadmap as a phase.
+  The **spec** pull request is what `/feature-spec` opens: the dated
+  `specs/YYYY-MM-DD-<feature-name>/` folder and nothing else. It is reviewed and merged on
+  its own, before any application code is written, so the plan is settled in `main` before
+  the work starts.
+
+  The **implementation** pull request is the one the one-per-phase rule governs. Every
+  phase in `specs/roadmap.md` implements in exactly one pull request — never two phases in
+  one, and never one phase's implementation split across two. A phase whose implementation
+  is too large to review is a phase that was drawn too large; the fix is to split the phase
+  in `specs/roadmap.md`, not to split the pull request. This keeps a phase's **Done when**
+  line provable in one place.
+
+  Both use the same phase-numbered branch name, so the branch, the spec folder, and the
+  phase stay in correspondence — the spec branch is deleted on merge and the
+  implementation branches from `main` under the same name.
+
+  A maintenance pull request traces to no phase and does not consume a phase's
+  implementation pull request. It must not carry phase work: a change that implements a
+  roadmap bullet belongs in that phase's implementation. If maintenance keeps accumulating
+  feature work, that work belongs on the roadmap as a phase.
 - **Review:** AI review first — run `/code-review` on the branch and address its findings
   — then the author self-merges. No second human approver is required.
 - **Merge style:** squash merge. `main`'s history is one commit per shipped pull request.

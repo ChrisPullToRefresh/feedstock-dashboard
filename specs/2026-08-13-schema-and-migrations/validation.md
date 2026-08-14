@@ -111,8 +111,8 @@ Run against a Neon branch created for the purpose. Get its URL into your shell a
 
 ## CI gate
 
-These GitHub Actions checks must be green before this pull request leaves draft, and are
-required on `main` — `specs/tech-stack.md` § CI/CD:
+These GitHub Actions checks must be green before the implementation pull request merges,
+and are required on `main` — `specs/tech-stack.md` § CI/CD:
 
 - `Commit convention`
 - `Lint`
