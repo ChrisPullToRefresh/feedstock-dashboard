@@ -16,7 +16,13 @@ import { PRODUCER_NAME_MAX_LENGTH } from "@/lib/producers";
 function renderForm() {
   const action = vi.fn<ProducerFormAction>(async () => ({ status: "idle" }));
 
-  render(<ProducerForm action={action} submitLabel="Create producer" />);
+  render(
+    <ProducerForm
+      action={action}
+      restore={vi.fn(async () => {})}
+      submitLabel="Create producer"
+    />,
+  );
 
   return {
     action,
@@ -79,6 +85,7 @@ describe("the producer form", () => {
     render(
       <ProducerForm
         action={vi.fn(async () => ({ status: "idle" }) as const)}
+        restore={vi.fn(async () => {})}
         defaultName="Riverbend Sawmill"
         submitLabel="Save changes"
       />,
@@ -94,6 +101,7 @@ describe("the producer form", () => {
           status: "error" as const,
           message: "Riverbend Sawmill is already a producer",
         }))}
+        restore={vi.fn(async () => {})}
         submitLabel="Create producer"
       />,
     );
@@ -105,5 +113,59 @@ describe("the producer form", () => {
     expect(
       await screen.findByText("Riverbend Sawmill is already a producer"),
     ).toBeVisible();
+  });
+});
+
+describe("a name that belongs to an archived producer", () => {
+  function renderCollision() {
+    const restore = vi.fn(async () => {});
+
+    render(
+      <ProducerForm
+        action={vi.fn<ProducerFormAction>(async () => ({
+          status: "archived-name",
+          archivedId: "p9",
+          name: "Larch Hollow",
+        }))}
+        restore={restore}
+        submitLabel="Create producer"
+      />,
+    );
+
+    return { restore, user: userEvent.setup() };
+  }
+
+  it("offers to restore it rather than only refusing", async () => {
+    const { user } = renderCollision();
+
+    await user.type(screen.getByLabelText("Name"), "larch hollow");
+    await user.click(screen.getByRole("button", { name: "Create producer" }));
+
+    // The offer is the point: with no screen listing archived producers, a
+    // bare refusal would leave the name permanently unusable.
+    expect(
+      await screen.findByRole("button", { name: "Restore Larch Hollow" }),
+    ).toBeVisible();
+  });
+
+  it("explains why the name is unavailable", async () => {
+    const { user } = renderCollision();
+
+    await user.type(screen.getByLabelText("Name"), "larch hollow");
+    await user.click(screen.getByRole("button", { name: "Create producer" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(/is archived/i);
+  });
+
+  it("restores the archived producer when the offer is taken", async () => {
+    const { restore, user } = renderCollision();
+
+    await user.type(screen.getByLabelText("Name"), "larch hollow");
+    await user.click(screen.getByRole("button", { name: "Create producer" }));
+    await user.click(
+      await screen.findByRole("button", { name: "Restore Larch Hollow" }),
+    );
+
+    expect(restore).toHaveBeenCalledTimes(1);
   });
 });

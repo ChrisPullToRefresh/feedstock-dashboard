@@ -23,10 +23,17 @@ export type ProducerFormAction = (
  */
 export function ProducerForm({
   action,
+  restore,
   defaultName = "",
   submitLabel,
 }: {
   action: ProducerFormAction;
+  /**
+   * Brings an archived producer back. The form only ever offers this when the
+   * action reports the name belongs to one — which is the only route to an
+   * archived producer, since no screen lists them.
+   */
+  restore: (id: string) => Promise<void>;
   defaultName?: string;
   submitLabel: string;
 }) {
@@ -56,28 +63,53 @@ export function ProducerForm({
     clientError ?? (state.status === "error" ? state.message : null);
 
   return (
-    <form action={dispatch} onSubmit={checkBeforeSubmit} className="space-y-6">
-      <Field data-invalid={message ? true : undefined}>
-        <FieldLabel htmlFor={nameId}>Name</FieldLabel>
-        <Input
-          id={nameId}
-          name="name"
-          defaultValue={defaultName}
-          // Long enough to be a real limit, short enough that the browser
-          // stops the paste before the schema has to explain it.
-          maxLength={PRODUCER_NAME_MAX_LENGTH}
-          autoComplete="off"
-          aria-invalid={message ? true : undefined}
-          aria-describedby={message ? `${nameId}-error` : undefined}
-        />
-        {message ? (
-          <FieldError id={`${nameId}-error`}>{message}</FieldError>
-        ) : null}
-      </Field>
+    <div className="space-y-6">
+      <form
+        action={dispatch}
+        onSubmit={checkBeforeSubmit}
+        className="space-y-6"
+      >
+        <Field data-invalid={message ? true : undefined}>
+          <FieldLabel htmlFor={nameId}>Name</FieldLabel>
+          <Input
+            id={nameId}
+            name="name"
+            defaultValue={defaultName}
+            // Long enough to be a real limit, short enough that the browser
+            // stops the paste before the schema has to explain it.
+            maxLength={PRODUCER_NAME_MAX_LENGTH}
+            autoComplete="off"
+            aria-invalid={message ? true : undefined}
+            aria-describedby={message ? `${nameId}-error` : undefined}
+          />
+          {message ? (
+            <FieldError id={`${nameId}-error`}>{message}</FieldError>
+          ) : null}
+        </Field>
 
-      <Button type="submit" disabled={pending}>
-        {pending ? "Saving…" : submitLabel}
-      </Button>
-    </form>
+        <Button type="submit" disabled={pending}>
+          {pending ? "Saving…" : submitLabel}
+        </Button>
+      </form>
+
+      {/* Deliberately a sibling of the form, not a child: a nested <form> is
+          invalid HTML, and the browser drops it — the Restore button would
+          then submit the form it was sitting inside. */}
+      {state.status === "archived-name" ? (
+        <div role="alert" className="rounded-md border p-4 text-sm">
+          <p>
+            <span className="font-medium">{state.name}</span> is archived. That
+            name is still taken, so it cannot be used for a new producer —
+            restoring brings the original back with its movement history
+            attached.
+          </p>
+          <form action={restore.bind(null, state.archivedId)} className="mt-3">
+            <Button type="submit" variant="outline">
+              Restore {state.name}
+            </Button>
+          </form>
+        </div>
+      ) : null}
+    </div>
   );
 }

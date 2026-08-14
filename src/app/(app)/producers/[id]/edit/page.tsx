@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { renameProducer } from "@/app/(app)/producers/actions";
+import { renameProducer, restoreProducer } from "@/app/(app)/producers/actions";
 import { ProducerForm } from "@/components/producer-form";
 import { findProducer } from "@/lib/producers";
 
@@ -26,6 +26,7 @@ export default async function EditProducerPage({
         // row is written, so it must not be something the browser can change.
         action={renameProducer.bind(null, producer.id)}
         defaultName={producer.name}
+        restore={restoreProducer}
         submitLabel="Save changes"
       />
     </section>
