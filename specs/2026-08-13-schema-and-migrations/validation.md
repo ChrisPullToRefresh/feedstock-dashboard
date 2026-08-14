@@ -92,11 +92,12 @@ Run against a Neon branch created for the purpose. Get its URL into your shell a
    unchanged — confirm with a `SELECT`.
 9. **A movement cannot be deleted.** Run `DELETE FROM movements WHERE id = '<the same
    row>';`. Postgres raises the trigger's exception and the row is still there.
-10. **A referenced producer cannot be deleted.** Run `DELETE FROM producers WHERE id =
-    '<the producer from step 4>';`. Postgres reports a foreign key violation. Deleting a
-    producer with no movements succeeds.
-11. **Deactivation is not deletion.** Run `UPDATE producers SET is_active = false WHERE id
-    = '<the producer from step 4>';`. It succeeds, the row remains, and the movement in
+10. **The delete backstop holds.** Run `DELETE FROM producers WHERE id = '<the producer
+    from step 4>';`. Postgres reports a foreign key violation. No application surface
+    attempts this — Phases 3 and 4 ship no delete — so `psql` is the only place it can be
+    proven.
+11. **Archiving is the removal path.** Run `UPDATE producers SET is_active = false WHERE
+    id = '<the producer from step 4>';`. It succeeds, the row remains, and the movement in
     step 4 still resolves to it.
 12. **The preview deployment migrated itself.** Open this pull request's Vercel preview in
     a signed-in browser and confirm it built green. Its Neon branch holds the migrated

@@ -16,10 +16,14 @@ Phase 2 ships no user interface. Everything it produces is read by Phases 3 thro
 
 **Reference data.** A feedstock producer and a sequestration site each have a name that
 is unique among their kind, an active flag, and creation and update timestamps. Both are
-editable — `specs/mission.md` § Constraints. Clearing the active flag retires a row from
-the movement-entry dropdowns while leaving its history and its record intact; deletion
-remains available for rows created in error and is refused by the database once any
-movement references the row.
+editable — `specs/mission.md` § Constraints.
+
+Deletion is soft — `specs/mission.md` § Constraints. Clearing the active flag archives a
+row, retiring it from the movement-entry dropdowns while leaving its record and its
+movement history intact. No surface in the app removes a producer or a sequestration
+site, and a row created in error is corrected by editing it. `onDelete: Restrict` stays
+on both relations as a backstop, so no future code path can destroy a movement's
+counterparty even though none tries.
 
 **Movements.** A movement records a direction (inbound or outbound), a weight in
 kilograms, the counterparty it moved to or from, and the timestamp at which it was
@@ -53,7 +57,7 @@ themselves at build time, so a preview is usable the moment it finishes building
       the database
 - [ ] `UPDATE` and `DELETE` against a movement row raise a Postgres exception
 - [ ] Deleting a producer or sequestration site that a movement references is refused by
-      the database
+      the database, proven directly in `psql` — no application surface attempts it
 - [ ] `npm run seed` run twice against the same database leaves the same rows
 - [ ] The `Database` CI job creates a fresh Neon branch, migrates, seeds, and deletes the
       branch, and is a required check on `main`
@@ -94,8 +98,6 @@ themselves at build time, so a preview is usable the moment it finishes building
   a production build. That is acceptable while the app is pre-launch and has no data to
   lose. `specs/roadmap.md` Phase 8 promotes `main` to production and is where this should
   be re-examined.
-- **Whether Phase 3 and Phase 4 need their roadmap bullets amended.** Both say a producer
-  or site can be "deleted in the deployed app", and this phase gives them two removal
-  paths — deactivate, and a delete the database refuses once movements exist. The
-  decision recorded in `plan.md` keeps both, but neither phase's spec is written yet and
-  the wording is theirs to reconcile.
+- **Whether archived rows ever need pruning.** Nothing removes a producer or site, so the
+  list surfaces grow monotonically, and an archived row keeps its name reserved. Neither
+  matters until Phase 3 renders the list.

@@ -69,31 +69,30 @@ authorization. `uuid(7)` was rejected as offering nothing here that `cuid()` doe
 
 The cost accepted: long ids in URLs and in seed output.
 
-**Referenced producers and sites cannot be deleted — `onDelete: Restrict`.**
+**Deletion is soft. Producers and sequestration sites are archived, never removed.**
 
-Movements are immutable history. Cascading deletes would destroy that history, and
-leaving the reference dangling contradicts the foreign key. The database refuses the
-delete instead.
+Clearing `isActive` retires a producer or site from the movement-entry dropdowns while
+its record stays editable and every movement that references it stays resolvable. That is
+the only removal in the app — Phases 3 and 4 ship an archive control and no delete.
+`specs/mission.md` § Constraints and `specs/tech-stack.md` § Data now say so, and
+`specs/roadmap.md` Phases 3 and 4 are written in those terms.
 
-The cost accepted, and the reason the next decision exists: a producer that has ever been
-used can never be removed by deletion.
+A row created in error does not need deletion: producers and sites are editable, so a
+mistyped row is corrected by editing it.
 
-**`isActive` is the retire path; delete is for mistakes only.**
+`onDelete: Restrict` stays on both relations as the backstop. It is not a rule a user can
+reach — nothing in the app attempts a delete — but it stops any future code path from
+destroying a movement's counterparty. Validation proves it in `psql` rather than through
+a screen.
 
-Clearing `isActive` removes a producer or site from the movement-entry dropdowns while
-its history stays intact and its record stays editable. Delete remains in Phases 3 and 4
-for rows created in error, and `onDelete: Restrict` makes the database refuse it once any
-movement references the row.
+Cascading deletes were rejected because movements are immutable history; a dangling
+reference was rejected because it contradicts the foreign key; and hard delete for
+unreferenced rows was rejected because it gives a row two removal paths whose difference
+is invisible at the moment of choosing.
 
-This was asked as a follow-up, because `isActive` and `Restrict` together give a row two
-ways to leave the dropdown and the spec should not leave which-is-for-what to the phase
-that finds out. The alternatives were dropping delete from Phases 3 and 4 entirely —
-rejected because it would require amending both phases' **Done when** lines first — and
-dropping `isActive` — rejected because it leaves no way to retire a used producer.
-
-The cost accepted: Phases 3 and 4 build two controls and have to make the difference
-legible in the UI. `requirements.md` § Open questions carries the wording question to
-those phases.
+The cost accepted: archived rows accumulate in the list surfaces with nothing to prune
+them, and a name held by an archived row stays taken, because the unique constraint the
+seed upserts against does not distinguish active rows.
 
 **Movements carry one timestamp, `recordedAt`, defaulted to the server clock.**
 
@@ -230,8 +229,9 @@ at build time. `requirements.md` § Open questions carries that to Phase 8.
 
 - **Whether build-time migration is right for production.** Carried in
   `requirements.md` § Open questions; belongs to `specs/roadmap.md` Phase 8.
-- **How Phases 3 and 4 word "delete" now that deactivation exists.** Carried in
-  `requirements.md` § Open questions; belongs to those phases' specs.
+- **Whether archived rows ever need pruning, and whether an archived name should free
+  itself for reuse.** Both are consequences of soft deletion, and neither has a caller
+  until Phase 3 renders the list. Not worth deciding before there is a screen.
 - **Whether the trigger needs a guard.** The decision above accepts that nothing stops a
   later migration from dropping it. If Phase 7's Playwright harness brings a live test
   database, that is the cheapest moment to add one.
