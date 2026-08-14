@@ -1,10 +1,13 @@
-import { PlaceholderPage } from "@/components/placeholder-page";
+import { ProducerList, ProducerListHeader } from "@/components/producer-list";
+import { listActiveProducers } from "@/lib/producers";
 
-export default function ProducersPage() {
+export default async function ProducersPage() {
+  const producers = await listActiveProducers();
+
   return (
-    <PlaceholderPage
-      title="Producers"
-      description="Manage the feedstock producers the inbound dropdown reads from. Arrives in Phase 3."
-    />
+    <section className="mx-auto max-w-3xl">
+      <ProducerListHeader />
+      <ProducerList producers={producers} />
+    </section>
   );
 }
