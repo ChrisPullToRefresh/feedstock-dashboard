@@ -29,6 +29,8 @@ model Producer {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  movements Movement[]
+
   @@map("producers")
 }
 
@@ -39,5 +41,41 @@ model SequestrationSite {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  movements Movement[]
+
   @@map("sequestration_sites")
+}
+
+// A Postgres enum, so an invalid direction cannot be written and the check
+// constraint in the initial migration has a concrete value to key on.
+enum Direction {
+  INBOUND
+  OUTBOUND
+}
+
+// Append-only history. specs/mission.md § Constraints: "a mistake is corrected
+// by recording a new adjusting entry, never by editing or deleting history".
+// A trigger in the initial migration enforces that; there is deliberately no
+// updatedAt, because a row that cannot be updated has nothing to record.
+//
+// Both counterparties are nullable and a check constraint requires exactly the
+// one matching `direction` — inbound from a producer, outbound to a
+// sequestration site. Prisma cannot express that constraint, so it is
+// hand-written SQL in the migration, guarded by a test.
+model Movement {
+  id        String    @id @default(cuid())
+  direction Direction
+  weightKg  Decimal   @map("weight_kg") @db.Decimal(12, 3)
+
+  // onDelete: Restrict is the backstop, not a rule a user can reach: nothing
+  // in the app deletes a counterparty. It stops any future code path from
+  // destroying a movement's producer or site.
+  producerId          String?            @map("producer_id")
+  producer            Producer?          @relation(fields: [producerId], references: [id], onDelete: Restrict)
+  sequestrationSiteId String?            @map("sequestration_site_id")
+  sequestrationSite   SequestrationSite? @relation(fields: [sequestrationSiteId], references: [id], onDelete: Restrict)
+
+  recordedAt DateTime @default(now()) @map("recorded_at")
+
+  @@map("movements")
 }

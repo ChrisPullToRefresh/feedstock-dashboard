@@ -13,18 +13,20 @@ import { describe, expect, it } from "vitest";
  */
 const schema = readFileSync("prisma/schema.prisma", "utf8");
 
-/** The body of one `model X { ... }` block, without its braces. */
-function modelBody(name: string): string {
+/** The body of one `model X { ... }` or `enum X { ... }` block. */
+function declarationBody(kind: "model" | "enum", name: string): string {
   const block = schema.match(
-    new RegExp(String.raw`^model ${name} \{$([\s\S]*?)^\}$`, "m"),
+    new RegExp(String.raw`^${kind} ${name} \{$([\s\S]*?)^\}$`, "m"),
   );
 
   if (!block) {
-    throw new Error(`prisma/schema.prisma declares no model ${name}`);
+    throw new Error(`prisma/schema.prisma declares no ${kind} ${name}`);
   }
 
   return block[1];
 }
+
+const modelBody = (name: string) => declarationBody("model", name);
 
 describe("the reference-data models", () => {
   // Both models are deliberately identical in shape — plan.md § Decisions.
@@ -36,7 +38,9 @@ describe("the reference-data models", () => {
   ] as const;
 
   it.each(models)("$model has a cuid() primary key", ({ model }) => {
-    expect(modelBody(model)).toMatch(/id\s+String\s+@id\s+@default\(cuid\(\)\)/);
+    expect(modelBody(model)).toMatch(
+      /id\s+String\s+@id\s+@default\(cuid\(\)\)/,
+    );
   });
 
   it.each(models)("$model has a unique name", ({ model }) => {
@@ -80,5 +84,83 @@ describe("the reference-data models", () => {
         new RegExp(String.raw`${field}\b[^\n]*@map\("${column}"\)`),
       );
     }
+  });
+});
+
+describe("the Direction enum", () => {
+  it("has exactly INBOUND and OUTBOUND", () => {
+    const values = declarationBody("enum", "Direction")
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line !== "" && !line.startsWith("//"));
+
+    // Exact, not a containment check: a third direction would silently escape
+    // the counterparty check constraint, which only knows these two.
+    expect(values).toEqual(["INBOUND", "OUTBOUND"]);
+  });
+});
+
+describe("the Movement model", () => {
+  const body = modelBody("Movement");
+
+  it("has a cuid() primary key", () => {
+    expect(body).toMatch(/id\s+String\s+@id\s+@default\(cuid\(\)\)/);
+  });
+
+  it("stores weight as an exact decimal to the gram", () => {
+    // Decimal(12, 3) exactly — plan.md § Decisions. A double would not sum
+    // exactly, and Phase 6's running totals are where that surfaces.
+    expect(body).toMatch(
+      /weightKg\s+Decimal\s+@map\("weight_kg"\)\s+@db\.Decimal\(12, 3\)/,
+    );
+  });
+
+  it.each([
+    { field: "producerId", column: "producer_id", model: "Producer" },
+    {
+      field: "sequestrationSiteId",
+      column: "sequestration_site_id",
+      model: "SequestrationSite",
+    },
+  ])("makes $field a nullable column", ({ field, column }) => {
+    // Nullable because exactly one counterparty is set per movement; which
+    // one is decided by direction, and enforced by the check constraint.
+    expect(body).toMatch(
+      new RegExp(String.raw`${field}\s+String\?\s+@map\("${column}"\)`),
+    );
+  });
+
+  it.each([
+    { relation: "producer", model: "Producer", field: "producerId" },
+    {
+      relation: "sequestrationSite",
+      model: "SequestrationSite",
+      field: "sequestrationSiteId",
+    },
+  ])(
+    "refuses to delete a $model a movement references",
+    ({ relation, model, field }) => {
+      expect(body).toMatch(
+        new RegExp(
+          String.raw`${relation}\s+${model}\?\s+@relation\(fields: \[${field}\], references: \[id\], onDelete: Restrict\)`,
+        ),
+      );
+    },
+  );
+
+  it("records the server clock when the row is written", () => {
+    expect(body).toMatch(
+      /recordedAt\s+DateTime\s+@default\(now\(\)\)\s+@map\("recorded_at"\)/,
+    );
+  });
+
+  it("has no updatedAt, because a movement is never updated", () => {
+    // The trigger in the initial migration is what enforces this; the absent
+    // field is the schema agreeing with it.
+    expect(body).not.toMatch(/updatedAt/);
+  });
+
+  it("maps to the movements table", () => {
+    expect(body).toMatch(/@@map\("movements"\)/);
   });
 });
