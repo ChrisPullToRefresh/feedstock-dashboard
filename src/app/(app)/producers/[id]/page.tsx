@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { archiveProducer } from "@/app/(app)/producers/actions";
 import { ArchiveProducerDialog } from "@/components/archive-producer-dialog";
 import { Button } from "@/components/ui/button";
-import { findProducer } from "@/lib/producers";
+import { findProducer } from "@/lib/producer-queries";
 
 export default async function ProducerPage({
   params,

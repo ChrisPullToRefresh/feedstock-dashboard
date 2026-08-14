@@ -2,11 +2,18 @@
 
 import { useActionState, useId, useState } from "react";
 
-import { IDLE, type ProducerFormState } from "@/app/(app)/producers/actions";
+import type { ProducerFormState } from "@/app/(app)/producers/actions";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { PRODUCER_NAME_MAX_LENGTH, producerSchema } from "@/lib/producers";
+
+/**
+ * Defined here rather than exported from the actions module: a "use server"
+ * file may only export async functions, so a shared constant object there
+ * fails the build.
+ */
+const IDLE: ProducerFormState = { status: "idle" };
 
 export type ProducerFormAction = (
   state: ProducerFormState,

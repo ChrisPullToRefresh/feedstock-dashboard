@@ -5,7 +5,8 @@ import { redirect } from "next/navigation";
 
 import { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
-import { findProducerByName, producerSchema } from "@/lib/producers";
+import { producerSchema } from "@/lib/producers";
+import { findProducerByName } from "@/lib/producer-queries";
 
 /**
  * Everything that writes a producer.
@@ -25,8 +26,6 @@ export type ProducerFormState =
    * no screen lists them.
    */
   | { status: "archived-name"; archivedId: string; name: string };
-
-export const IDLE: ProducerFormState = { status: "idle" };
 
 /**
  * Back to the list, carrying what just happened so the page can say so.

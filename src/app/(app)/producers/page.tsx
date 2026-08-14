@@ -2,7 +2,7 @@ import { Suspense } from "react";
 
 import { ProducerList, ProducerListHeader } from "@/components/producer-list";
 import { ProducerToast } from "@/components/producer-toast";
-import { listActiveProducers } from "@/lib/producers";
+import { listActiveProducers } from "@/lib/producer-queries";
 
 export default async function ProducersPage() {
   const producers = await listActiveProducers();

@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 
 import { renameProducer, restoreProducer } from "@/app/(app)/producers/actions";
 import { ProducerForm } from "@/components/producer-form";
-import { findProducer } from "@/lib/producers";
+import { findProducer } from "@/lib/producer-queries";
 
 export default async function EditProducerPage({
   params,

@@ -3,8 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 
 const listActiveProducers = vi.fn();
 
-vi.mock("@/lib/producers", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@/lib/producers")>()),
+vi.mock("@/lib/producer-queries", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/producer-queries")>()),
   listActiveProducers: () => listActiveProducers(),
 }));
 
