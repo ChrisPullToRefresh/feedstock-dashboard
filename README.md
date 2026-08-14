@@ -90,7 +90,8 @@ phase is therefore protected the moment it exists.
 ## Contributing
 
 `specs/tech-stack.md` § Branching & pull request workflow is binding. In short:
-never commit to `main`, one pull request per roadmap phase, branch named for the
-phase number, Conventional Commits for every commit message and every pull
-request title — the title is what a squash merge writes onto `main`, and CI
-checks it.
+never commit to `main`; one pull request per roadmap phase, on a branch named
+for the phase number; anything implementing no roadmap bullet goes on a
+`maint-` branch instead and does not count against a phase; Conventional
+Commits for every commit message and every pull request title — the title is
+what a squash merge writes onto `main`, and CI checks it.
