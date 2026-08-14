@@ -17,4 +17,10 @@ export default defineConfig({
     // lock that Neon's pooled endpoint cannot hold.
     url: env("DATABASE_URL_UNPOOLED"),
   },
+  migrations: {
+    // Kept identical to the `seed` script in package.json, so a database
+    // rebuilt by `prisma migrate reset` comes back with the same reference
+    // data as one seeded by hand.
+    seed: "node --env-file-if-exists=.env.local --disable-warning=MODULE_TYPELESS_PACKAGE_JSON prisma/seed.ts",
+  },
 });
