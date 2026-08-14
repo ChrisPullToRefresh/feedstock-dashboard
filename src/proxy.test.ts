@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { config } from "@/middleware";
+import { config } from "@/proxy";
 
 /*
  * Nothing asserted `config.matcher` before this. It decides which requests
@@ -13,7 +13,7 @@ import { config } from "@/middleware";
  */
 
 /**
- * Whether Next would run the middleware for `pathname`.
+ * Whether Next would run the proxy for `pathname`.
  *
  * Next compiles each matcher entry to a regular expression anchored at both
  * ends, which is what the entries are already written as.
@@ -24,7 +24,7 @@ function runsOn(pathname: string): boolean {
   );
 }
 
-describe("which requests the middleware runs on", () => {
+describe("which requests the proxy runs on", () => {
   it.each([
     // The hole this closes: a dot in the last segment used to read as a file
     // extension, so the id looked like a static asset.

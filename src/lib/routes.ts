@@ -7,7 +7,7 @@
  * is therefore protected by default — forgetting to add it to a list cannot
  * expose it.
  *
- * `src/middleware.ts` hands this list to Clerk's `createRouteMatcher`, which is
+ * `src/proxy.ts` hands this list to Clerk's `createRouteMatcher`, which is
  * the only thing that evaluates it. There is deliberately no local
  * reimplementation to test against: a mirror can agree with its own tests while
  * the real gate behaves differently.

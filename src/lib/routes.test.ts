@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { PUBLIC_ROUTES } from "@/lib/routes";
 
 /*
- * These run against Clerk's own matcher, the code `src/middleware.ts` actually
+ * These run against Clerk's own matcher, the code `src/proxy.ts` actually
  * calls. An earlier version of this file also tested a local helper that
  * mirrored the rule; nothing in production called it, and two functions named
  * `isPublicRoute` with different semantics is a trap rather than coverage.
