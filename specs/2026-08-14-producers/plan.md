@@ -116,10 +116,14 @@ Prisma 7 gates behind an experimental config flag. A normalized lowercase compan
 column was offered and declined as a second column to keep in step on every write, where
 a wrong write silently permits a duplicate.
 
-The cost accepted, and it is a real one: Prisma models indexes, unlike the check
-constraint and trigger it ignores, so this index may read as drift. **Task 2 must
-establish whether it does and record the answer here.** If it does, a regenerated
-migration could drop it, and the guard test is the only thing that would notice.
+The cost accepted: the index is invisible to `prisma/schema.prisma`, so only the guard
+test stands between a migration regenerated from the schema and a lost constraint.
+
+Task 2 settled the drift question it was given. `prisma migrate diff` reports **no
+drift** in either direction against a database carrying the index — Prisma ignores an
+expression index the same way it ignores the check constraint and the trigger. So no
+routine command will try to drop it, and the guard test covers the remaining case:
+someone recreating the migration history from the schema.
 
 **A producer name is required, trimmed, and 1–100 characters.**
 
@@ -201,10 +205,8 @@ guess about what Phase 6 wants. `requirements.md` § Open questions carries that
 
 ## Open questions
 
-- **Whether the expression index reads as drift to Prisma.** Task 2 answers it. Recorded
-  here rather than guessed, because the answer decides whether the guard test is a
-  formality or the only thing standing between a regenerated migration and a lost
-  constraint.
+- ~~**Whether the expression index reads as drift to Prisma.**~~ Answered by task 2: it
+  does not, in either direction. Recorded in § Decisions.
 - **Whether archived producers ever need a screen.** Carried in `requirements.md`
   § Open questions.
 - **Whether the detail page earns its place before Phase 6.** Carried in
