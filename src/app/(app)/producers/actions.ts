@@ -19,13 +19,23 @@ import { findProducerByName } from "@/lib/producer-queries";
 
 export type ProducerFormState =
   | { status: "idle" }
-  | { status: "error"; message: string }
+  /**
+   * `submitted` carries the name back to the form. React 19 resets an
+   * uncontrolled form once its action settles, so without it every refusal
+   * would also wipe what the operator typed.
+   */
+  | { status: "error"; message: string; submitted: string }
   /**
    * The name belongs to an archived producer. Carries its id so the form can
    * offer to restore it — the only route back to an archived producer, since
    * no screen lists them.
    */
-  | { status: "archived-name"; archivedId: string; name: string };
+  | {
+      status: "archived-name";
+      archivedId: string;
+      name: string;
+      submitted: string;
+    };
 
 /**
  * Back to the list, carrying what just happened so the page can say so.
@@ -49,12 +59,15 @@ function isUniqueViolation(error: unknown): boolean {
 }
 
 function parseName(formData: FormData): ProducerFormState | { name: string } {
-  const parsed = producerSchema.safeParse({ name: formData.get("name") });
+  const raw = formData.get("name");
+  const submitted = typeof raw === "string" ? raw : "";
+  const parsed = producerSchema.safeParse({ name: raw });
 
   if (!parsed.success) {
     return {
       status: "error",
       message: parsed.error.issues[0]?.message ?? "Enter a producer name",
+      submitted,
     };
   }
 
@@ -75,11 +88,16 @@ export async function createProducer(
   if (existing) {
     // Archived is recoverable; active is a genuine duplicate.
     return existing.isActive
-      ? { status: "error", message: `${existing.name} is already a producer` }
+      ? {
+          status: "error",
+          message: `${existing.name} is already a producer`,
+          submitted: name,
+        }
       : {
           status: "archived-name",
           archivedId: existing.id,
           name: existing.name,
+          submitted: name,
         };
   }
 
@@ -88,7 +106,11 @@ export async function createProducer(
   } catch (error) {
     // The check above races: two requests can both find nothing.
     if (isUniqueViolation(error)) {
-      return { status: "error", message: `${name} is already a producer` };
+      return {
+        status: "error",
+        message: `${name} is already a producer`,
+        submitted: name,
+      };
     }
     throw error;
   }
@@ -111,20 +133,27 @@ export async function renameProducer(
 
   // Renaming to a different case of its own name is a legitimate edit.
   if (existing && existing.id !== id) {
-    return existing.isActive
-      ? { status: "error", message: `${existing.name} is already a producer` }
-      : {
-          status: "archived-name",
-          archivedId: existing.id,
-          name: existing.name,
-        };
+    // No restore offer here. On the create route restoring is what the
+    // operator wanted; on a rename it would revive an unrelated producer and
+    // silently abandon the rename, then report success for the wrong thing.
+    return {
+      status: "error",
+      message: existing.isActive
+        ? `${existing.name} is already a producer`
+        : `${existing.name} is archived, so that name is taken`,
+      submitted: name,
+    };
   }
 
   try {
     await db.producer.update({ where: { id }, data: { name } });
   } catch (error) {
     if (isUniqueViolation(error)) {
-      return { status: "error", message: `${name} is already a producer` };
+      return {
+        status: "error",
+        message: `${name} is already a producer`,
+        submitted: name,
+      };
     }
     throw error;
   }

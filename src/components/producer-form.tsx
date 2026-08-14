@@ -46,7 +46,26 @@ export function ProducerForm({
 }) {
   const [state, dispatch, pending] = useActionState(action, IDLE);
   const [clientError, setClientError] = useState<string | null>(null);
+  const [name, setName] = useState(defaultName);
   const nameId = useId();
+
+  // React 19 resets an uncontrolled form once its action settles, which on
+  // every refusal wiped what the operator had typed — on the edit route it
+  // even reverted to the old name, so the error pointed at a value no longer
+  // on screen. The field is controlled, and the actions echo back what they
+  // were given, so a refusal leaves the text where it was.
+  //
+  // Adjusted during render rather than in an effect: React's documented way to
+  // react to a changed value, and it avoids the extra paint an effect costs.
+  const [lastState, setLastState] = useState(state);
+
+  if (state !== lastState) {
+    setLastState(state);
+
+    if (state.status === "error" || state.status === "archived-name") {
+      setName(state.submitted);
+    }
+  }
 
   /**
    * Synchronous on purpose: `preventDefault` has to run before React hands the
@@ -81,7 +100,8 @@ export function ProducerForm({
           <Input
             id={nameId}
             name="name"
-            defaultValue={defaultName}
+            value={name}
+            onChange={(event) => setName(event.target.value)}
             // Long enough to be a real limit, short enough that the browser
             // stops the paste before the schema has to explain it.
             maxLength={PRODUCER_NAME_MAX_LENGTH}
@@ -102,7 +122,7 @@ export function ProducerForm({
       {/* Deliberately a sibling of the form, not a child: a nested <form> is
           invalid HTML, and the browser drops it — the Restore button would
           then submit the form it was sitting inside. */}
-      {state.status === "archived-name" ? (
+      {state.status === "archived-name" && clientError === null ? (
         <div role="alert" className="rounded-md border p-4 text-sm">
           <p>
             <span className="font-medium">{state.name}</span> is archived. That
@@ -110,6 +130,10 @@ export function ProducerForm({
             restoring brings the original back with its movement history
             attached.
           </p>
+          {/* Bound in the browser, so the id is client-supplied — unlike the
+              rename action, which is bound on the server. Acceptable only
+              because specs/tech-stack.md § Auth gives every authenticated user
+              the same reference-data rights, so this grants nothing new. */}
           <form action={restore.bind(null, state.archivedId)} className="mt-3">
             <Button type="submit" variant="outline">
               Restore {state.name}

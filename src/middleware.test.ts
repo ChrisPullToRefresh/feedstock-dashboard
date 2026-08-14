@@ -36,6 +36,31 @@ describe("which requests the middleware runs on", () => {
   });
 
   it.each([
+    // An extension part-way along the path is not a static file. Without the
+    // trailing anchor these were skipped, which is the same hole this matcher
+    // exists to close — and the tests above miss it, because they all end in
+    // the extension.
+    "/producers/x.svg/edit",
+    "/producers/report.csv-co",
+    "/producers/clx1.png/edit",
+  ])(
+    "protects %s, where the extension is not the end of the path",
+    (pathname) => {
+      expect(runsOn(pathname)).toBe(true);
+    },
+  );
+
+  it("still treats a final segment that is a listed extension as a file", () => {
+    // The limit of this approach, stated rather than hidden: /producers/a.zip
+    // reads as a static file and is skipped. Producer ids are cuids, which
+    // contain no dots, so nothing reachable in the app lands here — and the
+    // roadmap's case, /producers/acme.co, is protected because `co` is not a
+    // listed extension.
+    expect(runsOn("/producers/acme.zip")).toBe(false);
+    expect(runsOn("/producers/acme.co")).toBe(true);
+  });
+
+  it.each([
     "/",
     "/producers",
     "/producers/acme",

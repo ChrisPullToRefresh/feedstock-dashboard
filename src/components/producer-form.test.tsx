@@ -97,9 +97,10 @@ describe("the producer form", () => {
   it("shows an error the action returns", async () => {
     render(
       <ProducerForm
-        action={vi.fn(async () => ({
-          status: "error" as const,
+        action={vi.fn<ProducerFormAction>(async () => ({
+          status: "error",
           message: "Riverbend Sawmill is already a producer",
+          submitted: "Riverbend Sawmill",
         }))}
         restore={vi.fn(async () => {})}
         submitLabel="Create producer"
@@ -126,6 +127,7 @@ describe("a name that belongs to an archived producer", () => {
           status: "archived-name",
           archivedId: "p9",
           name: "Larch Hollow",
+          submitted: "larch hollow",
         }))}
         restore={restore}
         submitLabel="Create producer"
@@ -167,5 +169,89 @@ describe("a name that belongs to an archived producer", () => {
     );
 
     expect(restore).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("what the form keeps when the server refuses", () => {
+  it("leaves the typed name in the field", async () => {
+    // React 19 resets an uncontrolled form once the action settles, which
+    // wiped the name on every refusal and made the operator retype it.
+    render(
+      <ProducerForm
+        action={vi.fn<ProducerFormAction>(async (_state, formData) => ({
+          status: "error",
+          message: "Riverbend Sawmill is already a producer",
+          submitted: String(formData.get("name")),
+        }))}
+        restore={vi.fn(async () => {})}
+        submitLabel="Create producer"
+      />,
+    );
+
+    const user = userEvent.setup();
+    await user.type(screen.getByLabelText("Name"), "Riverbend Sawmill");
+    await user.click(screen.getByRole("button", { name: "Create producer" }));
+
+    expect(
+      await screen.findByText("Riverbend Sawmill is already a producer"),
+    ).toBeVisible();
+    expect(screen.getByLabelText("Name")).toHaveValue("Riverbend Sawmill");
+  });
+
+  it("keeps the edited name rather than reverting to the original", async () => {
+    render(
+      <ProducerForm
+        action={vi.fn<ProducerFormAction>(async (_state, formData) => ({
+          status: "error",
+          message: "Larch Hollow is archived, so that name is taken",
+          submitted: String(formData.get("name")),
+        }))}
+        restore={vi.fn(async () => {})}
+        defaultName="Aspen Ridge Timber"
+        submitLabel="Save changes"
+      />,
+    );
+
+    const user = userEvent.setup();
+    const field = screen.getByLabelText("Name");
+    await user.clear(field);
+    await user.type(field, "Larch Hollow");
+    await user.click(screen.getByRole("button", { name: "Save changes" }));
+
+    expect(await screen.findByText(/is archived/)).toBeVisible();
+    expect(field).toHaveValue("Larch Hollow");
+  });
+
+  it("drops the restore offer once a client-side refusal replaces it", async () => {
+    render(
+      <ProducerForm
+        action={vi.fn<ProducerFormAction>(async () => ({
+          status: "archived-name",
+          archivedId: "p9",
+          name: "Larch Hollow",
+          submitted: "larch hollow",
+        }))}
+        restore={vi.fn(async () => {})}
+        submitLabel="Create producer"
+      />,
+    );
+
+    const user = userEvent.setup();
+    const field = screen.getByLabelText("Name");
+    await user.type(field, "larch hollow");
+    await user.click(screen.getByRole("button", { name: "Create producer" }));
+    expect(
+      await screen.findByRole("button", { name: "Restore Larch Hollow" }),
+    ).toBeVisible();
+
+    // Emptying the field and resubmitting is refused before the action runs,
+    // so the offer no longer describes anything on screen.
+    await user.clear(field);
+    await user.click(screen.getByRole("button", { name: "Create producer" }));
+
+    expect(await screen.findByText("Enter a producer name")).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: "Restore Larch Hollow" }),
+    ).not.toBeInTheDocument();
   });
 });

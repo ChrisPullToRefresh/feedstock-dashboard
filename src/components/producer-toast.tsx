@@ -28,10 +28,11 @@ export function ProducerToast() {
   useEffect(() => {
     if (event === null || name === null) return;
 
-    const message = MESSAGES[event]?.(name);
+    // hasOwn, not a bare lookup: `?toast=valueOf` would otherwise reach
+    // Object.prototype and hand sonner a function's result as a React child.
+    if (Object.hasOwn(MESSAGES, event)) toast.success(MESSAGES[event](name));
 
-    if (message !== undefined) toast.success(message);
-
+    // Cleared either way, so a crafted parameter does not linger in the URL.
     // replace, not push: the announcement is not a place to go back to.
     router.replace("/producers");
   }, [event, name, router]);

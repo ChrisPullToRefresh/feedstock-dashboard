@@ -34,7 +34,12 @@ export const config = {
     // meant a producer id with a dot in it — `/producers/acme.co` — read as a
     // static file and was served without a session. Named extensions still
     // skip `/favicon.ico` while leaving every application route protected.
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    //
+    // The trailing `$` is load-bearing and is not in Clerk's published
+    // pattern. Without it the extension can match anywhere in the path, so
+    // `/producers/x.svg/edit` counts as a static file and is served with no
+    // session — the same silent hole in a new place.
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)$).*)",
     // Always run on API routes.
     "/(api|trpc)(.*)",
   ],
