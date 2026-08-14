@@ -48,7 +48,10 @@ Decisions below are binding for v0.1. See `specs/mission.md` for scope and
 - **Database:** Neon Postgres, provisioned through the Vercel Marketplace so connection
   environment variables are wired into the project automatically.
 - **ORM:** Prisma. The schema lives in `prisma/schema.prisma` and is the single source of
-  truth for the data model.
+  truth for the data model. Connection URLs and the seed command live in
+  `prisma.config.ts` rather than in the schema, and the client is constructed with the
+  Neon driver adapter — both are Prisma 7 requirements. See
+  `specs/2026-08-13-schema-and-migrations/plan.md` § Decisions.
 - **Migrations:** Prisma Migrate. Every schema change ships as a checked-in migration.
   We will not edit the database by hand.
 - **Units:** weights are stored in kilograms. See the constraint in

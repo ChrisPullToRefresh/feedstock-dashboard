@@ -88,8 +88,8 @@ themselves at build time, so a preview is usable the moment it finishes building
 - **TypeScript strict mode** — `specs/tech-stack.md` § Application.
 - **Green CI is a hard merge requirement** and direct pushes to `main` are blocked —
   `specs/tech-stack.md` § CI/CD and § Branching & pull request workflow.
-- **One pull request for this phase** — `specs/tech-stack.md` § Branching & pull request
-  workflow.
+- **One implementation pull request for this phase**, following the spec pull request
+  that merged this folder — `specs/tech-stack.md` § Branching & pull request workflow.
 
 ## Open questions
 

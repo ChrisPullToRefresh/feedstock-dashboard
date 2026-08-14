@@ -28,8 +28,9 @@ present, not that it works; steps 4–7 below prove the behavior.
 **Weight** (`src/lib/weight.ts`):
 
 - Whole and fractional kilogram strings parse to the expected `Decimal`
-- Negative, empty, non-numeric, and more-than-three-decimal inputs are rejected, with
-  errors a form can tell apart
+- Negative, zero, empty, non-numeric, and more-than-three-decimal inputs are rejected,
+  with errors a form can tell apart — see `plan.md` § Decisions for why zero is among
+  them
 - Formatting a `Decimal` renders the kilogram string an operator would expect
 
 **Totals** (`src/lib/totals.ts`):
@@ -40,8 +41,10 @@ present, not that it works; steps 4–7 below prove the behavior.
   inbound, sequestration sites for outbound
 - A set of values that would drift as binary floats sums exactly
 
-**Client singleton** (`src/lib/db.ts`) — two imports return the same instance, and the
-instance is cached on `globalThis` outside production.
+**Client singleton** (`src/lib/db.ts`) — a second evaluation of the module returns the
+same instance, that instance is cached on `globalThis` outside production, and it is not
+cached there in production. The client is constructed with the Neon driver adapter, which
+Prisma 7 requires — `plan.md` § Decisions.
 
 ### Database (GitHub Actions, `Database` job)
 

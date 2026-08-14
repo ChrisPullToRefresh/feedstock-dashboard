@@ -6,14 +6,14 @@ pull request.
 | #  | Feature task | Paired test task |
 |----|--------------|------------------|
 | 1  | Neon Postgres provisioned through the Vercel Marketplace, with a database branch per preview deployment, and its connection variables present in every Vercel environment and in `.env.local` | Manual: `vercel env ls` lists the connection variables in development, preview, and production; `vercel env pull` gives a local URL that `psql` connects to; `git check-ignore .env.local` exits zero |
-| 2  | Prisma installed, `prisma/schema.prisma` created with its datasource and generator, and a `postinstall` script running `prisma generate` | Manual: a fresh clone runs `npm ci && npm run typecheck && npm run test` green with no manual generate step |
+| 2  | Prisma installed, `prisma/schema.prisma` created with its datasource and generator, `prisma.config.ts` created carrying the migrate connection URL and the seed command, and a `postinstall` script running `prisma generate` | Manual: a fresh clone runs `npm ci && npm run typecheck && npm run test` green with no manual generate step |
 | 3  | `Producer` and `SequestrationSite` models — `cuid()` id, a `name` unique within the model, `isActive` defaulting true, `createdAt`, `updatedAt` — with `@@map` and `@map` to snake_case tables and columns | Vitest test reading `prisma/schema.prisma` and asserting, per model: the `cuid()` id, the `@unique` on `name`, `isActive` defaulting true, and the snake_case table and column names |
 | 4  | `Direction` enum and the `Movement` model — `cuid()` id, `direction`, `weightKg` as `Decimal @db.Decimal(12, 3)`, nullable `producerId` and `sequestrationSiteId` relations with `onDelete: Restrict`, `recordedAt` defaulting to `now()` — mapped to snake_case | Vitest test asserting the `Direction` enum's two values, the exact `Decimal(12, 3)` attribute, both relations nullable and `onDelete: Restrict`, `recordedAt` defaulting to `now()`, and the absence of any `updatedAt` on this model |
 | 5  | A check constraint in the initial migration requiring exactly the counterparty that matches `direction`: inbound has a producer and no site, outbound has a site and no producer | Vitest test asserting the checked-in migration SQL still contains the constraint, so a regenerated migration cannot drop it silently. Behavior is proven by `validation.md` § Manual steps 4–7 |
 | 6  | A Postgres trigger in the initial migration raising an exception on `UPDATE` or `DELETE` of a `movements` row | Manual: `validation.md` § Manual steps 8–9 attempt an update and a delete against a seeded movement in `psql` and record the exception each raises |
 | 7  | The initial Prisma migration generated and checked in under `prisma/migrations/`, carrying the check constraint and the trigger | The `Database` CI job (task 13) applies it to a fresh Neon branch on every pull request |
-| 8  | `src/lib/db.ts` exporting a `db` Prisma client singleton, cached on `globalThis` so Next's dev server does not open a client per hot reload | Vitest test asserting two imports return the same instance and that the instance is stored on `globalThis` outside production |
-| 9  | `src/lib/weight.ts` — parse an entered kilogram weight to a `Decimal`, reject invalid input, format a `Decimal` for display | Vitest tests: whole and fractional kilograms parse; negative, zero-length, non-numeric, and more-than-three-decimal inputs are rejected with a distinguishable error; formatting a `Decimal` renders the kilogram string an operator would expect |
+| 8  | `src/lib/db.ts` exporting a `db` Prisma client singleton, constructed with the Neon driver adapter and cached on `globalThis` so Next's dev server does not open a client per hot reload | Vitest test asserting two imports return the same instance, that the instance is stored on `globalThis` outside production, and that it is not stored there in production |
+| 9  | `src/lib/weight.ts` — parse an entered kilogram weight to a `Decimal`, reject invalid input, format a `Decimal` for display | Vitest tests: whole and fractional kilograms parse; negative, zero, zero-length, non-numeric, and more-than-three-decimal inputs are rejected with a distinguishable error; formatting a `Decimal` renders the kilogram string an operator would expect |
 | 10 | `src/lib/totals.ts` — pure functions over arrays of movement records returning inbound total, outbound total, total by producer, and total by sequestration site | Vitest tests: an empty array totals zero; mixed directions are separated correctly; grouping keys off the counterparty that matches each movement's direction; summing values that would drift as binary floats stays exact |
 | 11 | `prisma/seed.ts` upserting a realistic set of feedstock producers and sequestration sites on `name`, wired to `npm run seed` | The `Database` CI job runs the seed twice against the fresh branch and asserts the row counts are identical after each run |
 | 12 | A `vercel-build` script running `prisma migrate deploy` before `next build` | Manual: this pull request's Vercel preview deploys green, and its Neon branch holds the migrated tables and no seed data |
@@ -22,7 +22,9 @@ pull request.
 
 ## Decisions
 
-Every entry below answers a question put to the user in the session that wrote this spec.
+Every entry below answers a question put to the user — most in the session that wrote
+this spec, and the last two in the session that implemented it, where building against
+the real tooling raised a question the spec had not anticipated.
 
 **A movement carries two nullable foreign keys and a check constraint.**
 
@@ -224,6 +226,45 @@ preview would have an empty database.
 
 The cost accepted: a failed migration fails the deployment, and production migrations run
 at build time. `requirements.md` § Open questions carries that to Phase 8.
+
+**Prisma 7, with connection URLs in `prisma.config.ts` and a Neon driver adapter.**
+
+Raised during implementation. This spec was written against Prisma 6's shape, and the
+current major changes three things it assumed. `datasource` no longer accepts `url` or
+`directUrl` — connection URLs move to a new `prisma.config.ts`. `PrismaClient` has no
+built-in query engine and requires a driver adapter passed to its constructor. The seed
+command moves from a `prisma` block in `package.json` to `migrations.seed` in the same
+config file.
+
+Pinning Prisma 6 to keep the spec literally true was offered and declined, as was
+stopping to amend the spec before writing any code. The user's answer was to build on 7
+and record the shape here.
+
+`@prisma/adapter-neon` is the adapter rather than `@prisma/adapter-pg`, because the
+pooled `DATABASE_URL` runs PgBouncer in transaction mode and Neon's own driver is built
+for that; node-postgres over a transaction pooler has prepared-statement sharp edges.
+Migrations keep using the unpooled URL, which is what `prisma.config.ts` carries.
+
+The cost accepted: two files hold what one used to — the schema no longer tells you what
+it connects to — and the client carries a dependency on a specific database vendor's
+driver, which a move off Neon would have to replace.
+
+**A weight of zero is refused, not stored.**
+
+Raised during implementation. Task 9 lists negative, zero-length, non-numeric, and
+over-precise inputs as rejections and says nothing about zero, which left accepting it as
+the literal reading.
+
+Zero is refused instead. A movement of nothing is not a movement: it would add a row that
+every total in Phase 6 ignores and that no operator could explain later. It gets its own
+`not-positive` reason alongside negatives, so Phase 5's form can word the two together or
+apart as it finds best.
+
+The alternative — accepting zero because the spec did not name it — was rejected as a
+reading that produces junk rows nothing else in the system has a use for.
+
+The cost accepted: an operator who genuinely wants to record a zero-weight event cannot,
+and would have to record the fact somewhere the system does not yet have.
 
 ## Open questions
 
