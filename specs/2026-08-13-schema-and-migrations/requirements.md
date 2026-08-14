@@ -57,7 +57,8 @@ themselves at build time, so a preview is usable the moment it finishes building
       the database
 - [ ] `UPDATE` and `DELETE` against a movement row raise a Postgres exception
 - [ ] Deleting a producer or sequestration site that a movement references is refused by
-      the database, proven directly in `psql` — no application surface attempts it
+      the database, proven directly in Neon's SQL Editor — no application surface
+      attempts it
 - [ ] `npm run seed` run twice against the same database leaves the same rows
 - [ ] The `Database` CI job creates a fresh Neon branch, migrates, seeds, and deletes the
       branch, and is a required check on `main`

@@ -5,12 +5,12 @@ pull request.
 
 | #  | Feature task | Paired test task |
 |----|--------------|------------------|
-| 1  | Neon Postgres provisioned through the Vercel Marketplace, with a database branch per preview deployment, and its connection variables present in every Vercel environment and in `.env.local` | Manual: `vercel env ls` lists the connection variables in development, preview, and production; `vercel env pull` gives a local URL that `psql` connects to; `git check-ignore .env.local` exits zero |
+| 1  | Neon Postgres provisioned through the Vercel Marketplace, with a database branch per preview deployment, and its connection variables present in every Vercel environment and in `.env.local` | Manual: `vercel env ls` lists the connection variables in development, preview, and production; `vercel env pull` gives a local URL that Prisma connects to; `git check-ignore .env.local` exits zero |
 | 2  | Prisma installed, `prisma/schema.prisma` created with its datasource and generator, `prisma.config.ts` created carrying the migrate connection URL and the seed command, and a `postinstall` script running `prisma generate` | Manual: a fresh clone runs `npm ci && npm run typecheck && npm run test` green with no manual generate step |
 | 3  | `Producer` and `SequestrationSite` models — `cuid()` id, a `name` unique within the model, `isActive` defaulting true, `createdAt`, `updatedAt` — with `@@map` and `@map` to snake_case tables and columns | Vitest test reading `prisma/schema.prisma` and asserting, per model: the `cuid()` id, the `@unique` on `name`, `isActive` defaulting true, and the snake_case table and column names |
 | 4  | `Direction` enum and the `Movement` model — `cuid()` id, `direction`, `weightKg` as `Decimal @db.Decimal(12, 3)`, nullable `producerId` and `sequestrationSiteId` relations with `onDelete: Restrict`, `recordedAt` defaulting to `now()` — mapped to snake_case | Vitest test asserting the `Direction` enum's two values, the exact `Decimal(12, 3)` attribute, both relations nullable and `onDelete: Restrict`, `recordedAt` defaulting to `now()`, and the absence of any `updatedAt` on this model |
 | 5  | A check constraint in the initial migration requiring exactly the counterparty that matches `direction`: inbound has a producer and no site, outbound has a site and no producer | Vitest test asserting the checked-in migration SQL still contains the constraint, so a regenerated migration cannot drop it silently. Behavior is proven by `validation.md` § Manual steps 4–7 |
-| 6  | A Postgres trigger in the initial migration raising an exception on `UPDATE` or `DELETE` of a `movements` row | Manual: `validation.md` § Manual steps 8–9 attempt an update and a delete against a seeded movement in `psql` and record the exception each raises |
+| 6  | A Postgres trigger in the initial migration raising an exception on `UPDATE` or `DELETE` of a `movements` row | Manual: `validation.md` § Manual steps 8–9 attempt an update and a delete against a seeded movement in Neon's SQL Editor and record the exception each raises |
 | 7  | The initial Prisma migration generated and checked in under `prisma/migrations/`, carrying the check constraint and the trigger | The `Database` CI job (task 13) applies it to a fresh Neon branch on every pull request |
 | 8  | `src/lib/db.ts` exporting a `db` Prisma client singleton, constructed with the Neon driver adapter and cached on `globalThis` so Next's dev server does not open a client per hot reload | Vitest test asserting two imports return the same instance, that the instance is stored on `globalThis` outside production, and that it is not stored there in production |
 | 9  | `src/lib/weight.ts` — parse an entered kilogram weight to a `Decimal`, reject invalid input, format a `Decimal` for display | Vitest tests: whole and fractional kilograms parse; negative, zero, zero-length, non-numeric, and more-than-three-decimal inputs are rejected with a distinguishable error; formatting a `Decimal` renders the kilogram string an operator would expect |
@@ -84,8 +84,8 @@ mistyped row is corrected by editing it.
 
 `onDelete: Restrict` stays on both relations as the backstop. It is not a rule a user can
 reach — nothing in the app attempts a delete — but it stops any future code path from
-destroying a movement's counterparty. Validation proves it in `psql` rather than through
-a screen.
+destroying a movement's counterparty. Validation proves it in Neon's SQL Editor rather
+than through a screen.
 
 Cascading deletes were rejected because movements are immutable history; a dangling
 reference was rejected because it contradicts the foreign key; and hard delete for
@@ -126,7 +126,8 @@ The cost accepted: the first request for a contact or an address is a migration.
 
 **Tables and columns are snake_case via `@@map` and `@map`.**
 
-`sequestration_sites`, `recorded_at` — conventional Postgres, unquoted in `psql`, and
+`sequestration_sites`, `recorded_at` — conventional Postgres, unquoted in any SQL
+client, and
 friendlier to any tool later pointed at this database. It also keeps the hand-written SQL
 in the migration — the check constraint and the immutability trigger — free of quoted
 mixed-case identifiers.
@@ -206,7 +207,8 @@ down; and a runner killed mid-job can leak a branch, which is why the delete ste
 **The immutability trigger is proven by hand, once.**
 
 No Vitest test can reach a Postgres trigger without a live database, and this phase
-builds no database test harness. `validation.md` § Manual carries the `psql` attempts and
+builds no database test harness. `validation.md` § Manual carries the SQL Editor attempts
+and
 the exception each raises. A live-database integration suite was offered and rejected as
 a test-infrastructure phase inside a schema phase.
 

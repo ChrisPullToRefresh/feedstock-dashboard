@@ -67,8 +67,14 @@ Not applicable. `specs/roadmap.md` Phase 7 installs Playwright; this phase preda
 
 ## Manual
 
-Run against a Neon branch created for the purpose. Get its URL into your shell as
-`$DB_URL` before starting, and delete the branch when finished.
+Run against a Neon branch created for the purpose — create it in the Neon console, which
+`vercel integration open neon` reaches by SSO, and delete it when finished. Steps 4 to 11
+are SQL, run in that branch's **SQL Editor** in the console. Steps 3 and 12 also need its
+connection string, which the console gives you; export it as `$DB_URL` for the commands
+that take one.
+
+Neon's console is the only SQL client this phase needs. No local Postgres install is
+involved.
 
 1. **Environment variables are wired.** Run `vercel env ls`. The Neon connection
    variables appear in development, preview, and production. Run `vercel env pull` and
@@ -76,11 +82,12 @@ Run against a Neon branch created for the purpose. Get its URL into your shell a
    zero.
 2. **A clean clone builds.** In a fresh clone, run `npm ci && npm run typecheck && npm run
    test`. All three pass with no manual `prisma generate` — `postinstall` did it.
-3. **Migrate and seed the branch.** `DATABASE_URL=$DB_URL npx prisma migrate deploy`
-   completes with no error, then `DATABASE_URL=$DB_URL npm run seed` reports the
-   producers and sequestration sites it upserted. `psql "$DB_URL" -c '\dt'` lists
-   `producers`, `sequestration_sites`, and `movements` in snake_case.
-4. **A valid inbound movement is accepted.** In `psql "$DB_URL"`, insert a movement with
+3. **Migrate and seed the branch.** `DATABASE_URL_UNPOOLED=$DB_URL npx prisma migrate
+   deploy` completes with no error, then `DATABASE_URL=$DB_URL npm run seed` reports 6
+   producers and 4 sequestration sites. In the SQL Editor,
+   `SELECT tablename FROM pg_tables WHERE schemaname = 'public';` lists `producers`,
+   `sequestration_sites`, and `movements` in snake_case.
+4. **A valid inbound movement is accepted.** In the SQL Editor, insert a movement with
    `direction = 'INBOUND'`, `weight_kg = 1250.500`, a `producer_id` taken from
    `SELECT id FROM producers LIMIT 1`, and `sequestration_site_id` null. It inserts.
 5. **An inbound movement with a sequestration site is rejected.** Repeat step 4 with
@@ -97,15 +104,16 @@ Run against a Neon branch created for the purpose. Get its URL into your shell a
    row>';`. Postgres raises the trigger's exception and the row is still there.
 10. **The delete backstop holds.** Run `DELETE FROM producers WHERE id = '<the producer
     from step 4>';`. Postgres reports a foreign key violation. No application surface
-    attempts this — Phases 3 and 4 ship no delete — so `psql` is the only place it can be
-    proven.
+    attempts this — Phases 3 and 4 ship no delete — so the SQL Editor is the only place
+    it can be proven.
 11. **Archiving is the removal path.** Run `UPDATE producers SET is_active = false WHERE
     id = '<the producer from step 4>';`. It succeeds, the row remains, and the movement in
     step 4 still resolves to it.
 12. **The preview deployment migrated itself.** Open this pull request's Vercel preview in
     a signed-in browser and confirm it built green. Its Neon branch holds the migrated
-    tables and no seed data — `\dt` against the preview branch lists the three tables and
-    `SELECT count(*) FROM producers` returns 0.
+    tables and no seed data — in that branch's SQL Editor,
+    `SELECT tablename FROM pg_tables WHERE schemaname = 'public';` lists the three tables
+    and `SELECT count(*) FROM producers;` returns 0.
 13. **Branch protection includes the new job.** Run `gh api
     repos/{owner}/{repo}/branches/main/protection --jq
     '.required_status_checks.contexts'`. It returns `Database` alongside
