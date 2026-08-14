@@ -28,8 +28,9 @@ present, not that it works; steps 4–7 below prove the behavior.
 **Weight** (`src/lib/weight.ts`):
 
 - Whole and fractional kilogram strings parse to the expected `Decimal`
-- Negative, empty, non-numeric, and more-than-three-decimal inputs are rejected, with
-  errors a form can tell apart
+- Negative, zero, empty, non-numeric, more-than-three-decimal, and larger-than-the-column
+  inputs are rejected, with errors a form can tell apart — see `plan.md` § Decisions for
+  why zero is among them. `999999999.999` is accepted; one more digit is not
 - Formatting a `Decimal` renders the kilogram string an operator would expect
 
 **Totals** (`src/lib/totals.ts`):
@@ -40,23 +41,25 @@ present, not that it works; steps 4–7 below prove the behavior.
   inbound, sequestration sites for outbound
 - A set of values that would drift as binary floats sums exactly
 
-**Client singleton** (`src/lib/db.ts`) — two imports return the same instance, and the
-instance is cached on `globalThis` outside production.
+**Client singleton** (`src/lib/db.ts`) — a second evaluation of the module returns the
+same instance, that instance is cached on `globalThis` outside production, and it is not
+cached there in production. The client is constructed with the `pg` driver adapter, which
+Prisma 7 requires — `plan.md` § Decisions.
 
 ### Database (GitHub Actions, `Database` job)
 
-On every pull request, the job:
+On every pull request, against a Postgres service container that starts empty:
 
-1. Creates a Neon branch named for the workflow run
-2. Runs `prisma migrate deploy` against it from empty — this is the phase's **Done when**
+1. Runs `prisma migrate deploy` from empty — half of the phase's **Done when**
    condition, proven per pull request rather than once
-3. Runs `npm run seed`, then records the row counts
-4. Runs `npm run seed` a second time and asserts the row counts are unchanged
-5. Deletes the branch in an `if: always()` step, so a failed or cancelled run does not
-   leak it
+2. Runs `npm run seed`, then records the row counts
+3. Runs `npm run seed` a second time and fails if the row counts moved
 
-The teardown is verified once during implementation by forcing a failing run and
-confirming the branch is still deleted.
+The other half — that it works *against Neon* — is **not** covered by this job, and is
+not covered by any automated check. It was proven once during implementation by
+`prisma migrate reset` against the Neon database, which dropped the schema and re-applied
+every migration from empty. `plan.md` § Decisions records why it could not be automated
+and what that leaves unguarded.
 
 ### End-to-end (Playwright)
 
@@ -64,8 +67,14 @@ Not applicable. `specs/roadmap.md` Phase 7 installs Playwright; this phase preda
 
 ## Manual
 
-Run against a Neon branch created for the purpose. Get its URL into your shell as
-`$DB_URL` before starting, and delete the branch when finished.
+Run against a Neon branch created for the purpose — create it in the Neon console, which
+`vercel integration open neon` reaches by SSO, and delete it when finished. Steps 4 to 11
+are SQL, run in that branch's **SQL Editor** in the console. Steps 3 and 12 also need its
+connection string, which the console gives you; export it as `$DB_URL` for the commands
+that take one.
+
+Neon's console is the only SQL client this phase needs. No local Postgres install is
+involved.
 
 1. **Environment variables are wired.** Run `vercel env ls`. The Neon connection
    variables appear in development, preview, and production. Run `vercel env pull` and
@@ -73,11 +82,12 @@ Run against a Neon branch created for the purpose. Get its URL into your shell a
    zero.
 2. **A clean clone builds.** In a fresh clone, run `npm ci && npm run typecheck && npm run
    test`. All three pass with no manual `prisma generate` — `postinstall` did it.
-3. **Migrate and seed the branch.** `DATABASE_URL=$DB_URL npx prisma migrate deploy`
-   completes with no error, then `DATABASE_URL=$DB_URL npm run seed` reports the
-   producers and sequestration sites it upserted. `psql "$DB_URL" -c '\dt'` lists
-   `producers`, `sequestration_sites`, and `movements` in snake_case.
-4. **A valid inbound movement is accepted.** In `psql "$DB_URL"`, insert a movement with
+3. **Migrate and seed the branch.** `DATABASE_URL_UNPOOLED=$DB_URL npx prisma migrate
+   deploy` completes with no error, then `DATABASE_URL=$DB_URL npm run seed` reports 6
+   producers and 4 sequestration sites. In the SQL Editor,
+   `SELECT tablename FROM pg_tables WHERE schemaname = 'public';` lists `producers`,
+   `sequestration_sites`, and `movements` in snake_case.
+4. **A valid inbound movement is accepted.** In the SQL Editor, insert a movement with
    `direction = 'INBOUND'`, `weight_kg = 1250.500`, a `producer_id` taken from
    `SELECT id FROM producers LIMIT 1`, and `sequestration_site_id` null. It inserts.
 5. **An inbound movement with a sequestration site is rejected.** Repeat step 4 with
@@ -94,15 +104,24 @@ Run against a Neon branch created for the purpose. Get its URL into your shell a
    row>';`. Postgres raises the trigger's exception and the row is still there.
 10. **The delete backstop holds.** Run `DELETE FROM producers WHERE id = '<the producer
     from step 4>';`. Postgres reports a foreign key violation. No application surface
-    attempts this — Phases 3 and 4 ship no delete — so `psql` is the only place it can be
-    proven.
+    attempts this — Phases 3 and 4 ship no delete — so the SQL Editor is the only place
+    it can be proven.
 11. **Archiving is the removal path.** Run `UPDATE producers SET is_active = false WHERE
     id = '<the producer from step 4>';`. It succeeds, the row remains, and the movement in
     step 4 still resolves to it.
-12. **The preview deployment migrated itself.** Open this pull request's Vercel preview in
-    a signed-in browser and confirm it built green. Its Neon branch holds the migrated
-    tables and no seed data — `\dt` against the preview branch lists the three tables and
-    `SELECT count(*) FROM producers` returns 0.
+12. **The preview deployment built against Neon.** Open this pull request's Vercel preview
+    in a signed-in browser and confirm it built green, and that the build log shows
+    `prisma migrate deploy` running before `next build`.
+
+    Expect it to report **"No pending migrations to apply"**, not "Applying migration".
+    Neon's preview branches are copy-on-write clones of the parent, so a preview branch
+    arrives already carrying the schema and the seed rows — `SELECT count(*) FROM
+    producers;` returns the seeded **6**, not 0. An earlier version of this step expected
+    an empty branch and 0 producers; that was wrong about how Neon branching works.
+
+    This step confirms the deployment reaches Neon and the migration is a no-op against an
+    already-migrated branch. It does **not** prove a migration applies from empty on Neon
+    — `plan.md` § Decisions covers what does, and what is left unguarded.
 13. **Branch protection includes the new job.** Run `gh api
     repos/{owner}/{repo}/branches/main/protection --jq
     '.required_status_checks.contexts'`. It returns `Database` alongside
@@ -128,3 +147,9 @@ migration applied.
 - **Nothing guards the immutability trigger between pull requests.** Steps 8 and 9 prove
   it once. See `plan.md` § Decisions for the choice and § Open questions for when to
   revisit.
+- **Nothing re-proves that migrations apply from empty against Neon.** Proven once by
+  hand; see `plan.md` § Decisions. The cheapest continuous substitute would be a CI step
+  running `prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma`
+  against the Neon database and failing on any drift — which needs the connection string
+  in GitHub Actions secrets rather than a Neon API key, and so is reachable. It proves
+  the Neon schema matches the migrations, not that they apply from empty. Not decided.

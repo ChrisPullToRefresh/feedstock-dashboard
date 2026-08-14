@@ -57,10 +57,13 @@ themselves at build time, so a preview is usable the moment it finishes building
       the database
 - [ ] `UPDATE` and `DELETE` against a movement row raise a Postgres exception
 - [ ] Deleting a producer or sequestration site that a movement references is refused by
-      the database, proven directly in `psql` — no application surface attempts it
+      the database, proven directly in Neon's SQL Editor — no application surface
+      attempts it
 - [ ] `npm run seed` run twice against the same database leaves the same rows
-- [ ] The `Database` CI job creates a fresh Neon branch, migrates, seeds, and deletes the
-      branch, and is a required check on `main`
+- [ ] The `Database` CI job migrates an empty database, seeds it twice with identical row
+      counts, and is a required check on `main`. Migrating from empty *against Neon* is
+      proven once by hand and by no automated check — `plan.md` § Decisions records the
+      gap
 - [ ] `Lint`, `Typecheck`, and `Test` stay green on a clean clone with no manual
       `prisma generate`
 - [ ] Weight parsing, formatting, and totals are covered by Vitest unit tests
@@ -88,8 +91,8 @@ themselves at build time, so a preview is usable the moment it finishes building
 - **TypeScript strict mode** — `specs/tech-stack.md` § Application.
 - **Green CI is a hard merge requirement** and direct pushes to `main` are blocked —
   `specs/tech-stack.md` § CI/CD and § Branching & pull request workflow.
-- **One pull request for this phase** — `specs/tech-stack.md` § Branching & pull request
-  workflow.
+- **One implementation pull request for this phase**, following the spec pull request
+  that merged this folder — `specs/tech-stack.md` § Branching & pull request workflow.
 
 ## Open questions
 

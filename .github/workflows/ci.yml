@@ -101,3 +101,79 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run test
+
+  # Proves specs/roadmap.md Phase 2's Done when line — "migrations run clean
+  # against Neon from a fresh database and seed data loads" — on every pull
+  # request rather than once by hand, and gives Phase 7's E2E runs the
+  # throwaway-database harness it will need.
+  #
+  # The Done when line is proven in two halves, because no one half covers it:
+  # this job applies the checked-in migration to a genuinely empty database and
+  # proves the seed is idempotent, deterministically and on every pull request;
+  # and the Vercel preview deployment applies the same migration to a real Neon
+  # branch of its own, because branch-per-preview is on and vercel-build runs
+  # prisma migrate deploy. See the spec's plan.md § Decisions.
+  database:
+    name: Database
+    runs-on: ubuntu-latest
+
+    # Empty at the start of every run, which is the property being tested.
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: feedstock
+        ports:
+          - 5432:5432
+        # The job must not start querying before Postgres accepts connections.
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      # Both, because prisma.config.ts migrates over the unpooled URL while the
+      # seed connects over DATABASE_URL. There is no pooler here, so they are
+      # the same string.
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/feedstock
+      DATABASE_URL_UNPOOLED: postgresql://postgres:postgres@localhost:5432/feedstock
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+
+      # From empty. A migration that cannot apply to a fresh database is
+      # exactly what should stop a merge.
+      - name: Apply migrations to the empty database
+        run: npx prisma migrate deploy
+
+      # pipefail by hand: GitHub's default shell is `bash -e`, so without it
+      # tee's success would mask a failing seed and this step would go green.
+      - name: Load the seed data
+        run: |
+          set -o pipefail
+          npm run seed | tee first-run.txt
+
+      - name: Seed again and require identical rows
+        run: |
+          set -euo pipefail
+
+          npm run seed | tee second-run.txt
+
+          # The seed reports a count per model. Identical counts across two
+          # runs is what makes it safe to re-run against a shared database.
+          counts() { grep -E '^(producers|sequestration sites) ' "$1"; }
+
+          if ! diff <(counts first-run.txt) <(counts second-run.txt); then
+            echo "::error::Seeding twice changed the row counts — it is not idempotent."
+            exit 1
+          fi
+
+          counts second-run.txt
