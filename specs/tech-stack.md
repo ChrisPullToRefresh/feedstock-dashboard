@@ -111,9 +111,11 @@ sequestration-site logins.
 
 > Work is never committed directly to `main`.
 
-- **Branch naming:** the roadmap phase number plus a short kebab-case description,
-  e.g. `2-schema-and-migrations`. Every branch traces to a numbered phase in
-  `specs/roadmap.md`.
+- **Branch naming:** phase work is the roadmap phase number plus a short kebab-case
+  description, e.g. `2-schema-and-migrations`. Work that implements no roadmap bullet —
+  corrections to shipped phases, agent skills, tooling, dependency bumps — is
+  `maint-<short-kebab-description>`, e.g. `maint-branch-naming`. The number is the audit
+  trail, so never borrow one for work that does not belong to that phase.
 - **Pull requests:** every change goes through a pull request. No exceptions, including
   documentation and configuration edits.
 - **Scope:** one pull request per phase. Every phase in `specs/roadmap.md` ships as
@@ -122,6 +124,11 @@ sequestration-site logins.
   large; the fix is to split the phase in `specs/roadmap.md`, not to split its pull
   request. This keeps a phase's **Done when** line provable in one place, and keeps the
   branch, the spec folder, and the pull request in one-to-one correspondence.
+
+  A maintenance pull request traces to no phase and does not consume a phase's single
+  pull request. It must not carry phase work: a change that implements a roadmap bullet
+  belongs in that phase's pull request. If maintenance keeps accumulating feature work,
+  that work belongs on the roadmap as a phase.
 - **Review:** AI review first — run `/code-review` on the branch and address its findings
   — then the author self-merges. No second human approver is required.
 - **Merge style:** squash merge. `main`'s history is one commit per shipped pull request.
