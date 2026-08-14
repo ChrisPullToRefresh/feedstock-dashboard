@@ -308,9 +308,13 @@ and would have to record the fact somewhere the system does not yet have.
 
 - **Whether build-time migration is right for production.** Carried in
   `requirements.md` § Open questions; belongs to `specs/roadmap.md` Phase 8.
-- **Whether archived rows ever need pruning, and whether an archived name should free
-  itself for reuse.** Both are consequences of soft deletion, and neither has a caller
-  until Phase 3 renders the list. Not worth deciding before there is a screen.
+- **Whether archived rows ever need pruning.** A consequence of soft deletion, with no
+  caller yet. `specs/2026-08-14-producers/requirements.md` § Open questions carries the
+  related question of whether archived producers ever need a screen.
+- ~~**Whether an archived name should free itself for reuse.**~~ Answered by
+  `specs/roadmap.md` Phase 3: it does not. The name stays taken and the archived producer
+  is restored instead — `specs/2026-08-14-producers/plan.md` § Decisions, "A name that
+  collides with an archived producer offers to restore it".
 - **Whether the trigger needs a guard.** The decision above accepts that nothing stops a
   later migration from dropping it. If Phase 7's Playwright harness brings a live test
   database, that is the cheapest moment to add one.

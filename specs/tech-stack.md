@@ -103,10 +103,13 @@ sequestration-site logins.
   2. Typecheck — `tsc --noEmit`
   3. Unit and component tests — Vitest
   4. E2E tests — Playwright. Not installed yet: `specs/roadmap.md` Phase 7 adds the suite
-     and makes the job a required check. Until then the workflow runs the other four.
+     and makes the job a required check. Until then the workflow runs the other five.
   5. Commit convention — the pull request title is checked against Conventional Commits.
      The title is what the squash merge writes onto `main`, so it is the thing worth
      gating; branch commits are squashed away and are not checked.
+  6. Database — added by `specs/roadmap.md` Phase 2. Applies every checked-in migration
+     to an empty Postgres service container, seeds it twice, and fails if the row counts
+     moved. A required check on `main`.
 - **Merge gate:** green CI is a hard requirement. A pull request with any failing check
   does not merge, including a failing E2E job.
 - **Build:** Vercel builds each PR as a preview deployment alongside the Actions run.
