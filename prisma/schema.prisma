@@ -1,0 +1,15 @@
+// The single source of truth for the data model — specs/tech-stack.md § Data.
+// Every schema change ships as a checked-in migration; the database is never
+// edited by hand.
+//
+// Connection URLs live in prisma.config.ts, not here: Prisma 7 removed the
+// datasource `url` and `directUrl` properties from schema files.
+
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}

@@ -5,6 +5,7 @@ coverage/
 node_modules/
 package-lock.json
 next-env.d.ts
+src/generated/
 
 # Prose we do not reflow: the specs are the contract, and the skills are
 # authored documents. Prettier owns application code, not these.
