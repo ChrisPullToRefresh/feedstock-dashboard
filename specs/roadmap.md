@@ -87,6 +87,13 @@ from.
 **Done when:** a producer can be created, edited, listed, and deleted in the deployed app.
 
 - List, create, edit, and delete pages for feedstock producers
+- Narrow the middleware matcher in `src/middleware.ts` before the first dynamic route
+  exists. It currently skips any path whose last segment contains a dot, so with a
+  `/producers/[id]` route in place, `/producers/acme.co` is served to an unauthenticated
+  request — measured at 200 with page content, against `/producers/acme` at 307. Clerk's
+  documented matcher, which excludes a named extension list rather than any dot, closes it
+  and still skips `/favicon.ico`. Pair it with a test over `config.matcher`, which nothing
+  asserts today
 - Form validation with shadcn/ui form components
 - Component tests for the form's validation behavior
 
