@@ -169,9 +169,27 @@ sequestration-site logins.
 - **Cleanup:** merged branches are deleted automatically on the remote. Locally, expect
   `git branch -d` to refuse: a squash merge replays the branch as one new commit, so the
   branch's own commits are never ancestors of `main` and the safety check cannot see them.
-  Confirm nothing is lost first with `git diff <branch> main --stat`, which must come back
-  empty, then delete with `git branch -D`. Never reach for `-D` without that diff — it
-  skips the check that just fired.
+
+  Before forcing the delete, confirm the branch actually merged — and confirm it against
+  the pull request, not against a diff:
+
+  ```bash
+  git fetch origin --prune   # the remote branch disappears when its pull request merges
+  git branch -vv             # the local branch now reads [origin/<branch>: gone]
+  gh pr list --state merged --head <branch> --json number,title,mergedAt
+  git branch -D <branch>
+  ```
+
+  Both signals matter: `: gone` says the remote branch was deleted, and the pull request
+  query says it was deleted *by a merge* rather than abandoned.
+
+  **A diff against `main` does not answer this question.** `git diff <branch> main`
+  compares two tips, so it reports everything `main` has gained since — it comes back
+  non-empty for any branch older than the last merge, whether that branch merged or not.
+  Narrowing it to the files the branch touched fails the same way as soon as a later pull
+  request edits one of them, which is common for `specs/`. An earlier version of this
+  section required that diff to be empty; following it meant either keeping merged
+  branches forever or ignoring the rule, so it is replaced rather than softened.
 
 ## Open questions
 
