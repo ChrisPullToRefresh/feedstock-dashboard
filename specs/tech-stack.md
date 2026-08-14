@@ -65,9 +65,7 @@ sequestration-site logins.
 - **User provisioning:** via the Clerk Backend API — `npm run provision -- <email>`.
   Accounts are created deliberately by someone with access to the Clerk instance, and
   there is no self-service sign-up, which is what internal-staff-only access
-  (`specs/mission.md` § Non-goals) requires. Clerk's invitation flow is not used and has
-  not been tried on this application; adopting it later would be a fresh decision rather
-  than the resumption of one.
+  (`specs/mission.md` § Non-goals) requires.
 - **Roles:** not modeled in v0.1. Every authenticated user can record movements and
   manage reference data.
 

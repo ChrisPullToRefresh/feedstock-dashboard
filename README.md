@@ -45,11 +45,6 @@ There is no sign-up page, and there will not be one. `specs/mission.md`
 § Non-goals limits this to internal staff, so every account is created
 deliberately, by someone who already has access to the Clerk instance.
 
-**Invitations are not used.** Accounts come from the Backend API instead, per
-`specs/tech-stack.md` § Auth. Clerk's invitation flow has not been tried on this
-application — if you want it, that is a fresh decision to make, not a blocked one to
-unblock.
-
 To create one:
 
 ```bash
@@ -74,7 +69,7 @@ provisioned against production cannot sign in to a preview, and vice versa.
 
 A production instance additionally needs a domain with DNS records you control.
 This project has not named one yet, which is tracked in
-`specs/2026-08-13-auth/plan.md` § Open questions and belongs to Phase 5.
+`specs/2026-08-13-auth/plan.md` § Open questions and belongs to Phase 8.
 
 ## Layout
 

@@ -5,11 +5,10 @@ import { randomBytes } from "node:crypto";
  *
  * `specs/tech-stack.md` § Auth makes this the provisioning path, and
  * `specs/mission.md` § Non-goals rules out self-service sign-up, so this script
- * is the only way an account comes into being. Clerk's invitation flow is not
- * used and has not been tried here.
+ * is the only way an account comes into being.
  *
  * The logic lives here rather than in `scripts/` so it can be tested with the
- * Clerk client mocked; `scripts/provision-user.ts` is the thin command line
+ * Clerk client mocked; `scripts/provision-user.mts` is the thin command line
  * around it.
  */
 

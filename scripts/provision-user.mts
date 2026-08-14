@@ -8,8 +8,7 @@ import {
 } from "../src/lib/provision-user.ts";
 
 /**
- * Creates one staff account. See the README for when to run it and why
- * invitations are not used.
+ * Creates one staff account. See the README for when to run it.
  *
  *   npm run provision -- someone@example.com
  *
