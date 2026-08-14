@@ -163,4 +163,11 @@ describe("the Movement model", () => {
   it("maps to the movements table", () => {
     expect(body).toMatch(/@@map\("movements"\)/);
   });
+
+  it.each(["producerId", "sequestrationSiteId"])("indexes %s", (field) => {
+    // Prisma does not index relation scalars on PostgreSQL by itself, so
+    // these are declared rather than inherited — and a dropped one would
+    // only show up as a slow query much later.
+    expect(body).toMatch(new RegExp(String.raw`@@index\(\[${field}\]\)`));
+  });
 });

@@ -43,6 +43,10 @@ describe("parsing an entered weight", () => {
     // The column holds grams; a fourth decimal place would be rounded away
     // silently, so it is refused instead.
     { entered: "1.2345", reason: "too-precise" },
+    // Decimal(12, 3) leaves nine digits before the point. One more overflows
+    // the column, which Postgres would refuse at INSERT.
+    { entered: "1000000000", reason: "too-large" },
+    { entered: "9999999999.999", reason: "too-large" },
   ])("refuses $entered as $reason", ({ entered, reason }) => {
     const result = parseWeightKg(entered);
 
@@ -50,10 +54,15 @@ describe("parsing an entered weight", () => {
     expect(result.ok === false && result.reason).toBe(reason);
   });
 
+  it("accepts the largest weight the column can hold", () => {
+    // The boundary itself is valid — only what exceeds it is refused.
+    expect(parseWeightKg("999999999.999").ok).toBe(true);
+  });
+
   it("tells the rejections apart", () => {
     // The point of separate reasons is that a form can say something
     // different about each, so no two of these may collapse.
-    const reasons = ["", "abc", "-1", "1.2345"].map((entered) => {
+    const reasons = ["", "abc", "-1", "1.2345", "1000000000"].map((entered) => {
       const result = parseWeightKg(entered);
       return result.ok ? "accepted" : result.reason;
     });

@@ -14,12 +14,21 @@ import { Prisma } from "@/generated/prisma/client";
 export const WEIGHT_DECIMAL_PLACES = 3;
 
 /**
+ * The largest weight `Decimal(12, 3)` can hold: twelve digits of precision,
+ * three of them after the point, so nine before it. A weight above this is
+ * refused here rather than by Postgres, which would raise a numeric overflow
+ * at INSERT — a raw failure at the write, well past the form that could have
+ * said something useful about it.
+ */
+export const MAX_WEIGHT_KG = "999999999.999";
+
+/**
  * Why an entered weight was refused. Separate cases rather than one message,
  * so Phase 5's form can say something specific about each without matching on
  * prose.
  */
 export type WeightRejection =
-  "empty" | "not-a-number" | "not-positive" | "too-precise";
+  "empty" | "not-a-number" | "not-positive" | "too-precise" | "too-large";
 
 export type ParsedWeight =
   | { ok: true; weightKg: Prisma.Decimal }
@@ -57,6 +66,10 @@ export function parseWeightKg(input: string): ParsedWeight {
   // movement, and recording one would add a row that every total ignores.
   if (weightKg.lessThanOrEqualTo(0)) {
     return { ok: false, reason: "not-positive" };
+  }
+
+  if (weightKg.greaterThan(MAX_WEIGHT_KG)) {
+    return { ok: false, reason: "too-large" };
   }
 
   return { ok: true, weightKg };

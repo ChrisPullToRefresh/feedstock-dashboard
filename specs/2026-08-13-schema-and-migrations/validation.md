@@ -28,9 +28,9 @@ present, not that it works; steps 4–7 below prove the behavior.
 **Weight** (`src/lib/weight.ts`):
 
 - Whole and fractional kilogram strings parse to the expected `Decimal`
-- Negative, zero, empty, non-numeric, and more-than-three-decimal inputs are rejected,
-  with errors a form can tell apart — see `plan.md` § Decisions for why zero is among
-  them
+- Negative, zero, empty, non-numeric, more-than-three-decimal, and larger-than-the-column
+  inputs are rejected, with errors a form can tell apart — see `plan.md` § Decisions for
+  why zero is among them. `999999999.999` is accepted; one more digit is not
 - Formatting a `Decimal` renders the kilogram string an operator would expect
 
 **Totals** (`src/lib/totals.ts`):

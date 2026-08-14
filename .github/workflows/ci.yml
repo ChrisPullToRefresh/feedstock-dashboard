@@ -154,8 +154,12 @@ jobs:
       - name: Apply migrations to the empty database
         run: npx prisma migrate deploy
 
+      # pipefail by hand: GitHub's default shell is `bash -e`, so without it
+      # tee's success would mask a failing seed and this step would go green.
       - name: Load the seed data
-        run: npm run seed | tee first-run.txt
+        run: |
+          set -o pipefail
+          npm run seed | tee first-run.txt
 
       - name: Seed again and require identical rows
         run: |
