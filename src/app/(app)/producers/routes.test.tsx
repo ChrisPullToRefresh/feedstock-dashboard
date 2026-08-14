@@ -67,3 +67,43 @@ describe("the edit route", () => {
     expect(notFound).toHaveBeenCalled();
   });
 });
+
+const { default: ProducerPage } =
+  await import("@/app/(app)/producers/[id]/page");
+
+describe("the detail route", () => {
+  beforeEach(() => {
+    findProducer.mockReset();
+    notFound.mockClear();
+  });
+
+  it("renders the producer's name", async () => {
+    findProducer.mockResolvedValue({ id: "p1", name: "Cascade Timber Mill" });
+
+    render(await ProducerPage({ params: Promise.resolve({ id: "p1" }) }));
+
+    expect(
+      screen.getByRole("heading", { name: "Cascade Timber Mill" }),
+    ).toBeVisible();
+  });
+
+  it("offers Edit and Archive", async () => {
+    findProducer.mockResolvedValue({ id: "p1", name: "Cascade Timber Mill" });
+
+    render(await ProducerPage({ params: Promise.resolve({ id: "p1" }) }));
+
+    expect(screen.getByRole("link", { name: /edit/i })).toHaveAttribute(
+      "href",
+      "/producers/p1/edit",
+    );
+    expect(screen.getByRole("button", { name: /archive/i })).toBeVisible();
+  });
+
+  it("is a 404 when no such producer exists", async () => {
+    findProducer.mockResolvedValue(null);
+
+    await expect(
+      ProducerPage({ params: Promise.resolve({ id: "missing" }) }),
+    ).rejects.toThrow("NEXT_NOT_FOUND");
+  });
+});
