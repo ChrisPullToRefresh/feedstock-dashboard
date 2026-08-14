@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { archiveProducer } from "@/app/(app)/producers/actions";
+import { ArchiveProducerDialog } from "@/components/archive-producer-dialog";
 import { Button } from "@/components/ui/button";
 import { findProducer } from "@/lib/producers";
 
@@ -31,11 +32,10 @@ export default async function ProducerPage({
           </Link>
         </Button>
 
-        <form action={archiveProducer.bind(null, producer.id)}>
-          <Button type="submit" variant="destructive">
-            Archive
-          </Button>
-        </form>
+        <ArchiveProducerDialog
+          producerName={producer.name}
+          archive={archiveProducer.bind(null, producer.id)}
+        />
       </div>
     </section>
   );
