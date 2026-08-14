@@ -1,14 +1,14 @@
 ---
 name: feature-spec
-description: Scaffold the spec for the next unstarted phase on specs/roadmap.md — a dated specs/ folder holding requirements.md, plan.md, and validation.md — then branch, commit, push, and open a draft pull request gated on CI. Use only when called directly.
+description: Scaffold the spec for the next unstarted phase on specs/roadmap.md — a dated specs/ folder holding requirements.md, plan.md, and validation.md — then branch, commit, push, and open the phase's spec pull request for review. Use only when called directly.
 disable-model-invocation: true
 allowed-tools: Read, Write, Glob, Grep, AskUserQuestion, Bash
 ---
 
 # Feature Spec
 
-Turn the next unstarted phase of `specs/roadmap.md` into a working spec and an open
-draft pull request.
+Turn the next unstarted phase of `specs/roadmap.md` into a working spec and an open pull
+request carrying it.
 
 This skill produces exactly one directory:
 
@@ -16,11 +16,11 @@ This skill produces exactly one directory:
 specs/YYYY-MM-DD-<feature-name>/
 ├── requirements.md   — what we are building this phase and how we know it is right
 ├── plan.md           — the ordered task list, every feature task paired with a test task
-└── validation.md     — how we prove it works before the pull request leaves draft
+└── validation.md     — how we prove it works before the implementation pull request merges
 ```
 
-It does not write application code. It ends with a draft pull request that a later
-session picks up.
+It does not write application code. It ends with a spec pull request that is reviewed and
+merged on its own; `/feature-implement` picks the plan up from `main` afterwards.
 
 ## Core rules
 
@@ -108,15 +108,15 @@ offer it as a way to avoid asking properly.
 Do not pad. A question whose options are all the same work in different words teaches
 the user to skim, and a skimmed question is worse than one you never asked.
 
-- **Scope** (`header: "Scope"`). A spec covers exactly one phase, and that phase ships as
-  exactly one pull request — `specs/tech-stack.md` § Branching & pull request workflow.
-  So this question is not "which slice"; never offer a subset of a phase's bullets or a
-  follow-up spec for the remainder. Ask instead whether the phase you detected is the
-  right one and whether its bullets are still the work: list them back, and offer the
-  alternatives that actually exist — proceed with all of them, or the roadmap needs
-  changing first, because a phase too large for one reviewable pull request is a phase
-  drawn too large, and the fix is to split it in `specs/roadmap.md` before any spec is
-  written.
+- **Scope** (`header: "Scope"`). A spec covers exactly one phase, and that phase
+  implements in exactly one pull request — `specs/tech-stack.md` § Branching & pull
+  request workflow. So this question is not "which slice"; never offer a subset of a
+  phase's bullets or a follow-up spec for the remainder. Ask instead whether the phase you
+  detected is the right one and whether its bullets are still the work: list them back,
+  and offer the alternatives that actually exist — proceed with all of them, or the
+  roadmap needs changing first, because a phase too large for one reviewable
+  implementation is a phase drawn too large, and the fix is to split it in
+  `specs/roadmap.md` before any spec is written.
 
 - **Decisions** (`header: "Decisions"`). One question per open technical choice the
   constitution does not already make — a data-shape question, a library choice inside an
@@ -221,7 +221,8 @@ Numbered steps someone follows on a real device or browser, with the expected
 result after each.
 
 ## CI gate
-The GitHub Actions checks that must be green before this leaves draft.
+The GitHub Actions checks that must be green before the implementation pull request
+merges.
 
 ## Open questions
 ```
@@ -241,10 +242,10 @@ git push -u origin <branch>
 
 Commit messages end with the project's `Co-Authored-By` trailer.
 
-### 7. Open the draft pull request
+### 7. Open the spec pull request
 
 ```bash
-gh pr create --draft --base main --title "Phase <N> — <Feature Name>" --body "<body>"
+gh pr create --base main --title "Phase <N> — <Feature Name>" --body "<body>"
 ```
 
 The body contains: the goal, the phase's bullets, the acceptance criteria as
@@ -255,15 +256,19 @@ invented names.
 If no workflow files exist yet, say so explicitly in the body under **Merge gate**:
 name it as blocked on the phase that adds CI, and do not claim a gate that is not there.
 
-**This draft is the phase's pull request — the only one it gets.** `specs/tech-stack.md`
-§ Branching & pull request workflow gives each phase exactly one, and `/feature-implement`
-works the plan onto this same branch and marks this same pull request ready. Merging it
-before the implementation lands costs the phase its single pull request and forces a
-second one. Say so in the body, so nobody merges it out of tidiness.
+**This is the phase's spec pull request, and it is meant to be merged on its own.**
+`specs/tech-stack.md` § Branching & pull request workflow gives a phase two pull requests
+— the spec, then the implementation — and reserves the one-per-phase rule for the
+implementation. Merging this one settles the plan in `main` before any application code is
+written. Say so in the body: it carries the spec only, and `/feature-implement` opens the
+implementation pull request afterwards on a branch of the same name.
+
+It is not a draft. This skill's output is complete when the three files are written, so
+the pull request is ready for review the moment it opens — `specs/tech-stack.md` § Review
+is the path from there: `/code-review` on the branch, then the author self-merges.
 
 `specs/tech-stack.md` makes green CI a hard merge requirement and blocks direct pushes to
-`main`. The pull request stays **draft** — this skill scaffolds a spec, it does not ship a
-phase. Do not mark it ready, and do not merge.
+`main`. Do not merge it yourself — this skill opens the pull request and stops.
 
 ### 8. Report
 

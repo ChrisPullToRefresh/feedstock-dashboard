@@ -10,8 +10,10 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion, TaskCreate,
 Turn an existing spec into shipped code on its branch.
 
 This skill is the second half of `/feature-spec`. That skill wrote
-`specs/YYYY-MM-DD-<feature-name>/` and opened a draft pull request. This one works the
-plan, proves it, and takes the pull request out of draft.
+`specs/YYYY-MM-DD-<feature-name>/` and shipped it as the phase's spec pull request, which
+is merged before this runs. This one opens the phase's implementation pull request — the
+single one `specs/tech-stack.md` § Branching & pull request workflow allows it — works the
+plan, proves it, and marks it ready.
 
 It reads three files and treats them as binding:
 
@@ -66,16 +68,14 @@ The active spec is the `specs/` folder whose feature name matches the current br
 branch `0-foundation` pairs with `specs/2026-08-12-foundation/`. The branch carries no
 date; the folder does.
 
-- **On a phase branch with a matching folder:** that is the spec. Proceed.
-- **On `main` with an open draft pull request:** check out its head branch and pair it the
-  same way. That draft is the phase's one pull request; the implementation lands on its
-  branch and it is the pull request you take out of draft. If there is more than one
-  draft, ask which with `AskUserQuestion`.
-- **On `main` with the spec already merged and no open pull request:** the phase's pull
-  request was spent on the spec alone, so the implementation cannot join it. Branch from
-  `main` and open a second one — then say plainly in step 9 that this phase took two pull
-  requests against `specs/tech-stack.md` § Branching & pull request workflow, and why.
-  Do not let it pass unremarked; the rule erodes one convenient exception at a time.
+- **On `main` with the spec already merged:** the normal case. `specs/tech-stack.md`
+  § Branching & pull request workflow gives the phase a second pull request for the
+  implementation. Branch from `main` under the same phase-numbered name the spec used —
+  `2-schema-and-migrations` again — and pair it with the dated spec folder by feature name.
+- **On a phase branch with a matching folder:** that is the spec. Proceed on this branch.
+- **On `main` with the spec pull request still open:** the spec has not been reviewed or
+  merged yet. Say so and ask whether to merge it first or to implement on its branch;
+  do not open a third pull request for the phase.
 - **No spec folder for this branch:** stop. Tell the user to run `/feature-spec` first.
   This skill implements a spec; it does not invent one.
 
@@ -160,10 +160,25 @@ Then check `requirements.md` § Acceptance criteria one by one and note, for eac
 thing that proves it: a passing test, a command's output, or a manual step from
 `validation.md`. A criterion with nothing behind it is not met.
 
-### 7. Push and confirm CI
+### 7. Push, open the pull request, and confirm CI
+
+On a branch that has no pull request yet — the normal case, since the spec's was merged
+and this branch is new — push it and open one as a **draft**. It leaves draft in step 8,
+once manual validation passes.
 
 ```bash
-git push
+git push -u origin <branch>
+gh pr create --draft --base main --title "<type>(<scope>): <subject>" --body "<body>"
+```
+
+The title is what the squash merge writes onto `main`, so it follows Conventional Commits
+— `specs/tech-stack.md` § Branching & pull request workflow. The body is the commit body
+you want in the history: the phase, its **Done when** line, the acceptance criteria as
+checkboxes, and a link to the spec folder now in `main`.
+
+If the pull request already exists — you are on the spec's own branch — just push.
+
+```bash
 gh pr checks --watch
 ```
 
@@ -203,10 +218,10 @@ Plain text:
 - Anything you found that contradicts the spec, and anything still parked under
   `## Open questions` in either file.
 
-The phase ships as one pull request — `specs/tech-stack.md` § Branching & pull request
-workflow — so there is no follow-up slice to hand on. A row you could not finish is a
-blocker to report by name, not a remainder for a later pull request, and the phase is not
-done while it stands.
+The phase implements in one pull request — `specs/tech-stack.md` § Branching & pull
+request workflow — so there is no follow-up slice to hand on. A row you could not finish
+is a blocker to report by name, not a remainder for a later pull request, and the phase is
+not done while it stands.
 
 ## Writing style
 
