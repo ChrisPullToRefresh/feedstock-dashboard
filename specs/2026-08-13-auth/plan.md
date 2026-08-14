@@ -36,7 +36,7 @@ costs.
 | 9  | A slim header above `main` inside the `(app)` layout, carrying a right-aligned shadcn Button that calls Clerk's `signOut()` and returns to `/sign-in`. One rendering, not a mobile copy and a desktop copy | RTL test asserting exactly one control with the accessible name "Sign out" renders for a signed-in user, none for a signed-out one, and that clicking it calls `signOut`, with Clerk's hooks mocked |
 | 10 | Clerk publishable and secret keys configured in Vercel for each environment and in `.env.local`, with `.env.local` ignored by git | Manual: `vercel env ls` lists both keys in every environment, `git check-ignore .env.local` exits zero, and the app boots locally against the keys |
 | 11 | A provisioning script that creates a user through the Clerk Backend API, taking an email address and reporting the created user id | Unit test with the Clerk client mocked: a valid email calls `createUser` once with that address; a missing or malformed argument exits non-zero without calling Clerk. Plus one live run creating and then deleting a throwaway user |
-| 12 | `README.md` created — what the app is, how to run it locally, and a provisioning section covering how to run the script, who to run it for, and why invitations are not used | Manual: someone who has not read the script follows the README end to end to create and delete a throwaway user, and gets the app running locally from the same document |
+| 12 | `README.md` created — what the app is, how to run it locally, and a provisioning section covering how to run the script and who to run it for | Manual: someone who has not read the script follows the README end to end to create and delete a throwaway user, and gets the app running locally from the same document |
 | 13 | The initial staff accounts provisioned, including one for Arin | Manual: each account signs in on the pull request's Vercel preview and reaches the app shell |
 
 ## Decisions
@@ -146,9 +146,8 @@ page.
      — development instance to Vercel's development and preview environments, production
      instance to production — and syncs both keys into the project, which is how
      `specs/tech-stack.md` § Data already provisions Neon. The catch: an existing Clerk
-     application cannot be connected to it, so taking this route means a new application,
-     and the open invitations support ticket in `specs/tech-stack.md` § Auth may not
-     follow.
+     application cannot be connected to it, so taking this route means a new
+     application.
      <https://clerk.com/docs/guides/development/integrations/platforms/vercel-marketplace>
 
   **Settled during implementation.** The Vercel Marketplace integration was installed, so

@@ -59,7 +59,7 @@ found too late to ship in Phase 0 — see `specs/2026-08-12-foundation/plan.md`
 - Configure Clerk environment variables in Vercel and locally
 - Write a script that provisions users through the Clerk Backend API
 - Provision the initial staff accounts, including one for Arin
-- Document the provisioning path and why invitations are not used
+- Document the provisioning path
 
 ## Phase 2 — Data model
 

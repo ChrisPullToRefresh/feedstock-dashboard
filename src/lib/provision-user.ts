@@ -3,13 +3,12 @@ import { randomBytes } from "node:crypto";
 /**
  * Account creation for internal staff, through the Clerk Backend API.
  *
- * `specs/tech-stack.md` § Auth records why this exists rather than an
- * invitation: Clerk's invitation flow is broken for this account and a support
- * ticket is open. `specs/mission.md` § Non-goals rules out self-service sign-up,
- * so this script is the only way an account comes into being.
+ * `specs/tech-stack.md` § Auth makes this the provisioning path, and
+ * `specs/mission.md` § Non-goals rules out self-service sign-up, so this script
+ * is the only way an account comes into being.
  *
  * The logic lives here rather than in `scripts/` so it can be tested with the
- * Clerk client mocked; `scripts/provision-user.ts` is the thin command line
+ * Clerk client mocked; `scripts/provision-user.mts` is the thin command line
  * around it.
  */
 

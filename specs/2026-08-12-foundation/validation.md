@@ -25,10 +25,10 @@ by hand below instead.
 
 ## Manual
 
-Run these against the pull request's Vercel preview deployment, not `localhost`. Per
-`specs/tech-stack.md` § Hosting & deployment, the Vercel account and the
-browser-automation Chrome profile are different accounts, so every step here is done by
-a person or via the Vercel CLI — never by browser automation.
+Run these against the pull request's Vercel preview deployment, not `localhost`.
+Preview deployments are SSO-protected, so `curl` receives Vercel's login wall; a
+signed-in browser reaches them, as does the Vercel CLI
+(`specs/tech-stack.md` § Hosting & deployment).
 
 1. Open the pull request on GitHub. **Expect:** a Vercel preview deployment with a URL,
    and a GitHub Actions run listing a lint job, a typecheck job, and a test job.

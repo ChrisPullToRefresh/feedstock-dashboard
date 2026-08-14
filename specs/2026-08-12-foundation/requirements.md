@@ -87,9 +87,9 @@ directly to `main` is rejected.
   (`specs/tech-stack.md` § Hosting & deployment).
 - Work is never committed directly to `main`; branches are the phase number plus a short
   kebab-case description (`specs/tech-stack.md` § Branching & pull request workflow).
-- The Vercel account and the browser-automation Chrome profile are different accounts,
-  so preview deployments cannot be verified by browser automation. They are verified
-  manually or via the Vercel CLI (`specs/tech-stack.md` § Hosting & deployment).
+- Preview deployments are SSO-protected: `curl` receives Vercel's login wall, while a
+  signed-in browser and the Vercel CLI reach them
+  (`specs/tech-stack.md` § Hosting & deployment).
 
 ## Open questions
 

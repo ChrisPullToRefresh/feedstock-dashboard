@@ -10,7 +10,12 @@ Decisions below are binding for v0.1. See `specs/mission.md` for scope and
 - **Styling:** Tailwind CSS. We will never write a raw CSS file. Styling lives in
   Tailwind classes and in the shadcn/ui theme tokens.
 - **Components:** shadcn/ui for all components. If a UI need has a shadcn component, we
-  use it rather than hand-rolling one.
+  use it rather than hand-rolling one. One exception, and it does not generalise: Clerk's
+  own `<SignIn />` renders the sign-in surface, because authentication is a protocol
+  rather than a widget and rebuilding those flows is where it goes subtly wrong. It is
+  themed through Clerk's `appearance` prop from this project's tokens. Everything else
+  around authentication — the sign-out control included — is shadcn. See
+  `specs/2026-08-13-auth/plan.md` § Decisions for the full reasoning.
 - **Icons:** lucide-react, which ships with shadcn/ui.
 - **Font:** Inter, loaded from Google Fonts via `next/font`. Chosen for legibility on
   phones and for tabular numerals, so columns of weights align.
@@ -57,9 +62,10 @@ v0.1 has real authentication. Internal staff only — no external producer or
 sequestration-site logins.
 
 - **Provider:** Clerk, using its Next.js middleware to gate the app.
-- **User provisioning:** via the Clerk Backend API. Clerk's invitation flow is currently
-  broken for this account and a support ticket is open, so we will not depend on
-  invitations until that is resolved.
+- **User provisioning:** via the Clerk Backend API — `npm run provision -- <email>`.
+  Accounts are created deliberately by someone with access to the Clerk instance, and
+  there is no self-service sign-up, which is what internal-staff-only access
+  (`specs/mission.md` § Non-goals) requires.
 - **Roles:** not modeled in v0.1. Every authenticated user can record movements and
   manage reference data.
 
@@ -68,9 +74,12 @@ sequestration-site logins.
 - **Host:** Vercel, under the company-owned Vercel team.
 - **Preview deploys:** every pull request gets a Vercel preview deployment.
 - **Production:** deploys from `main` after a PR merges.
-- **Note for agents:** the Vercel account and the browser-automation Chrome profile are
-  different accounts, so preview deployments cannot be verified via browser automation.
-  Verify previews manually or via the Vercel CLI.
+- **Note for agents:** Vercel, GitHub, and the browser-automation Chrome profile are all
+  the same account — `chris@pulltorefresh.team`. Preview deployments are SSO-protected, so
+  `curl` gets Vercel's login wall, but a signed-in browser reaches them. Verify previews
+  in the browser or via the Vercel CLI. An earlier version of this file said the accounts
+  were separate and ruled out browser automation; that was imported from another project
+  and is no longer true here.
 
 ## Testing
 
@@ -89,7 +98,8 @@ sequestration-site logins.
   1. Lint — ESLint
   2. Typecheck — `tsc --noEmit`
   3. Unit and component tests — Vitest
-  4. E2E tests — Playwright
+  4. E2E tests — Playwright. Not installed yet: `specs/roadmap.md` Phase 7 adds the suite
+     and makes the job a required check. Until then the workflow runs the other four.
   5. Commit convention — the pull request title is checked against Conventional Commits.
      The title is what the squash merge writes onto `main`, so it is the thing worth
      gating; branch commits are squashed away and are not checked.
