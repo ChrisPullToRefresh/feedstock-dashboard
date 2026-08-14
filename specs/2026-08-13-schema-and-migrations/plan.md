@@ -5,19 +5,19 @@ pull request.
 
 | #  | Feature task | Paired test task |
 |----|--------------|------------------|
-| 1  | Neon Postgres provisioned through the Vercel Marketplace, with a database branch per preview deployment, and its connection variables present in every Vercel environment and in `.env.local` | Manual: `vercel env ls` lists the connection variables in development, preview, and production; `vercel env pull` gives a local URL that Prisma connects to; `git check-ignore .env.local` exits zero |
+| 1  | Neon Postgres provisioned through the Vercel Marketplace, with a database branch per preview deployment — Storage → the database → Projects → Update Project Connection, which needs *Require Active Resource Before Deploy* on before *Create Database Branch For Deployment → Preview* can be ticked — and its connection variables present in every Vercel environment and in `.env.local` | Manual: `vercel env ls` lists the connection variables in development, preview, and production; `vercel env pull` gives a local URL that Prisma connects to; `git check-ignore .env.local` exits zero |
 | 2  | Prisma installed, `prisma/schema.prisma` created with its datasource and generator, `prisma.config.ts` created carrying the migrate connection URL and the seed command, and a `postinstall` script running `prisma generate` | Manual: a fresh clone runs `npm ci && npm run typecheck && npm run test` green with no manual generate step |
 | 3  | `Producer` and `SequestrationSite` models — `cuid()` id, a `name` unique within the model, `isActive` defaulting true, `createdAt`, `updatedAt` — with `@@map` and `@map` to snake_case tables and columns | Vitest test reading `prisma/schema.prisma` and asserting, per model: the `cuid()` id, the `@unique` on `name`, `isActive` defaulting true, and the snake_case table and column names |
 | 4  | `Direction` enum and the `Movement` model — `cuid()` id, `direction`, `weightKg` as `Decimal @db.Decimal(12, 3)`, nullable `producerId` and `sequestrationSiteId` relations with `onDelete: Restrict`, `recordedAt` defaulting to `now()` — mapped to snake_case | Vitest test asserting the `Direction` enum's two values, the exact `Decimal(12, 3)` attribute, both relations nullable and `onDelete: Restrict`, `recordedAt` defaulting to `now()`, and the absence of any `updatedAt` on this model |
 | 5  | A check constraint in the initial migration requiring exactly the counterparty that matches `direction`: inbound has a producer and no site, outbound has a site and no producer | Vitest test asserting the checked-in migration SQL still contains the constraint, so a regenerated migration cannot drop it silently. Behavior is proven by `validation.md` § Manual steps 4–7 |
 | 6  | A Postgres trigger in the initial migration raising an exception on `UPDATE` or `DELETE` of a `movements` row | Manual: `validation.md` § Manual steps 8–9 attempt an update and a delete against a seeded movement in Neon's SQL Editor and record the exception each raises |
 | 7  | The initial Prisma migration generated and checked in under `prisma/migrations/`, carrying the check constraint and the trigger | The `Database` CI job (task 13) applies it to a fresh Neon branch on every pull request |
-| 8  | `src/lib/db.ts` exporting a `db` Prisma client singleton, constructed with the Neon driver adapter and cached on `globalThis` so Next's dev server does not open a client per hot reload | Vitest test asserting two imports return the same instance, that the instance is stored on `globalThis` outside production, and that it is not stored there in production |
+| 8  | `src/lib/db.ts` exporting a `db` Prisma client singleton, constructed with the `pg` driver adapter and cached on `globalThis` so Next's dev server does not open a client per hot reload | Vitest test asserting two imports return the same instance, that the instance is stored on `globalThis` outside production, and that it is not stored there in production |
 | 9  | `src/lib/weight.ts` — parse an entered kilogram weight to a `Decimal`, reject invalid input, format a `Decimal` for display | Vitest tests: whole and fractional kilograms parse; negative, zero, zero-length, non-numeric, and more-than-three-decimal inputs are rejected with a distinguishable error; formatting a `Decimal` renders the kilogram string an operator would expect |
 | 10 | `src/lib/totals.ts` — pure functions over arrays of movement records returning inbound total, outbound total, total by producer, and total by sequestration site | Vitest tests: an empty array totals zero; mixed directions are separated correctly; grouping keys off the counterparty that matches each movement's direction; summing values that would drift as binary floats stays exact |
 | 11 | `prisma/seed.ts` upserting a realistic set of feedstock producers and sequestration sites on `name`, wired to `npm run seed` | The `Database` CI job runs the seed twice against the fresh branch and asserts the row counts are identical after each run |
 | 12 | A `vercel-build` script running `prisma migrate deploy` before `next build` | Manual: this pull request's Vercel preview deploys green, and its Neon branch holds the migrated tables and no seed data |
-| 13 | A `Database` job in `.github/workflows/ci.yml` that creates a Neon branch named for the run, applies migrations, seeds twice, and deletes the branch in an `if: always()` step, using a Neon API key and project id held in GitHub Actions secrets | The job's own run on this pull request, green — and one deliberately failing run confirming the branch is still deleted |
+| 13 | A `Database` job in `.github/workflows/ci.yml` that applies migrations to an empty Postgres service container and seeds it twice, requiring identical row counts. The Neon half of the **Done when** line is proven by the preview deployment, which migrates its own empty Neon branch — see § Decisions | The job's own run on this pull request, green — and the preview deployment's build log showing `prisma migrate deploy` applying to its Neon branch |
 | 14 | `Database` added to `main`'s required status checks | Manual: `gh api repos/{owner}/{repo}/branches/main/protection --jq '.required_status_checks.contexts'` returns it alongside `Commit convention`, `Lint`, `Typecheck`, and `Test` |
 
 ## Decisions
@@ -183,26 +183,48 @@ diff, drifting whenever someone edits the schema without regenerating.
 The cost accepted: every install pays the generation time, and a broken schema fails at
 install rather than at a named step.
 
-**A required `Database` CI job proves the Done-when line, on a Neon branch it creates
-and deletes itself.**
+**A required `Database` CI job proves the Done-when line, and the preview deployment
+proves the Neon half.**
 
 `specs/roadmap.md` Phase 2's **Done when** is "migrations run clean against Neon from a
-fresh database and seed data loads". A job that creates a branch per run, migrates,
-seeds, and tears down proves exactly that, on every pull request rather than once by
-hand — and it is the harness Phase 7's E2E runs will need.
+fresh database and seed data loads". That is two claims — the migration applies to an
+empty database and the seed loads, and it happens against Neon — and they are proven
+separately, because nothing available proves both at once.
 
-A one-off manual run was offered and rejected; so was a long-lived `ci` branch, which
-concurrent pull requests would collide on, and a Postgres service container, which would
-not prove anything about Neon. The job is a required check on `main`, because
-`specs/tech-stack.md` § CI/CD makes green CI a hard merge requirement and a migration
-that will not apply is exactly what should block a merge. A `paths` filter was rejected:
-GitHub treats a skipped required check as pending, so it would block the merge button on
-documentation pull requests rather than speed them up.
+The `Database` job applies the checked-in migration to an empty Postgres service
+container, seeds it, seeds it again, and fails if the row counts moved. Deterministic,
+free, and on every pull request. The Vercel preview deployment covers Neon: with
+branch-per-preview enabled, each pull request gets its own empty Neon branch, and
+`vercel-build` runs `prisma migrate deploy` against it before building. A migration that
+will not apply to Neon fails the deployment.
 
-The cost accepted: a Neon API key and project id in GitHub Actions secrets; every pull
-request, including documentation-only ones, waits on a branch being created and torn
-down; and a runner killed mid-job can leak a branch, which is why the delete step is
-`if: always()` and why task 13 tests a failing run.
+This decision was rewritten during implementation and replaces the original, which had
+the job create and delete a Neon branch per run through the Neon API. That needed a Neon
+API key, and the key could not be obtained: the project is Vercel-managed, so the console
+is the only place to mint one, and the account-link flow that grants console access
+failed repeatedly. Neon's own documentation notes that `neon auth` does not work for
+Vercel-managed accounts and CLI access requires an API key, which leaves no way to
+bootstrap one. Waiting on Neon support was offered and declined; shipping with the job
+unverified was offered and declined.
+
+The rewrite is not purely a concession. The original decision rejected a service
+container as proving "nothing about Neon", and that reasoning predated preview branching
+being switched on — the preview deployment now provides the Neon evidence the container
+cannot. It also removes a credential from CI, and a class of failure where a killed
+runner leaks a branch.
+
+A long-lived `ci` branch was rejected, as before, because concurrent pull requests would
+collide on it. The job stays a required check on `main`, because `specs/tech-stack.md`
+§ CI/CD makes green CI a hard merge requirement and a migration that will not apply is
+exactly what should block a merge. A `paths` filter was rejected: GitHub treats a skipped
+required check as pending, so it would block the merge button on documentation pull
+requests rather than speed them up.
+
+The cost accepted, and stated plainly: no single check proves the **Done when** line
+end to end. If preview deployments stop running, or branch-per-preview is switched off,
+the Neon half goes unproven and nothing turns red to say so. The container also runs
+stock Postgres rather than Neon's build, so a divergence between them would surface in
+the preview deployment rather than in CI.
 
 **The immutability trigger is proven by hand, once.**
 
@@ -229,7 +251,7 @@ preview would have an empty database.
 The cost accepted: a failed migration fails the deployment, and production migrations run
 at build time. `requirements.md` § Open questions carries that to Phase 8.
 
-**Prisma 7, with connection URLs in `prisma.config.ts` and a Neon driver adapter.**
+**Prisma 7, with connection URLs in `prisma.config.ts` and a driver adapter.**
 
 Raised during implementation. This spec was written against Prisma 6's shape, and the
 current major changes three things it assumed. `datasource` no longer accepts `url` or
@@ -242,14 +264,18 @@ Pinning Prisma 6 to keep the spec literally true was offered and declined, as wa
 stopping to amend the spec before writing any code. The user's answer was to build on 7
 and record the shape here.
 
-`@prisma/adapter-neon` is the adapter rather than `@prisma/adapter-pg`, because the
-pooled `DATABASE_URL` runs PgBouncer in transaction mode and Neon's own driver is built
-for that; node-postgres over a transaction pooler has prepared-statement sharp edges.
-Migrations keep using the unpooled URL, which is what `prisma.config.ts` carries.
+`@prisma/adapter-pg` is the adapter. `@prisma/adapter-neon` was tried first, on the
+reasoning that the pooled `DATABASE_URL` runs PgBouncer in transaction mode and Neon's
+own driver is built for it. It was replaced once the `Database` job stopped using Neon
+(see the decision below): Neon's serverless driver speaks Neon's protocol and cannot
+reach a stock Postgres, so CI would have had to construct its client differently from
+the application's — testing something other than what ships. node-postgres sends unnamed
+statements, so transaction pooling has nothing to trip over. Migrations keep using the
+unpooled URL, which is what `prisma.config.ts` carries.
 
 The cost accepted: two files hold what one used to — the schema no longer tells you what
-it connects to — and the client carries a dependency on a specific database vendor's
-driver, which a move off Neon would have to replace.
+it connects to — and the pooled connection is used through a general-purpose driver
+rather than one tuned for this vendor.
 
 **A weight of zero is refused, not stored.**
 

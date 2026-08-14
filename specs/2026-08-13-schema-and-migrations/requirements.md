@@ -60,8 +60,10 @@ themselves at build time, so a preview is usable the moment it finishes building
       the database, proven directly in Neon's SQL Editor — no application surface
       attempts it
 - [ ] `npm run seed` run twice against the same database leaves the same rows
-- [ ] The `Database` CI job creates a fresh Neon branch, migrates, seeds, and deletes the
-      branch, and is a required check on `main`
+- [ ] The `Database` CI job migrates an empty database, seeds it twice with identical row
+      counts, and is a required check on `main`; and the preview deployment migrates its
+      own empty Neon branch — together these prove the **Done when** line, per
+      `plan.md` § Decisions
 - [ ] `Lint`, `Typecheck`, and `Test` stay green on a clean clone with no manual
       `prisma generate`
 - [ ] Weight parsing, formatting, and totals are covered by Vitest unit tests

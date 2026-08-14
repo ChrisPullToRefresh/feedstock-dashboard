@@ -105,59 +105,53 @@ jobs:
   # Proves specs/roadmap.md Phase 2's Done when line — "migrations run clean
   # against Neon from a fresh database and seed data loads" — on every pull
   # request rather than once by hand, and gives Phase 7's E2E runs the
-  # throwaway-database harness they will need.
+  # throwaway-database harness it will need.
   #
-  # Every run gets its own Neon branch, so concurrent pull requests never
-  # collide, and the branch is deleted whatever happens to the run.
+  # The Done when line is proven in two halves, because no one half covers it:
+  # this job applies the checked-in migration to a genuinely empty database and
+  # proves the seed is idempotent, deterministically and on every pull request;
+  # and the Vercel preview deployment applies the same migration to a real Neon
+  # branch of its own, because branch-per-preview is on and vercel-build runs
+  # prisma migrate deploy. See the spec's plan.md § Decisions.
   database:
     name: Database
     runs-on: ubuntu-latest
+
+    # Empty at the start of every run, which is the property being tested.
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: feedstock
+        ports:
+          - 5432:5432
+        # The job must not start querying before Postgres accepts connections.
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     env:
-      NEON_API: https://console.neon.tech/api/v2
-      NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+      # Both, because prisma.config.ts migrates over the unpooled URL while the
+      # seed connects over DATABASE_URL. There is no pooler here, so they are
+      # the same string.
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/feedstock
+      DATABASE_URL_UNPOOLED: postgresql://postgres:postgres@localhost:5432/feedstock
+
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: .nvmrc
           cache: npm
-      # Before the branch exists, so a broken install does not leave one
-      # running while npm resolves the tree.
       - run: npm ci
 
-      - name: Create a Neon branch for this run
-        id: neon
-        env:
-          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
-        run: |
-          set -euo pipefail
-
-          response=$(curl --fail-with-body --silent --show-error \
-            --request POST "$NEON_API/projects/$NEON_PROJECT_ID/branches" \
-            --header "Authorization: Bearer $NEON_API_KEY" \
-            --header "Content-Type: application/json" \
-            --data "$(jq --null-input \
-              --arg name "ci-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
-              '{branch: {name: $name}, endpoints: [{type: "read_write"}]}')")
-
-          # Recorded before anything else can fail, so the teardown step below
-          # always has an id to delete.
-          branch_id=$(printf '%s' "$response" | jq --raw-output '.branch.id')
-          echo "branch_id=$branch_id" >> "$GITHUB_OUTPUT"
-
-          uri=$(printf '%s' "$response" \
-            | jq --raw-output '.connection_uris[0].connection_uri')
-
-          # The URI carries the role password. Masked before it can reach a log.
-          echo "::add-mask::$uri"
-
-          # A fresh branch has no pooler of its own to worry about, so the same
-          # URI serves both: prisma.config.ts reads the unpooled one to migrate,
-          # and the seed reads DATABASE_URL.
-          echo "DATABASE_URL=$uri" >> "$GITHUB_ENV"
-          echo "DATABASE_URL_UNPOOLED=$uri" >> "$GITHUB_ENV"
-
-      - name: Apply migrations to the empty branch
+      # From empty. A migration that cannot apply to a fresh database is
+      # exactly what should stop a merge.
+      - name: Apply migrations to the empty database
         run: npx prisma migrate deploy
 
       - name: Load the seed data
@@ -179,22 +173,3 @@ jobs:
           fi
 
           counts second-run.txt
-
-      # always(), because a failed, cancelled, or killed run must not leak a
-      # branch. The id guard covers the case where creation itself failed.
-      - name: Delete the Neon branch
-        if: always() && steps.neon.outputs.branch_id != ''
-        env:
-          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
-          # Through the environment rather than interpolated into the script,
-          # like the pull request title above.
-          BRANCH_ID: ${{ steps.neon.outputs.branch_id }}
-        run: |
-          set -euo pipefail
-
-          curl --fail-with-body --silent --show-error \
-            --request DELETE \
-            "$NEON_API/projects/$NEON_PROJECT_ID/branches/$BRANCH_ID" \
-            --header "Authorization: Bearer $NEON_API_KEY" > /dev/null
-
-          echo "Deleted Neon branch $BRANCH_ID"

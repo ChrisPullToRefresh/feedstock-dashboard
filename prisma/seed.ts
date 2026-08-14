@@ -1,4 +1,4 @@
-import { PrismaNeon } from "@prisma/adapter-neon";
+import { PrismaPg } from "@prisma/adapter-pg";
 
 import { PrismaClient } from "../src/generated/prisma/client.ts";
 
@@ -47,7 +47,7 @@ async function main(): Promise<void> {
   }
 
   const db = new PrismaClient({
-    adapter: new PrismaNeon({ connectionString }),
+    adapter: new PrismaPg({ connectionString }),
   });
 
   try {

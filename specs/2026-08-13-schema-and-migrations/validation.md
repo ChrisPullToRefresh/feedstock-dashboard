@@ -43,23 +43,23 @@ present, not that it works; steps 4–7 below prove the behavior.
 
 **Client singleton** (`src/lib/db.ts`) — a second evaluation of the module returns the
 same instance, that instance is cached on `globalThis` outside production, and it is not
-cached there in production. The client is constructed with the Neon driver adapter, which
+cached there in production. The client is constructed with the `pg` driver adapter, which
 Prisma 7 requires — `plan.md` § Decisions.
 
 ### Database (GitHub Actions, `Database` job)
 
-On every pull request, the job:
+On every pull request, against a Postgres service container that starts empty:
 
-1. Creates a Neon branch named for the workflow run
-2. Runs `prisma migrate deploy` against it from empty — this is the phase's **Done when**
+1. Runs `prisma migrate deploy` from empty — half of the phase's **Done when**
    condition, proven per pull request rather than once
-3. Runs `npm run seed`, then records the row counts
-4. Runs `npm run seed` a second time and asserts the row counts are unchanged
-5. Deletes the branch in an `if: always()` step, so a failed or cancelled run does not
-   leak it
+2. Runs `npm run seed`, then records the row counts
+3. Runs `npm run seed` a second time and fails if the row counts moved
 
-The teardown is verified once during implementation by forcing a failing run and
-confirming the branch is still deleted.
+The other half — that it works *against Neon* — is proven by the Vercel preview
+deployment, which migrates its own empty Neon branch at build time because
+branch-per-preview is enabled and `vercel-build` runs `prisma migrate deploy`. Neither
+check covers the whole line on its own; `plan.md` § Decisions records why, and what that
+costs.
 
 ### End-to-end (Playwright)
 
