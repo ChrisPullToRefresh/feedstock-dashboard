@@ -71,3 +71,25 @@ ALTER TABLE "movements" ADD CONSTRAINT "movements_counterparty_matches_direction
         AND "producer_id" IS NULL
     )
 );
+
+-- Movements are append-only. specs/mission.md § Constraints: "a mistake is
+-- corrected by recording a new adjusting entry, never by editing or deleting
+-- history". Enforced here rather than remembered, so no application code path
+-- and no hand-run statement in psql can rewrite the record.
+--
+-- Nothing guards this trigger between pull requests — plan.md § Decisions
+-- accepts that deliberately, and validation.md § Manual steps 8-9 prove it
+-- once by hand.
+CREATE OR REPLACE FUNCTION "reject_movement_mutation"() RETURNS TRIGGER AS $$
+BEGIN
+    RAISE EXCEPTION
+        'movements are append-only: % is not permitted. Record an adjusting entry instead.',
+        TG_OP
+        USING ERRCODE = 'restrict_violation';
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER "movements_are_append_only"
+    BEFORE UPDATE OR DELETE ON "movements"
+    FOR EACH ROW
+    EXECUTE FUNCTION "reject_movement_mutation"();
