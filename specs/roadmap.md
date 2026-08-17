@@ -89,7 +89,7 @@ from.
 - List, create, edit, and archive pages for feedstock producers. Deletion is soft:
   archiving clears `isActive`, which drops the producer from the inbound dropdown while
   its record and its movement history stay intact. Nothing removes a producer row
-- Narrow the middleware matcher in `src/middleware.ts` before the first dynamic route
+- Narrow the route matcher in `src/proxy.ts` before the first dynamic route
   exists. It currently skips any path whose last segment contains a dot, so with a
   `/producers/[id]` route in place, `/producers/acme.co` is served to an unauthenticated
   request — measured at 200 with page content, against `/producers/acme` at 307. Clerk's
@@ -97,7 +97,7 @@ from.
   starting point, and it still skips `/favicon.ico`. It is not sufficient on its own:
   Phase 3 found that without a trailing `$` anchoring the extension to the end of the
   path, `/producers/x.svg/edit` is skipped and served with no session — the same hole in
-  a new place. `src/middleware.ts` carries the anchor and `src/middleware.test.ts` pins
+  a new place. `src/proxy.ts` carries the anchor and `src/proxy.test.ts` pins
   it. Pair it with a test over `config.matcher`, which nothing asserts today
 - Form validation with shadcn/ui's Field components. `@shadcn/form` resolves to an empty
   stub under this project's `radix-nova` style, so Field is the form primitive here and

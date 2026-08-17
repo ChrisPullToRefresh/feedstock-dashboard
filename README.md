@@ -78,7 +78,7 @@ src/app/(app)/     Everything behind authentication — renders inside the shell
 src/app/sign-in/   Outside the group, so it renders without navigation
 src/components/    Shell, sign-out control, and shadcn/ui components under ui/
 src/lib/           Navigation, route rules, provisioning, helpers
-src/middleware.ts  The gate: everything is protected except the public list
+src/proxy.ts       The gate: everything is protected except the public list
 scripts/           Operational commands, run by hand
 specs/             Mission, tech stack, roadmap, and one folder per phase
 ```
@@ -90,8 +90,10 @@ phase is therefore protected the moment it exists.
 ## Contributing
 
 `specs/tech-stack.md` § Branching & pull request workflow is binding. In short:
-never commit to `main`; one pull request per roadmap phase, on a branch named
-for the phase number; anything implementing no roadmap bullet goes on a
-`maint-` branch instead and does not count against a phase; Conventional
-Commits for every commit message and every pull request title — the title is
-what a squash merge writes onto `main`, and CI checks it.
+never commit to `main`; a phase ships in two pull requests, its spec then its
+implementation, both on a branch named for the phase number, and it is the
+implementation the one-per-phase rule governs; anything implementing no
+roadmap bullet goes on a `maint-` branch instead and does not count against a
+phase; Conventional Commits for every commit message and every pull request
+title — the title is what a squash merge writes onto `main`, and CI checks
+it.

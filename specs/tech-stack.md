@@ -81,9 +81,7 @@ sequestration-site logins.
 - **Note for agents:** Vercel, GitHub, and the browser-automation Chrome profile are all
   the same account — `chris@pulltorefresh.team`. Preview deployments are SSO-protected, so
   `curl` gets Vercel's login wall, but a signed-in browser reaches them. Verify previews
-  in the browser or via the Vercel CLI. An earlier version of this file said the accounts
-  were separate and ruled out browser automation; that was imported from another project
-  and is no longer true here.
+  in the browser or via the Vercel CLI.
 
 ## Testing
 

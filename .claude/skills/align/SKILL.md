@@ -68,8 +68,13 @@ ls -d specs/*/ 2>/dev/null
 ```
 
 Read `specs/mission.md`, `specs/tech-stack.md`, and `specs/roadmap.md` in full, then
-every `requirements.md`, `plan.md`, and `validation.md` under each dated folder. If the
-constitution is missing, stop and tell the user to run `/create-constitution`.
+every `requirements.md`, `plan.md`, and `validation.md` under each dated folder, then
+`README.md`. If the constitution is missing, stop and tell the user to run
+`/create-constitution`.
+
+`README.md` describes the repository as it is today and restates parts of the
+constitution, so it goes stale in both directions — a renamed file in its layout block,
+or a workflow rule the constitution has since changed.
 
 Read them completely before forming any finding. Most apparent contradictions dissolve in
 a sentence two paragraphs further down.
@@ -163,7 +168,7 @@ Only if the user chose at least one edit. Never branch from a dirty tree — if
 ```bash
 git checkout main && git pull --ff-only
 git checkout -b <phase-number>-<short-kebab-description>
-git add specs/
+git add specs/ README.md
 git commit
 git push -u origin <branch>
 gh pr create --base main
@@ -172,7 +177,7 @@ gh pr create --base main
 Branch naming, commit format, and pull request titles all come from
 `specs/tech-stack.md` § Branching & pull request workflow — read it rather than assuming,
 because it is one of the files this skill audits and it may have changed. Commit only the
-spec files this run touched.
+files this run touched.
 
 Do not merge.
 

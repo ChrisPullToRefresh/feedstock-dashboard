@@ -158,5 +158,5 @@ page.
   throwaway, and Arin gets a second one in Phase 8.
 
   Still open, and not this phase's to close: **no production domain is named**, so there is
-  no path to a Clerk production instance. It belongs in `specs/tech-stack.md` § Hosting &
-  deployment rather than here, because Phase 8's production promotion depends on it too.
+  no path to a Clerk production instance. `specs/roadmap.md` Phase 8 carries it, because
+  that is where production promotion depends on it.
