@@ -1,5 +1,6 @@
 import { createProducer, restoreProducer } from "@/app/(app)/producers/actions";
-import { ProducerForm } from "@/components/producer-form";
+import { ReferenceForm } from "@/components/reference-form";
+import { PRODUCER_SINGULAR } from "@/lib/reference-data";
 
 export default function NewProducerPage() {
   return (
@@ -7,7 +8,8 @@ export default function NewProducerPage() {
       <h1 className="mb-6 text-2xl font-semibold tracking-tight">
         Add producer
       </h1>
-      <ProducerForm
+      <ReferenceForm
+        singular={PRODUCER_SINGULAR}
         action={createProducer}
         restore={restoreProducer}
         submitLabel="Create producer"

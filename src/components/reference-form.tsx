@@ -1,44 +1,52 @@
 "use client";
 
-import { useActionState, useId, useState } from "react";
+import { useActionState, useId, useMemo, useState } from "react";
 
-import type { ProducerFormState } from "@/app/(app)/producers/actions";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { PRODUCER_NAME_MAX_LENGTH, producerSchema } from "@/lib/producers";
+import {
+  REFERENCE_NAME_MAX_LENGTH,
+  referenceSchema,
+  type ReferenceFormAction,
+  type ReferenceFormState,
+} from "@/lib/reference-data";
 
 /**
- * Defined here rather than exported from the actions module: a "use server"
+ * Defined here rather than exported from an actions module: a "use server"
  * file may only export async functions, so a shared constant object there
  * fails the build.
  */
-const IDLE: ProducerFormState = { status: "idle" };
-
-export type ProducerFormAction = (
-  state: ProducerFormState,
-  formData: FormData,
-) => Promise<ProducerFormState>;
+const IDLE: ReferenceFormState = { status: "idle" };
 
 /**
- * The one form behind both creating and renaming a producer.
+ * The one form behind creating and renaming both producers and sequestration
+ * sites.
  *
- * Validation runs twice on purpose — `plan.md` § Decisions. Here it is for
- * immediate feedback, so an obvious mistake never costs a round trip on a
- * phone at the scale; the Server Action runs the same schema again, because
- * that is the copy an attacker cannot skip.
+ * Generalized in Phase 4 rather than copied —
+ * `specs/2026-08-16-sequestration-sites/plan.md` § Decisions. It takes
+ * individual props rather than a per-entity config object, so the words stay
+ * next to the screen they appear on and TypeScript catches a missing one.
+ *
+ * Validation runs twice on purpose. Here it is for immediate feedback, so an
+ * obvious mistake never costs a round trip on a phone at the scale; the Server
+ * Action runs the same schema again, because that is the copy an attacker
+ * cannot skip.
  */
-export function ProducerForm({
+export function ReferenceForm({
+  singular,
   action,
   restore,
   defaultName = "",
   submitLabel,
 }: {
-  action: ProducerFormAction;
+  /** What a refusal calls the thing — "producer", "sequestration site". */
+  singular: string;
+  action: ReferenceFormAction;
   /**
-   * Brings an archived producer back. The form only ever offers this when the
+   * Brings an archived row back. The form only ever offers this when the
    * action reports the name belongs to one — which is the only route to an
-   * archived producer, since no screen lists them.
+   * archived row, since no screen lists them.
    */
   restore: (id: string) => Promise<void>;
   defaultName?: string;
@@ -48,6 +56,11 @@ export function ProducerForm({
   const [clientError, setClientError] = useState<string | null>(null);
   const [name, setName] = useState(defaultName);
   const nameId = useId();
+
+  // The schema carries the entity's words in its messages, so it is built from
+  // the label rather than passed in beside it — one prop that cannot disagree
+  // with itself.
+  const schema = useMemo(() => referenceSchema(singular), [singular]);
 
   // React 19 resets an uncontrolled form once its action settles, which on
   // every refusal wiped what the operator had typed — on the edit route it
@@ -72,7 +85,7 @@ export function ProducerForm({
    * submission to the action, and an awaited check would be too late.
    */
   function checkBeforeSubmit(event: React.FormEvent<HTMLFormElement>) {
-    const parsed = producerSchema.safeParse({
+    const parsed = schema.safeParse({
       name: new FormData(event.currentTarget).get("name"),
     });
 
@@ -82,7 +95,9 @@ export function ProducerForm({
     }
 
     event.preventDefault();
-    setClientError(parsed.error.issues[0]?.message ?? "Enter a producer name");
+    setClientError(
+      parsed.error.issues[0]?.message ?? `Enter a ${singular} name`,
+    );
   }
 
   const message =
@@ -104,7 +119,7 @@ export function ProducerForm({
             onChange={(event) => setName(event.target.value)}
             // Long enough to be a real limit, short enough that the browser
             // stops the paste before the schema has to explain it.
-            maxLength={PRODUCER_NAME_MAX_LENGTH}
+            maxLength={REFERENCE_NAME_MAX_LENGTH}
             autoComplete="off"
             aria-invalid={message ? true : undefined}
             aria-describedby={message ? `${nameId}-error` : undefined}
@@ -126,7 +141,7 @@ export function ProducerForm({
         <div role="alert" className="rounded-md border p-4 text-sm">
           <p>
             <span className="font-medium">{state.name}</span> is archived. That
-            name is still taken, so it cannot be used for a new producer —
+            name is still taken, so it cannot be used for a new {singular} —
             restoring brings the original back with its movement history
             attached.
           </p>

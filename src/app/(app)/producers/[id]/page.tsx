@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { archiveProducer } from "@/app/(app)/producers/actions";
-import { ArchiveProducerDialog } from "@/components/archive-producer-dialog";
+import { ArchiveDialog } from "@/components/archive-dialog";
 import { Button } from "@/components/ui/button";
 import { findProducer } from "@/lib/producer-queries";
 
@@ -32,8 +32,10 @@ export default async function ProducerPage({
           </Link>
         </Button>
 
-        <ArchiveProducerDialog
-          producerName={producer.name}
+        <ArchiveDialog
+          name={producer.name}
+          description="It stops appearing in the producers list and in the inbound movement dropdown. Its record and its movement history stay intact, and nothing is deleted."
+          confirmLabel="Archive producer"
           archive={archiveProducer.bind(null, producer.id)}
         />
       </div>

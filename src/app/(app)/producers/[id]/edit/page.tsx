@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 
 import { renameProducer, restoreProducer } from "@/app/(app)/producers/actions";
-import { ProducerForm } from "@/components/producer-form";
+import { ReferenceForm } from "@/components/reference-form";
 import { findProducer } from "@/lib/producer-queries";
+import { PRODUCER_SINGULAR } from "@/lib/reference-data";
 
 export default async function EditProducerPage({
   params,
@@ -21,7 +22,8 @@ export default async function EditProducerPage({
       <h1 className="mb-6 text-2xl font-semibold tracking-tight">
         Edit producer
       </h1>
-      <ProducerForm
+      <ReferenceForm
+        singular={PRODUCER_SINGULAR}
         // Bound rather than passed through a hidden field: the id decides which
         // row is written, so it must not be something the browser can change.
         action={renameProducer.bind(null, producer.id)}

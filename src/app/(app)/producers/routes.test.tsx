@@ -1,5 +1,8 @@
 import { render, screen } from "@testing-library/react";
+import { isValidElement, type ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { ReferenceForm } from "@/components/reference-form";
 
 const findProducer = vi.fn();
 
@@ -18,6 +21,24 @@ const { default: NewProducerPage } =
   await import("@/app/(app)/producers/new/page");
 const { default: EditProducerPage } =
   await import("@/app/(app)/producers/[id]/edit/page");
+const { createProducer, restoreProducer } =
+  await import("@/app/(app)/producers/actions");
+
+/** The ReferenceForm element a route returned, wherever it sits in the tree. */
+function findForm(node: ReactNode): Record<string, unknown> | null {
+  if (Array.isArray(node)) {
+    for (const child of node) {
+      const found = findForm(child);
+      if (found) return found;
+    }
+    return null;
+  }
+
+  if (!isValidElement(node)) return null;
+  if (node.type === ReferenceForm) return node.props as Record<string, unknown>;
+
+  return findForm((node.props as { children?: ReactNode }).children);
+}
 
 /*
  * Both routes render the same form; what differs is which action it is bound
@@ -32,6 +53,17 @@ describe("the create route", () => {
     expect(
       screen.getByRole("button", { name: "Create producer" }),
     ).toBeVisible();
+  });
+
+  it("hands the form both the create action and the restore path", () => {
+    // The mirror of the same assertion on /sites/new. The restore offer is the
+    // only route back to an archived producer, and the form's own tests supply
+    // a stub restore action, so a route that dropped the prop would pass
+    // everything and fail first in front of a person.
+    const props = findForm(NewProducerPage());
+
+    expect(props?.action).toBe(createProducer);
+    expect(props?.restore).toBe(restoreProducer);
   });
 });
 

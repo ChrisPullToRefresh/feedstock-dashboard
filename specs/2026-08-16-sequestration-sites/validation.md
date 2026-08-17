@@ -60,9 +60,13 @@ one suite proves the new surface and guards the refactor of the shipped one.
 
 **The producer routes**, unchanged from Phase 3 and re-run against the refactor:
 
-- `src/app/(app)/producers/routes.test.tsx` and `src/app/(app)/producers/list-page.test.tsx`
-  pass with their assertions unchanged. An assertion that has to be edited to pass is a
-  behavior change, not a refactor, and needs explaining in the pull request
+- `src/app/(app)/producers/routes.test.tsx` passes with its assertions unchanged
+- `src/app/(app)/producers/list-page.test.tsx` passes with its producer assertions
+  unchanged. Its one edit is the list of routes that still render `PlaceholderPage`:
+  `/sites` leaves it, because the task 10 row above is what makes that false, and `/`
+  takes its place
+- Any other edited assertion is a behavior change, not a refactor, and needs explaining in
+  the pull request
 
 **Migration shape** — `src/test/prisma-migration.test.ts` extended to assert both
 case-insensitive indexes are still present in the checked-in SQL: producers' from Phase 3
