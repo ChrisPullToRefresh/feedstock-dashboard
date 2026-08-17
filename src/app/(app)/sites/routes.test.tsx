@@ -1,5 +1,8 @@
 import { render, screen } from "@testing-library/react";
+import { isValidElement, type ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { ReferenceForm } from "@/components/reference-form";
 
 const findSite = vi.fn();
 
@@ -17,6 +20,23 @@ vi.mock("next/navigation", () => ({ notFound: () => notFound() }));
 const { default: NewSitePage } = await import("@/app/(app)/sites/new/page");
 const { default: EditSitePage } =
   await import("@/app/(app)/sites/[id]/edit/page");
+const { createSite, restoreSite } = await import("@/app/(app)/sites/actions");
+
+/** The ReferenceForm element a route returned, wherever it sits in the tree. */
+function findForm(node: ReactNode): Record<string, unknown> | null {
+  if (Array.isArray(node)) {
+    for (const child of node) {
+      const found = findForm(child);
+      if (found) return found;
+    }
+    return null;
+  }
+
+  if (!isValidElement(node)) return null;
+  if (node.type === ReferenceForm) return node.props as Record<string, unknown>;
+
+  return findForm((node.props as { children?: ReactNode }).children);
+}
 
 /*
  * Both routes render the same form; what differs is which action it is bound
@@ -31,6 +51,18 @@ describe("the create route", () => {
     expect(
       screen.getByRole("button", { name: "Create sequestration site" }),
     ).toBeVisible();
+  });
+
+  it("hands the form both the create action and the restore path", () => {
+    // The restore offer is the only route back to an archived site, and the
+    // form can only render it if the route passes restoreSite down. Nothing
+    // else in the suite would notice this prop going missing — the form's own
+    // tests supply their own stub — and the failure would surface first in
+    // validation.md § Manual step 9.
+    const props = findForm(NewSitePage());
+
+    expect(props?.action).toBe(createSite);
+    expect(props?.restore).toBe(restoreSite);
   });
 });
 
