@@ -1,11 +1,11 @@
 import { Factory } from "lucide-react";
 import { Suspense } from "react";
 
-import { ProducerToast } from "@/components/producer-toast";
 import {
   ReferenceList,
   ReferenceListHeader,
 } from "@/components/reference-list";
+import { ReferenceToast } from "@/components/reference-toast";
 import { listActiveProducers } from "@/lib/producer-queries";
 
 export default async function ProducersPage() {
@@ -16,7 +16,7 @@ export default async function ProducersPage() {
       {/* Reads the search parameters the actions redirect with, which Next
           requires a boundary around. It renders nothing. */}
       <Suspense>
-        <ProducerToast />
+        <ReferenceToast listPath="/producers" />
       </Suspense>
       <ReferenceListHeader
         heading="Producers"
