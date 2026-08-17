@@ -65,7 +65,7 @@ Decisions below are binding for v0.1. See `specs/mission.md` for scope and
 v0.1 has real authentication. Internal staff only — no external producer or
 sequestration-site logins.
 
-- **Provider:** Clerk, using its Next.js middleware to gate the app.
+- **Provider:** Clerk, gating the app from `src/proxy.ts`, Next's proxy file convention.
 - **User provisioning:** via the Clerk Backend API — `npm run provision -- <email>`.
   Accounts are created deliberately by someone with access to the Clerk instance, and
   there is no self-service sign-up, which is what internal-staff-only access
@@ -103,10 +103,12 @@ sequestration-site logins.
   2. Typecheck — `tsc --noEmit`
   3. Unit and component tests — Vitest
   4. E2E tests — Playwright. Not installed yet: `specs/roadmap.md` Phase 7 adds the suite
-     and makes the job a required check. Until then the workflow runs the other four.
+     and makes the job a required check. Until then the workflow runs the other five.
   5. Commit convention — the pull request title is checked against Conventional Commits.
      The title is what the squash merge writes onto `main`, so it is the thing worth
      gating; branch commits are squashed away and are not checked.
+  6. Database — applies every checked-in migration to an empty Postgres service
+     container, seeds it twice, and fails if the row counts moved.
 - **Merge gate:** green CI is a hard requirement. A pull request with any failing check
   does not merge, including a failing E2E job.
 - **Build:** Vercel builds each PR as a preview deployment alongside the Actions run.

@@ -5,6 +5,10 @@ import { PUBLIC_ROUTES } from "@/lib/routes";
 const isPublicRoute = createRouteMatcher([...PUBLIC_ROUTES]);
 
 /**
+ * Next 16 renamed this file convention from `middleware` to `proxy`; the
+ * behaviour is unchanged, and the default export is what Next picks up either
+ * way. Clerk still calls its own helper `clerkMiddleware`.
+ *
  * Everything is protected except the routes named in `PUBLIC_ROUTES`. Gating by
  * exception rather than by enumeration means a page added in a later phase is
  * protected the moment it exists — `specs/mission.md` allows internal staff

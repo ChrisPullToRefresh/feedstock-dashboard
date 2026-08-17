@@ -93,10 +93,15 @@ from.
   exists. It currently skips any path whose last segment contains a dot, so with a
   `/producers/[id]` route in place, `/producers/acme.co` is served to an unauthenticated
   request — measured at 200 with page content, against `/producers/acme` at 307. Clerk's
-  documented matcher, which excludes a named extension list rather than any dot, closes it
-  and still skips `/favicon.ico`. Pair it with a test over `config.matcher`, which nothing
-  asserts today
-- Form validation with shadcn/ui form components
+  documented matcher, which excludes a named extension list rather than any dot, is the
+  starting point, and it still skips `/favicon.ico`. It is not sufficient on its own:
+  Phase 3 found that without a trailing `$` anchoring the extension to the end of the
+  path, `/producers/x.svg/edit` is skipped and served with no session — the same hole in
+  a new place. `src/middleware.ts` carries the anchor and `src/middleware.test.ts` pins
+  it. Pair it with a test over `config.matcher`, which nothing asserts today
+- Form validation with shadcn/ui's Field components. `@shadcn/form` resolves to an empty
+  stub under this project's `radix-nova` style, so Field is the form primitive here and
+  validation runs against the shared zod schema rather than react-hook-form
 - Component tests for the form's validation behavior
 
 ## Phase 4 — Sequestration sites
@@ -112,7 +117,8 @@ anything the two surfaces genuinely share is extracted here rather than duplicat
 
 - List, create, edit, and archive pages for sequestration sites, reusing the producer
   patterns rather than duplicating them. Deletion is soft here too
-- Form validation with shadcn/ui form components
+- Form validation with shadcn/ui's Field components, following Phase 3 — see its bullet
+  for why Field rather than Form
 - Component tests for the form's validation behavior
 
 ## Phase 5 — Movement entry
@@ -181,17 +187,17 @@ to end.
       from a dropdown
 - [ ] Outbound movements are recorded with a weight in kilograms and a sequestration site
       selected from a dropdown
-- [ ] Feedstock producers can be created, edited, listed, and archived
+- [x] Feedstock producers can be created, edited, listed, and archived
 - [ ] Sequestration sites can be created, edited, listed, and archived
 - [ ] The movement list shows every movement, filterable, with running totals by producer
       and by sequestration site
 - [ ] Movement entry is usable one-handed on a phone; review is comfortable on desktop
-- [ ] Clerk gates the app and staff accounts are provisioned via the Backend API
+- [x] Clerk gates the app and staff accounts are provisioned via the Backend API
 - [ ] The Prisma schema and all migrations are checked in and run clean on a fresh
       database
 - [ ] Lint, typecheck, Vitest, and the full Playwright suite pass in GitHub Actions and
       are required to merge
-- [ ] `main` is branch-protected and no commit has landed on it outside a pull request
+- [x] `main` is branch-protected and no commit has landed on it outside a pull request
 - [ ] The app is deployed to production on the company Vercel team
 - [ ] Arin has been walked through the deployed app end to end
 
