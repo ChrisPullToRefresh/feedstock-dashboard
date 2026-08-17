@@ -167,7 +167,7 @@ Only if the user chose at least one edit. Never branch from a dirty tree — if
 
 ```bash
 git checkout main && git pull --ff-only
-git checkout -b <phase-number>-<short-kebab-description>
+git checkout -b maint-<short-kebab-description>
 git add specs/ README.md
 git commit
 git push -u origin <branch>
