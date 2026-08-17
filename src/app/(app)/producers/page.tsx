@@ -8,6 +8,14 @@ import {
 import { ReferenceToast } from "@/components/reference-toast";
 import { listActiveProducers } from "@/lib/producer-queries";
 
+/**
+ * Rendered per request, never prerendered — see the same export in
+ * `src/app/(app)/sites/page.tsx` for why. Phase 3 shipped this page static;
+ * leaving it that way while `/sites` is dynamic would give the two reference
+ * surfaces different behavior, which is what this phase exists to prevent.
+ */
+export const dynamic = "force-dynamic";
+
 export default async function ProducersPage() {
   const producers = await listActiveProducers();
 
