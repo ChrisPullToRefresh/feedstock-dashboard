@@ -5,8 +5,12 @@ import { redirect } from "next/navigation";
 
 import { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
-import { producerSchema } from "@/lib/reference-data";
 import { findProducerByName } from "@/lib/producer-queries";
+import {
+  producerSchema,
+  PRODUCER_SINGULAR,
+  type ReferenceFormState,
+} from "@/lib/reference-data";
 
 /**
  * Everything that writes a producer.
@@ -14,28 +18,12 @@ import { findProducerByName } from "@/lib/producer-queries";
  * Each action re-validates with the same schema the form used. A Server Action
  * is a public endpoint — anything that can reach the app can invoke one — so
  * the browser's copy is for fast feedback and this one is what counts.
- * `plan.md` § Decisions.
+ * `specs/2026-08-14-producers/plan.md` § Decisions.
+ *
+ * The state shape is shared with the sequestration site actions, because the
+ * form that reads it is one component —
+ * `specs/2026-08-16-sequestration-sites/plan.md` § Decisions.
  */
-
-export type ProducerFormState =
-  | { status: "idle" }
-  /**
-   * `submitted` carries the name back to the form. React 19 resets an
-   * uncontrolled form once its action settles, so without it every refusal
-   * would also wipe what the operator typed.
-   */
-  | { status: "error"; message: string; submitted: string }
-  /**
-   * The name belongs to an archived producer. Carries its id so the form can
-   * offer to restore it — the only route back to an archived producer, since
-   * no screen lists them.
-   */
-  | {
-      status: "archived-name";
-      archivedId: string;
-      name: string;
-      submitted: string;
-    };
 
 /**
  * Back to the list, carrying what just happened so the page can say so.
@@ -58,7 +46,7 @@ function isUniqueViolation(error: unknown): boolean {
   );
 }
 
-function parseName(formData: FormData): ProducerFormState | { name: string } {
+function parseName(formData: FormData): ReferenceFormState | { name: string } {
   const raw = formData.get("name");
   const submitted = typeof raw === "string" ? raw : "";
   const parsed = producerSchema.safeParse({ name: raw });
@@ -66,7 +54,8 @@ function parseName(formData: FormData): ProducerFormState | { name: string } {
   if (!parsed.success) {
     return {
       status: "error",
-      message: parsed.error.issues[0]?.message ?? "Enter a producer name",
+      message:
+        parsed.error.issues[0]?.message ?? `Enter a ${PRODUCER_SINGULAR} name`,
       submitted,
     };
   }
@@ -75,9 +64,9 @@ function parseName(formData: FormData): ProducerFormState | { name: string } {
 }
 
 export async function createProducer(
-  _previous: ProducerFormState,
+  _previous: ReferenceFormState,
   formData: FormData,
-): Promise<ProducerFormState> {
+): Promise<ReferenceFormState> {
   const parsed = parseName(formData);
 
   if ("status" in parsed) return parsed;
@@ -121,9 +110,9 @@ export async function createProducer(
 
 export async function renameProducer(
   id: string,
-  _previous: ProducerFormState,
+  _previous: ReferenceFormState,
   formData: FormData,
-): Promise<ProducerFormState> {
+): Promise<ReferenceFormState> {
   const parsed = parseName(formData);
 
   if ("status" in parsed) return parsed;
