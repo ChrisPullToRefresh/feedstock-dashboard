@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 
 import { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
-import { producerSchema } from "@/lib/producers";
+import { producerSchema } from "@/lib/reference-data";
 import { findProducerByName } from "@/lib/producer-queries";
 
 /**

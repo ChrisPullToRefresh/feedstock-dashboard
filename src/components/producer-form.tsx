@@ -2,23 +2,24 @@
 
 import { useActionState, useId, useState } from "react";
 
-import type { ProducerFormState } from "@/app/(app)/producers/actions";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { PRODUCER_NAME_MAX_LENGTH, producerSchema } from "@/lib/producers";
+import {
+  REFERENCE_NAME_MAX_LENGTH,
+  producerSchema,
+  type ReferenceFormAction,
+  type ReferenceFormState,
+} from "@/lib/reference-data";
 
 /**
  * Defined here rather than exported from the actions module: a "use server"
  * file may only export async functions, so a shared constant object there
  * fails the build.
  */
-const IDLE: ProducerFormState = { status: "idle" };
+const IDLE: ReferenceFormState = { status: "idle" };
 
-export type ProducerFormAction = (
-  state: ProducerFormState,
-  formData: FormData,
-) => Promise<ProducerFormState>;
+export type ProducerFormAction = ReferenceFormAction;
 
 /**
  * The one form behind both creating and renaming a producer.
@@ -104,7 +105,7 @@ export function ProducerForm({
             onChange={(event) => setName(event.target.value)}
             // Long enough to be a real limit, short enough that the browser
             // stops the paste before the schema has to explain it.
-            maxLength={PRODUCER_NAME_MAX_LENGTH}
+            maxLength={REFERENCE_NAME_MAX_LENGTH}
             autoComplete="off"
             aria-invalid={message ? true : undefined}
             aria-describedby={message ? `${nameId}-error` : undefined}

@@ -6,7 +6,7 @@ import {
   ProducerForm,
   type ProducerFormAction,
 } from "@/components/producer-form";
-import { PRODUCER_NAME_MAX_LENGTH } from "@/lib/producers";
+import { REFERENCE_NAME_MAX_LENGTH } from "@/lib/reference-data";
 
 /*
  * These drive the form the way an operator does. The action is a stand-in, so
@@ -57,14 +57,14 @@ describe("the producer form", () => {
 
     // The input caps typing, so the over-long value is set directly — the
     // schema is the thing under test, not the browser's maxLength.
-    const tooLong = "a".repeat(PRODUCER_NAME_MAX_LENGTH + 1);
+    const tooLong = "a".repeat(REFERENCE_NAME_MAX_LENGTH + 1);
     await user.click(name);
     (name as HTMLInputElement).value = tooLong;
     await user.click(submit);
 
     expect(
       await screen.findByText(
-        `Use ${PRODUCER_NAME_MAX_LENGTH} characters or fewer`,
+        `Use ${REFERENCE_NAME_MAX_LENGTH} characters or fewer`,
       ),
     ).toBeVisible();
     expect(action).not.toHaveBeenCalled();
