@@ -28,51 +28,54 @@ const entities = [
   },
 ];
 
-describe.each(entities)("the $entity name schema", ({ nameSchema, missing }) => {
-  it.each([
-    { entered: "", why: "empty" },
-    { entered: "   ", why: "whitespace only" },
-    { entered: "\t\n ", why: "whitespace only, other characters" },
-  ])("refuses a name that is $why", ({ entered }) => {
-    expect(nameSchema.safeParse(entered).success).toBe(false);
-  });
+describe.each(entities)(
+  "the $entity name schema",
+  ({ nameSchema, missing }) => {
+    it.each([
+      { entered: "", why: "empty" },
+      { entered: "   ", why: "whitespace only" },
+      { entered: "\t\n ", why: "whitespace only, other characters" },
+    ])("refuses a name that is $why", ({ entered }) => {
+      expect(nameSchema.safeParse(entered).success).toBe(false);
+    });
 
-  it("refuses a name longer than the column allows", () => {
-    const tooLong = "a".repeat(REFERENCE_NAME_MAX_LENGTH + 1);
+    it("refuses a name longer than the column allows", () => {
+      const tooLong = "a".repeat(REFERENCE_NAME_MAX_LENGTH + 1);
 
-    expect(nameSchema.safeParse(tooLong).success).toBe(false);
-  });
+      expect(nameSchema.safeParse(tooLong).success).toBe(false);
+    });
 
-  it("accepts a name at the limit", () => {
-    // The boundary itself is valid — only what exceeds it is refused.
-    const atLimit = "a".repeat(REFERENCE_NAME_MAX_LENGTH);
+    it("accepts a name at the limit", () => {
+      // The boundary itself is valid — only what exceeds it is refused.
+      const atLimit = "a".repeat(REFERENCE_NAME_MAX_LENGTH);
 
-    expect(nameSchema.safeParse(atLimit).success).toBe(true);
-  });
+      expect(nameSchema.safeParse(atLimit).success).toBe(true);
+    });
 
-  it.each([
-    { entered: "  Cascade Timber Mill  ", stored: "Cascade Timber Mill" },
-    { entered: "\tHarney Basin Storage\n", stored: "Harney Basin Storage" },
-    { entered: "High Desert Ranch", stored: "High Desert Ranch" },
-  ])("parses $entered to $stored", ({ entered, stored }) => {
-    expect(nameSchema.parse(entered)).toBe(stored);
-  });
+    it.each([
+      { entered: "  Cascade Timber Mill  ", stored: "Cascade Timber Mill" },
+      { entered: "\tHarney Basin Storage\n", stored: "Harney Basin Storage" },
+      { entered: "High Desert Ranch", stored: "High Desert Ranch" },
+    ])("parses $entered to $stored", ({ entered, stored }) => {
+      expect(nameSchema.parse(entered)).toBe(stored);
+    });
 
-  it("trims before measuring length, not after", () => {
-    // A name at the limit with padding either side is still valid: the padding
-    // is not part of what gets stored.
-    const padded = `  ${"a".repeat(REFERENCE_NAME_MAX_LENGTH)}  `;
+    it("trims before measuring length, not after", () => {
+      // A name at the limit with padding either side is still valid: the padding
+      // is not part of what gets stored.
+      const padded = `  ${"a".repeat(REFERENCE_NAME_MAX_LENGTH)}  `;
 
-    expect(nameSchema.safeParse(padded).success).toBe(true);
-  });
+      expect(nameSchema.safeParse(padded).success).toBe(true);
+    });
 
-  it("says something a form can show when a name is missing", () => {
-    const result = nameSchema.safeParse("");
+    it("says something a form can show when a name is missing", () => {
+      const result = nameSchema.safeParse("");
 
-    expect(result.success).toBe(false);
-    expect(result.error?.issues[0]?.message).toBe(missing);
-  });
-});
+      expect(result.success).toBe(false);
+      expect(result.error?.issues[0]?.message).toBe(missing);
+    });
+  },
+);
 
 describe.each(entities)("the $entity object schema", ({ schema }) => {
   it("parses a name into a trimmed object", () => {
