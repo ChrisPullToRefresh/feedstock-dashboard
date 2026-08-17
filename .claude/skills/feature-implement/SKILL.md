@@ -107,7 +107,10 @@ config, the test. A commit message claiming a task is weaker evidence than the a
 existing and its test passing. Where they disagree, trust the repository.
 
 Run the test suite once here if one exists. A red suite you inherited is the first thing
-to fix, and it is not a new task — it is the previous row, unfinished.
+to fix, and it is not a new task — it is the previous row, unfinished. Unless the same
+commit is green in CI: then the difference is your environment, not the repository, and
+fixing the repository would be fixing nothing. Check the Node version against `.nvmrc`
+first.
 
 ### 4. Track the table
 
@@ -122,8 +125,15 @@ For each incomplete row in order:
 1. **Write the feature.** The smallest change that produces the outcome the row names.
 2. **Write the paired test**, or perform the paired setup for a `Manual:` row.
 3. **Run the checks the repository already has** — `npm run lint`, `npm run typecheck`,
-   `npm run test`, or whichever of them exist at this point in the phase. Early rows in a
-   foundation phase may predate their own tooling; run what exists.
+   `npm run test`, `npm run build`, or whichever of them exist at this point in the
+   phase. Early rows in a foundation phase may predate their own tooling; run what
+   exists.
+
+   The build is the slowest and the one worth keeping: a Server Component reaching a
+   client bundle, or a `"use server"` file exporting anything but an async function,
+   fails there and nowhere else. The test runner resolves Node modules happily and sees
+   neither. `specs/tech-stack.md` § CI/CD makes the deployment build part of the merge
+   gate, so a row that does not build is not a row that is done.
 4. **Commit the row**, feature and test together:
 
    ```bash
@@ -144,11 +154,9 @@ make and the constitution does not settle, or when a row cannot be done as writt
 not stop to report routine progress.
 
 Rows that depend on something outside the repository — a GitHub setting, a Vercel
-connection, a dashboard toggle, a credential — are done as far as the CLI reaches
-(`gh api`, `vercel`), and the remainder goes to the handoff in step 8. Note that
-`specs/tech-stack.md` § Hosting & deployment puts the Vercel account and the
-browser-automation Chrome profile on different accounts: never verify a preview
-deployment by browser automation.
+connection, a dashboard toggle, a credential — are done as far as the tooling reaches
+(`gh api`, `vercel`, the browser), and the remainder goes to the handoff in step 8.
+`specs/tech-stack.md` § Hosting & deployment says which of those this project allows.
 
 ### 6. Run the automated validation
 
