@@ -123,6 +123,6 @@ Playwright is the remaining check `specs/tech-stack.md` § CI/CD names, and
 
 ## Open questions
 
-None beyond the two parked in `plan.md` § Open questions. The Clerk instance question
+None beyond the one parked in `plan.md` § Open questions. The Clerk instance question
 changes which account signs in at manual steps 11 and 16, but not how any of these steps
 are run.

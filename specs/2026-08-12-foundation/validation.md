@@ -81,5 +81,4 @@ Typecheck, and Test are required checks in `main`'s branch protection.
 
 ## Open questions
 
-None beyond the two parked in `plan.md` § Open questions, neither of which changes how
-this phase is validated.
+None. `plan.md` § Open questions carries none either.
