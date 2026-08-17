@@ -1,0 +1,25 @@
+-- Sequestration site names are unique regardless of case. The @unique on
+-- `name` that the initial migration created is case-sensitive, so "Cascade
+-- Basin" and "cascade basin" could both exist — two rows for one real site.
+-- specs/roadmap.md Phase 6 groups totals by sequestration site and Phase 5
+-- puts them in a dropdown, so that would split the numbers and mislead the
+-- operator.
+--
+-- It also makes the restore-on-collision path reliable: findSiteByName matches
+-- through lower(name), and a lookup that disagrees with the constraint would
+-- offer to restore a row the insert then refuses.
+--
+-- This mirrors 20260814134844_producer_name_unique_case_insensitive exactly —
+-- specs/2026-08-16-sequestration-sites/plan.md § Decisions.
+--
+-- Hand-written because Prisma cannot express an index over an expression. The
+-- test in src/test/prisma-migration.test.ts is what stops a regenerated
+-- migration from dropping it silently, the same guard the counterparty check
+-- constraint and the producer index already use.
+--
+-- The column keeps its own case-sensitive unique index as well. That one is
+-- redundant while this exists, but dropping it would change what the seed's
+-- upsert-on-name resolves against.
+
+-- CreateIndex
+CREATE UNIQUE INDEX "sequestration_sites_name_lower_key" ON "sequestration_sites" (lower("name"));
