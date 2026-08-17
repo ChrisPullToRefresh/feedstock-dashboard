@@ -15,12 +15,15 @@ vi.mock("next/navigation", () => ({
 
 const { default: ProducersPage } = await import("@/app/(app)/producers/page");
 const { default: RecordPage } = await import("@/app/(app)/record/page");
-const { default: SitesPage } = await import("@/app/(app)/sites/page");
+const { default: MovementsPage } = await import("@/app/(app)/page");
 
 /*
- * `/producers` was a PlaceholderPage until this phase. These assert the swap
- * happened and that it did not take the other two placeholders with it —
- * Phases 4 and 5 still stand behind them.
+ * `/producers` was a PlaceholderPage until Phase 3. These assert the swap
+ * happened and that it did not take the remaining placeholders with it.
+ *
+ * Phase 4 took `/sites` off this list, because it is a real page now —
+ * `src/app/(app)/sites/list-page.test.tsx` asserts that. `/` and `/record`
+ * stand behind Phases 6 and 5.
  */
 describe("the producers route", () => {
   it("renders the real list, not the placeholder", async () => {
@@ -49,7 +52,7 @@ describe("the producers route", () => {
 describe("the routes still waiting on later phases", () => {
   it.each([
     { name: "/record", Page: RecordPage },
-    { name: "/sites", Page: SitesPage },
+    { name: "/", Page: MovementsPage },
   ])("$name still renders its placeholder", ({ Page }) => {
     render(<Page />);
 
