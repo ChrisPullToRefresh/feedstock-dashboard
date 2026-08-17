@@ -66,3 +66,48 @@ describe("the edit route", () => {
     expect(notFound).toHaveBeenCalled();
   });
 });
+
+const { default: SitePage } = await import("@/app/(app)/sites/[id]/page");
+
+describe("the detail route", () => {
+  beforeEach(() => {
+    findSite.mockReset();
+    notFound.mockClear();
+  });
+
+  it("renders the site's name", async () => {
+    findSite.mockResolvedValue({
+      id: "s1",
+      name: "Basalt Ridge Injection Site",
+    });
+
+    render(await SitePage({ params: Promise.resolve({ id: "s1" }) }));
+
+    expect(
+      screen.getByRole("heading", { name: "Basalt Ridge Injection Site" }),
+    ).toBeVisible();
+  });
+
+  it("offers Edit and Archive", async () => {
+    findSite.mockResolvedValue({
+      id: "s1",
+      name: "Basalt Ridge Injection Site",
+    });
+
+    render(await SitePage({ params: Promise.resolve({ id: "s1" }) }));
+
+    expect(screen.getByRole("link", { name: /edit/i })).toHaveAttribute(
+      "href",
+      "/sites/s1/edit",
+    );
+    expect(screen.getByRole("button", { name: /archive/i })).toBeVisible();
+  });
+
+  it("is a 404 when no such site exists", async () => {
+    findSite.mockResolvedValue(null);
+
+    await expect(
+      SitePage({ params: Promise.resolve({ id: "missing" }) }),
+    ).rejects.toThrow("NEXT_NOT_FOUND");
+  });
+});
