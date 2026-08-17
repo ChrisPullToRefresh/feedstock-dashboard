@@ -1,7 +1,11 @@
+import { Factory } from "lucide-react";
 import { Suspense } from "react";
 
-import { ProducerList, ProducerListHeader } from "@/components/producer-list";
 import { ProducerToast } from "@/components/producer-toast";
+import {
+  ReferenceList,
+  ReferenceListHeader,
+} from "@/components/reference-list";
 import { listActiveProducers } from "@/lib/producer-queries";
 
 export default async function ProducersPage() {
@@ -14,8 +18,20 @@ export default async function ProducersPage() {
       <Suspense>
         <ProducerToast />
       </Suspense>
-      <ProducerListHeader />
-      <ProducerList producers={producers} />
+      <ReferenceListHeader
+        heading="Producers"
+        createPath="/producers/new"
+        createLabel="Add producer"
+      />
+      <ReferenceList
+        items={producers}
+        basePath="/producers"
+        createPath="/producers/new"
+        emptyIcon={Factory}
+        emptyTitle="No producers yet"
+        emptyDescription="Feedstock producers are who inbound movements come from. Add one and it becomes available when recording an inbound movement."
+        emptyActionLabel="Add the first producer"
+      />
     </section>
   );
 }
