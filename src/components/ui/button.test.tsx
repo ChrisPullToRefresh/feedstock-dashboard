@@ -36,3 +36,19 @@ describe("Button", () => {
     expect(button).toHaveAttribute("data-size", "lg");
   });
 });
+
+describe("the destructive variant", () => {
+  it("puts its label on a solid fill rather than a tint of itself", () => {
+    // The scaffold shipped `bg-destructive/10 text-destructive`, which put the
+    // label on its own 10% fill: 4.39:1 in light and 3.16:1 in dark, against
+    // WCAG 2.1 AA's 4.5:1 for the 14px label this button uses. A solid fill
+    // with a theme-dependent foreground measures 4.76:1 and 6.84:1.
+    render(<Button variant="destructive">Archive</Button>);
+
+    const button = screen.getByRole("button", { name: "Archive" });
+
+    expect(button).toHaveClass("bg-destructive");
+    expect(button).toHaveClass("text-destructive-foreground");
+    expect(button.className).not.toMatch(/bg-destructive\/\d/);
+  });
+});
