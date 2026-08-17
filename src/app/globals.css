@@ -36,6 +36,8 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-hover: var(--destructive-hover);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -95,6 +97,11 @@
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
+  /* White on this fill measures 4.76:1, clearing WCAG AA's 4.5:1 for the
+     14px label the Button uses. The dark palette flips the pair, exactly as
+     --primary does, because its destructive is a lighter red. */
+  --destructive-foreground: oklch(1 0 0);
+  --destructive-hover: oklch(0.505 0.213 27.518);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: var(--accent-emerald);
@@ -135,6 +142,9 @@
     --accent: oklch(0.269 0 0);
     --accent-foreground: oklch(0.985 0 0);
     --destructive: oklch(0.704 0.191 22.216);
+    /* Near-black on this fill measures 6.84:1. White would be 2.89:1. */
+    --destructive-foreground: oklch(0.145 0 0);
+    --destructive-hover: oklch(0.77 0.16 22);
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
     --ring: var(--accent-emerald);

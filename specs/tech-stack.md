@@ -20,7 +20,8 @@ Decisions below are binding for v0.1. See `specs/mission.md` for scope and
 - **Font:** Inter, loaded from Google Fonts via `next/font`. Chosen for legibility on
   phones and for tabular numerals, so columns of weights align.
 - **Accent color:** Emerald. This is the only accent. Every other surface, border, and
-  text color is neutral gray. The shade differs by theme so both clear WCAG AA:
+  text color is neutral gray, apart from the destructive red below. The shade differs by
+  theme so both clear WCAG AA:
   `emerald-700` in light with white on it (5.37:1), `emerald-500` in dark with near-black
   on it (8.03:1). `emerald-600` is not used for text or for fills under text — it
   measures 3.67:1 on white, below AA's 4.5:1 — and is reserved for non-text roles such as
@@ -32,6 +33,15 @@ Decisions below are binding for v0.1. See `specs/mission.md` for scope and
   fill away from the background — darker in light, lighter in dark. An alpha fill such as
   `bg-primary/80` washes toward the background instead, which measured 3.72:1 under a
   white label and failed AA.
+- **Destructive color:** red, and the only non-neutral besides the accent. It marks the
+  one irreversible control in v0.1 — archiving. Like the accent it is a theme-dependent
+  pair on a solid fill, carried by `--destructive` and `--destructive-foreground`: white
+  on the light red (4.76:1), near-black on the dark red (6.84:1). White in dark measures
+  2.89:1 and is not used. A tinted fill under the label — `bg-destructive/10` — is not
+  used either: it measured 4.39:1 in light and 3.16:1 in dark, below AA's 4.5:1.
+- **Destructive hover:** `--destructive-hover`, darker in light (6.42:1 with white on it)
+  and lighter in dark (8.50:1 with near-black on it), moving the fill away from the
+  background exactly as the accent hover does.
 - **Theme:** light and dark, chosen by the operating system through
   `prefers-color-scheme`. v0.1 has no in-app toggle and stores no per-user preference, so
   there is nothing to persist and no flash of the wrong palette to guard against. Both
