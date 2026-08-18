@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useId, useMemo, useState } from "react";
+import { useActionState, useEffect, useId, useMemo, useState } from "react";
+import { toast } from "sonner";
 
-import type { Direction } from "@/generated/prisma/enums";
+import { Direction } from "@/generated/prisma/enums";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -32,6 +33,12 @@ const IDLE: MovementFormState = { status: "idle" };
 function asLabel(singular: string): string {
   return singular.charAt(0).toUpperCase() + singular.slice(1);
 }
+
+/** Feedstock comes *from* a producer and goes *to* a sequestration site. */
+const PREPOSITION: Record<Direction, string> = {
+  [Direction.INBOUND]: "from",
+  [Direction.OUTBOUND]: "to",
+};
 
 /**
  * The one form behind recording feedstock in and feedstock out.
@@ -94,6 +101,21 @@ export function MovementForm({
       setCounterpartyId("");
     }
   }
+
+  // Announced from an effect rather than from the block above, because a toast
+  // is a side effect and that block runs during render. `state` is a fresh
+  // object per settled action, so this fires once per save — including for two
+  // identical weighings in a row — and not again on an unrelated re-render.
+  //
+  // With nothing in this phase listing movements, this is the only proof a
+  // movement saved: `specs/2026-08-17-movement-entry/plan.md` § Decisions.
+  useEffect(() => {
+    if (state.status !== "success") return;
+
+    toast.success(
+      `${state.weightLabel} kg recorded ${PREPOSITION[direction]} ${state.counterpartyName}`,
+    );
+  }, [state, direction]);
 
   /**
    * Synchronous on purpose: `preventDefault` has to run before React hands the
