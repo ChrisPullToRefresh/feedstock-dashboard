@@ -7,6 +7,7 @@ import {
   type CounterpartyFilterOption,
   DEFAULT_LIMIT,
   filterHref,
+  formatRecordedAt,
   hasAnyFilter,
   MAX_LIMIT,
   MAX_WEIGHT_KG,
@@ -311,5 +312,45 @@ describe("whether a Clear filters control belongs", () => {
     { sequestrationSiteId: "site_x" },
   ])("is present once %o is set", (change) => {
     expect(hasAnyFilter({ ...NO_FILTERS, ...change })).toBe(true);
+  });
+});
+
+describe("when a movement was recorded", () => {
+  it("renders an absolute date and time with the zone named", () => {
+    expect(formatRecordedAt(new Date("2026-08-18T13:45:09.000Z"))).toBe(
+      "18 Aug 2026, 13:45 UTC",
+    );
+  });
+
+  it("pads the day and the time so a column of them aligns", () => {
+    expect(formatRecordedAt(new Date("2026-01-05T09:05:00.000Z"))).toBe(
+      "05 Jan 2026, 09:05 UTC",
+    );
+  });
+
+  it("renders midnight as 00:00 on the day it begins", () => {
+    expect(formatRecordedAt(new Date("2026-12-31T00:00:00.000Z"))).toBe(
+      "31 Dec 2026, 00:00 UTC",
+    );
+  });
+
+  it("renders the same string whatever zone the process keeps", () => {
+    // The assertion that keeps this independent of where it runs. A local
+    // format would put two people comparing screens on different numbers for
+    // the same row, and would shift the date across the line either way.
+    const instant = new Date("2026-08-18T23:30:00.000Z");
+    const original = process.env.TZ;
+
+    const rendered = ["Pacific/Kiritimati", "Pacific/Midway", "UTC"].map(
+      (zone) => {
+        process.env.TZ = zone;
+        return formatRecordedAt(instant);
+      },
+    );
+
+    process.env.TZ = original;
+
+    expect(new Set(rendered).size).toBe(1);
+    expect(rendered[0]).toBe("18 Aug 2026, 23:30 UTC");
   });
 });

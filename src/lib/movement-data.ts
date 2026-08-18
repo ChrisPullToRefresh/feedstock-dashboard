@@ -390,3 +390,49 @@ export function showMoreHref(filters: MovementFilters): string {
 
 /** Where **Clear filters** goes — the bare list, with nothing narrowed. */
 export const CLEARED_FILTERS_HREF = movementListHref(NO_FILTERS);
+
+/**
+ * Month names, so a rendered date can never be read day-first by one person
+ * and month-first by another.
+ */
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+] as const;
+
+/** Two digits, so 09:05 lines up under 13:45 in Inter's tabular numerals. */
+const pad = (value: number) => String(value).padStart(2, "0");
+
+/**
+ * When a movement was recorded, as an absolute date and time in UTC with the
+ * zone named.
+ *
+ * UTC rather than the facility's own zone because nothing in this constitution
+ * names a location — `plan.md` § Decisions, and
+ * `requirements.md` § Open questions carries the question to
+ * `specs/roadmap.md` Phase 8. The label is what stops anyone mistaking which
+ * zone they are reading; changing the zone later is this one constant, not a
+ * schema change, because `recorded_at` stores an instant either way.
+ *
+ * Built from the `getUTC*` accessors rather than through `Intl`: this is
+ * rendered on the server and compared in a test, and `Intl`'s output for a
+ * given locale moves with the ICU version the runtime was built against. The
+ * accessors read the same instant on every machine.
+ */
+export function formatRecordedAt(recordedAt: Date): string {
+  const day = pad(recordedAt.getUTCDate());
+  const month = MONTHS[recordedAt.getUTCMonth()];
+  const time = `${pad(recordedAt.getUTCHours())}:${pad(recordedAt.getUTCMinutes())}`;
+
+  return `${day} ${month} ${recordedAt.getUTCFullYear()}, ${time} UTC`;
+}
