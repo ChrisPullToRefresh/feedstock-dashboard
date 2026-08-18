@@ -101,11 +101,15 @@ Clerk's documented form, which excludes a named extension list rather than any d
 
 ## Open questions
 
-- **Whether archived producers ever need a screen of their own.** This phase deliberately
-  ships none, so the only way to reach an archived producer is the name-collision restore
-  path. If that proves too narrow in use — an archived producer someone wants back but
-  cannot name exactly — a list behind a filter is the smallest fix.
-- **Whether the detail page earns its place before Phase 6.** It shows one field today.
-  It exists because `specs/roadmap.md` Phase 6 will want somewhere to hang a producer's
-  movements and totals, and that is a guess about Phase 6 rather than a requirement of
-  this one.
+None outstanding. Both were settled after Phase 5 shipped, and are recorded struck through
+rather than deleted so the reasoning stays with the phase that raised them.
+
+- ~~**Whether archived producers ever need a screen of their own.**~~ Not in v0.1. The
+  name-collision restore path stays the only route back, deliberately. A screen for
+  archived rows is now deferred work in `specs/roadmap.md` § After v0.1 — and Phase 6's
+  totals still show archived producers that carry movement history, so what is deferred is
+  managing them, not seeing them.
+- ~~**Whether the detail page earns its place before Phase 6.**~~ It does. It stays, and
+  `specs/roadmap.md` Phase 6 extracts what it duplicates with the sequestration site page
+  rather than deleting either. Deleting both was considered and declined: Phase 6 renders
+  a counterparty's movements and totals, and those pages are where that goes.

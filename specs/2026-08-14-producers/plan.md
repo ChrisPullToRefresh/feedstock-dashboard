@@ -219,7 +219,7 @@ guess about what Phase 6 wants. `requirements.md` § Open questions carries that
 
 - ~~**Whether the expression index reads as drift to Prisma.**~~ Answered by task 2: it
   does not, in either direction. Recorded in § Decisions.
-- **Whether archived producers ever need a screen.** Carried in `requirements.md`
-  § Open questions.
-- **Whether the detail page earns its place before Phase 6.** Carried in
-  `requirements.md` § Open questions.
+- ~~**Whether archived producers ever need a screen.**~~ Settled after Phase 5 shipped.
+  Answered in `requirements.md` § Open questions.
+- ~~**Whether the detail page earns its place before Phase 6.**~~ Settled after Phase 5
+  shipped. Answered in `requirements.md` § Open questions.

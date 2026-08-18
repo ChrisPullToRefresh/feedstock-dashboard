@@ -105,11 +105,21 @@ An editable date and time defaulting to now was offered and declined: a third co
 form the mission requires to be usable one-handed, plus a picker to build and test, for
 work outside every Phase 5 bullet.
 
-The cost accepted is real and the user asked for it recorded rather than settled: a
-weighing entered an hour after the fact is stamped with entry time, not scale time, and
-because movements are append-only, nothing can correct it. `requirements.md`
-§ Open questions carries it. Deciding the same thing and staying silent about it was
-offered and declined.
+The cost is real: a weighing entered an hour after the fact is stamped with entry time,
+not scale time, and because movements are append-only, nothing can correct it.
+
+**That cost was reconsidered once the implementation existed, and the decision stands.**
+An editable `datetime-local` field was specified in full — empty meaning now, future times
+refused, native picker for one-handed use — and withdrawn before any of it was written, on
+a better argument than the one that parked it. Manual entry is a v0.1 condition, not the
+destination. Back-dating exists only because a person is typing after the fact, and
+`specs/roadmap.md` § After v0.1 has a machine reading the scale through the Viam API,
+which captures the weight and its time in the same moment. The control would be built now
+and deleted by that work, having meanwhile put a third field on a form
+`specs/mission.md` binds to one-handed use.
+
+So the question is closed rather than parked, and `requirements.md` § Open questions
+records it struck through.
 
 **One zod weight schema, shared by both sides; `Prisma.Decimal` stays on the server.**
 
@@ -249,10 +259,9 @@ trucks can weigh the same.
 
 ## Open questions
 
-- **Whether the entry timestamp needs to be correctable.** Carried in `requirements.md`
-  § Open questions. Chosen deliberately, not overlooked.
-- **Whether archived rows ever need a screen.** Carried in `requirements.md`
-  § Open questions from Phases 3 and 4. Phase 5 sharpens it: archiving now pulls a
-  counterparty out from under a form an operator may have open.
-- **Whether the detail page earns its place before Phase 6.** Carried in `requirements.md`
-  § Open questions from Phases 3 and 4, untouched here.
+- ~~**Whether the entry timestamp needs to be correctable.**~~ Settled: no. See the
+  addition to § Decisions above, and `requirements.md` § Open questions.
+- ~~**Whether archived rows ever need a screen.**~~ Settled: not in v0.1. Answered in
+  `requirements.md` § Open questions.
+- ~~**Whether the detail page earns its place before Phase 6.**~~ Settled: it does.
+  Answered in `requirements.md` § Open questions.
