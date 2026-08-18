@@ -164,6 +164,30 @@ describe.each(directions)(
       expect(weight()).toHaveValue("1250.5");
     });
 
+    it("renders an archived counterparty refusal under the dropdown", async () => {
+      const user = userEvent.setup();
+      const archived = `${options[0].name} has been archived — pick another`;
+
+      renderForm({
+        status: "error",
+        message: archived,
+        field: "counterparty",
+        submittedWeightKg: "1250.5",
+        // The action clears it, so the refreshed list does not re-offer the
+        // row that was just refused.
+        submittedCounterpartyId: "",
+      });
+
+      await user.type(weight(), "1250.5");
+      await choose(user, options[0].name);
+      await user.click(save());
+
+      expect(await screen.findByRole("alert")).toHaveTextContent(archived);
+      // The weighing itself was fine and is not made to be re-entered.
+      expect(weight()).toHaveValue("1250.5");
+      expect(screen.getByRole("combobox")).toHaveTextContent(placeholder);
+    });
+
     it("clears both fields when the action reports success", async () => {
       const user = userEvent.setup();
       renderForm({

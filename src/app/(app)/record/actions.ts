@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 import { Direction } from "@/generated/prisma/enums";
 import {
   COUNTERPARTY_SINGULAR,
@@ -23,6 +25,12 @@ import { formatWeightKg, parseWeightKg } from "@/lib/weight";
  * which announces it and clears the fields for the next weighing. A truck is
  * several weighings, so the next entry is zero taps away.
  */
+
+/** Where each direction's form lives, so its dropdown can be refreshed. */
+const RECORD_PATH: Record<Direction, string> = {
+  [Direction.INBOUND]: "/record/inbound",
+  [Direction.OUTBOUND]: "/record/outbound",
+};
 
 /** What the browser sent, as a string, whatever it actually sent. */
 function submitted(formData: FormData, name: string): string {
@@ -71,6 +79,11 @@ async function record(
       direction === Direction.INBOUND
         ? await findProducer(parsed.data.counterpartyId)
         : await findSite(parsed.data.counterpartyId);
+
+    // The dropdown has gone stale under the operator, so it is refreshed as
+    // part of this action's response. Without it they would reopen the list
+    // and be offered the same archived row the refusal just rejected.
+    revalidatePath(RECORD_PATH[direction]);
 
     return {
       status: "error",
