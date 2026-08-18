@@ -248,6 +248,14 @@ The cost accepted, and stated plainly: nothing guards the trigger afterwards. A 
 regenerated migration can drop it with no test turning red. The check constraint has that
 guard — task 5 — and the trigger does not. This was the user's choice between the two.
 
+**That cost was paid off after Phase 5, and the premise turned out to be wrong.** Both
+halves were available without a new harness. `src/test/prisma-migration.test.ts` already
+guarded the check constraint by reading the checked-in SQL, and the same technique asserts
+the trigger is declared and not dropped later. And this phase's own `Database` CI job
+already stands up a real Postgres, so it now inserts a movement and requires both the
+UPDATE and the DELETE to be refused — the half no search over SQL can answer. Neither
+needed Phase 7. See § Open questions.
+
 **Deployments migrate themselves — `vercel-build` runs `prisma migrate deploy`.**
 
 With a Neon branch per preview deployment, each preview starts empty. Running
@@ -306,15 +314,23 @@ and would have to record the fact somewhere the system does not yet have.
 
 ## Open questions
 
-- **Whether build-time migration is right for production.** Carried in
-  `requirements.md` § Open questions; belongs to `specs/roadmap.md` Phase 8.
-- **Whether archived rows ever need pruning.** A consequence of soft deletion, with no
-  caller yet. `specs/2026-08-14-producers/requirements.md` § Open questions carries the
-  related question of whether archived producers ever need a screen.
+- ~~**Whether build-time migration is right for production.**~~ Now a Phase 8 bullet in
+  `specs/roadmap.md`, to settle before `main` is promoted. Answered in `requirements.md`
+  § Open questions.
+- ~~**Whether archived rows ever need pruning.**~~ No — `specs/mission.md` § Constraints
+  forbids hard deletion outright, and pruning is that under another name. The related
+  question this entry pointed at, whether archived producers ever need a screen, was
+  settled after Phase 5: no screen in v0.1, and one is deferred work under
+  `specs/roadmap.md` § After v0.1.
 - ~~**Whether an archived name should free itself for reuse.**~~ Answered by
   `specs/roadmap.md` Phase 3: it does not. The name stays taken and the archived producer
   is restored instead — `specs/2026-08-14-producers/plan.md` § Decisions, "A name that
   collides with an archived producer offers to restore it".
-- **Whether the trigger needs a guard.** The decision above accepts that nothing stops a
-  later migration from dropping it. If Phase 7's Playwright harness brings a live test
-  database, that is the cheapest moment to add one.
+- ~~**Whether the trigger needs a guard.**~~ It does, and it has one as of the maintenance
+  change after Phase 5. This entry assumed the guard had to wait for Phase 7's Playwright
+  harness to bring a live database; it did not. `src/test/prisma-migration.test.ts`
+  asserts the SQL is still checked in and not dropped by a later migration, and this
+  phase's own `Database` CI job inserts a movement and requires both an UPDATE and a
+  DELETE to be refused. Append-only history is binding in `specs/mission.md`
+  § Constraints and is the one property of this data model that cannot be repaired after
+  the fact, so it is guarded at both levels rather than one.

@@ -96,11 +96,15 @@ themselves at build time, so a preview is usable the moment it finishes building
 
 ## Open questions
 
-- **Whether build-time migration survives Phase 8.** `plan.md` task 12 runs
-  `prisma migrate deploy` in `vercel-build`, which means production migrations run during
-  a production build. That is acceptable while the app is pre-launch and has no data to
-  lose. `specs/roadmap.md` Phase 8 promotes `main` to production and is where this should
-  be re-examined.
-- **Whether archived rows ever need pruning.** Nothing removes a producer or site, so the
-  list surfaces grow monotonically, and an archived row keeps its name reserved. Neither
-  matters until Phase 3 renders the list.
+None outstanding. Both were settled after Phase 5, and are recorded struck through rather
+than deleted so the reasoning stays with the phase that raised them.
+
+- ~~**Whether build-time migration survives Phase 8.**~~ Not answered here, because it
+  cannot be until production exists — but it is no longer a question with nobody driving
+  it. `specs/roadmap.md` Phase 8 now carries it as a bullet to settle before `main` is
+  promoted, which makes it work with an owner rather than a note in a shipped spec.
+- ~~**Whether archived rows ever need pruning.**~~ No, and not later either.
+  `specs/mission.md` § Constraints already forbids it: "Nothing is ever hard-deleted...
+  so every movement's counterparty stays resolvable for the life of the record." Pruning
+  is that deletion under another name. The list-growth half of this entry is answered too
+  — archived rows render on no screen, so the lists do not grow with them.

@@ -182,6 +182,13 @@ to end.
 - Re-provision the staff accounts, including Arin's, against that production instance.
   Phase 1's accounts live in Clerk's development instance, which backs preview deployments
   only; see `specs/2026-08-13-auth/plan.md` § Open questions
+- Decide how production migrations run, before promoting. `vercel-build` is
+  `prisma migrate deploy && next build`, so a production migration runs inside the
+  production build today. That was accepted while the app was pre-launch with nothing to
+  lose — `specs/2026-08-13-schema-and-migrations/plan.md` § Decisions — and this is the
+  phase that was named as where to re-examine it. What changes here is that the database
+  starts holding records nobody can re-enter: a migration that half-applies fails the
+  build after the fact, and nothing separates changing the schema from shipping the code
 - Promote `main` to the production Vercel deployment
 - Verify the deployed app manually on a phone and on desktop
 - Walk Arin through recording an inbound movement, an outbound movement, reference data

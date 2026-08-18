@@ -110,3 +110,53 @@ describe.each([
     expect(sql).toContain(`CREATE UNIQUE INDEX "${index}"`);
   });
 });
+
+/*
+ * The append-only trigger is the one guarantee of this data model that cannot
+ * be repaired after the fact — `specs/mission.md` § Constraints makes movement
+ * history immutable, and a movement rewritten while the trigger was missing
+ * leaves no trace of having been.
+ *
+ * Like the constraint above it is hand-written SQL that nothing regenerates,
+ * so a migration recreated from `schema.prisma` would arrive without it. These
+ * assertions read text; the `Database` job in `.github/workflows/ci.yml` asks a
+ * real Postgres whether an UPDATE is actually refused, which is the half no
+ * search over SQL can answer.
+ */
+describe("the append-only trigger on movements", () => {
+  const initial = flatten(initialMigrationSql());
+  const everything = flatten(allMigrationSql());
+
+  it("still declares the function that raises", () => {
+    expect(initial).toContain(
+      'CREATE OR REPLACE FUNCTION "reject_movement_mutation"() RETURNS TRIGGER',
+    );
+  });
+
+  it("still fires before every update and delete, row by row", () => {
+    // BEFORE, not AFTER: the exception has to stop the write rather than
+    // follow it. FOR EACH ROW, not FOR EACH STATEMENT: a statement-level
+    // trigger would let an UPDATE touching no rows pass and is not what the
+    // constraint means.
+    expect(initial).toContain(
+      'CREATE TRIGGER "movements_are_append_only" BEFORE UPDATE OR DELETE ON "movements" FOR EACH ROW EXECUTE FUNCTION "reject_movement_mutation"()',
+    );
+  });
+
+  it("is not dropped by any later migration", () => {
+    // The failure this exists for: the trigger survives review because it is
+    // in the initial migration, and a later migration removes it.
+    expect(everything).not.toMatch(
+      /DROP TRIGGER[^;]*movements_are_append_only/,
+    );
+    expect(everything).not.toMatch(
+      /DROP FUNCTION[^;]*reject_movement_mutation/,
+    );
+  });
+
+  it("is not left behind by a later migration recreating the table", () => {
+    // Dropping "movements" takes its triggers with it, silently. Nothing in
+    // this project should ever do that to an append-only table.
+    expect(everything).not.toMatch(/DROP TABLE[^;]*"movements"/);
+  });
+});
