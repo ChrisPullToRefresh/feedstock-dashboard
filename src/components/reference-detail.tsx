@@ -95,11 +95,16 @@ export function ReferenceDetail({
           <h2 className="text-lg font-semibold tracking-tight">
             Recent movements
           </h2>
-          {/* Unconditional: the counterparty's whole history lives on the
-              movement list, where the cap and its Show more already are. */}
-          <Button asChild variant="ghost">
-            <Link href={seeAllHref}>See all</Link>
-          </Button>
+          {/* Only when there is something to see. The movement list resolves a
+              counterparty id against the counterparties that have movements —
+              a filter has to be able to reach every name in the table, and no
+              further — so a counterparty with none is not one it can filter
+              to, and this link would quietly widen to the whole facility. */}
+          {movements.length === 0 ? null : (
+            <Button asChild variant="ghost">
+              <Link href={seeAllHref}>See all</Link>
+            </Button>
+          )}
         </div>
 
         {movements.length === 0 ? (

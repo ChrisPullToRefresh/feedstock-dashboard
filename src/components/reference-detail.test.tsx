@@ -172,12 +172,15 @@ describe.each([PRODUCER, SITE])("the detail page for $entity", (fixture) => {
     expect(screen.queryAllByRole("listitem")).toHaveLength(0);
   });
 
-  it("still offers See all with no movements", () => {
-    // The link is unconditional: the counterparty's whole history lives on the
-    // movement list, and an empty filtered list is a legible answer.
+  it("offers no See all when there is nothing to see", () => {
+    // The movement list resolves a counterparty id against the counterparties
+    // that have movements, so a counterparty with none cannot be filtered to
+    // and this link would quietly widen to the whole facility.
     renderDetail(fixture, { movements: [] });
 
-    expect(screen.getByRole("link", { name: "See all" })).toBeVisible();
+    expect(
+      screen.queryByRole("link", { name: "See all" }),
+    ).not.toBeInTheDocument();
   });
 
   it("offers no control that edits a movement", () => {

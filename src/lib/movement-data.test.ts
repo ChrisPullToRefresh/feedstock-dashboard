@@ -286,6 +286,18 @@ describe("building the URL", () => {
     expect(showMoreHref({ ...NO_FILTERS, limit: 2 })).toBe("/?limit=102");
   });
 
+  it("never asks for more than the parser will accept", () => {
+    // Without the clamp this would build `?limit=10100`, which parseLimit
+    // refuses and falls back to 100 — tapping Show more at the cap would
+    // collapse the table instead of growing it.
+    expect(showMoreHref({ ...NO_FILTERS, limit: MAX_LIMIT })).toBe(
+      `/?limit=${MAX_LIMIT}`,
+    );
+    expect(showMoreHref({ ...NO_FILTERS, limit: MAX_LIMIT - 50 })).toBe(
+      `/?limit=${MAX_LIMIT}`,
+    );
+  });
+
   it("builds the See all link a detail page needs", () => {
     expect(filterHref(NO_FILTERS, { producerId: "producer_a" })).toBe(
       "/?producer=producer_a",
@@ -384,5 +396,16 @@ describe("the page the query returned", () => {
       visible: [],
       hasMore: false,
     });
+  });
+
+  it("reports no more at the cap, however many rows came back", () => {
+    // There is nowhere further to go, and a control that cannot show more must
+    // not say it can.
+    const atTheCap = Array.from({ length: MAX_LIMIT + 1 }, (_, n) => n);
+
+    expect(pageAtLimit(atTheCap, MAX_LIMIT).hasMore).toBe(false);
+    expect(pageAtLimit(atTheCap, MAX_LIMIT).visible).toHaveLength(MAX_LIMIT);
+    // One short of it, the control still belongs.
+    expect(pageAtLimit(atTheCap, MAX_LIMIT - 1).hasMore).toBe(true);
   });
 });

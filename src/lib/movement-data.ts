@@ -217,9 +217,14 @@ export type MovementFormAction = (
 export const DEFAULT_LIMIT = 100;
 
 /**
- * The most a hand-typed `limit` may ask for. **Show more** raises the limit a
- * hundred at a time, so nothing the page links to comes near this; the cap is
- * what stops `?limit=99999999` pulling the whole table into Node to total it.
+ * The most a `limit` may ask for, whether hand-typed or reached by tapping
+ * **Show more** enough times.
+ *
+ * It bounds the rendered table and nothing else. The totals query is
+ * deliberately unbounded — `plan.md` § Decisions accepts that every matching
+ * row is summed in Node on every load, and only that query's narrow projection
+ * bounds its cost — so this cap is about how many full rows are read, joined
+ * and rendered, not about the arithmetic.
  */
 export const MAX_LIMIT = 10_000;
 
@@ -383,9 +388,20 @@ export function filterHref(
   return movementListHref({ ...filters, ...change, limit: DEFAULT_LIMIT });
 }
 
-/** The next hundred rows, with every filter left exactly as it was. */
+/**
+ * The next hundred rows, with every filter left exactly as it was.
+ *
+ * Clamped to `MAX_LIMIT`, because `parseMovementFilters` refuses anything past
+ * it and falls back to the default: without the clamp, tapping **Show more**
+ * at the cap would collapse the table to its first hundred rows instead of
+ * growing it. `pageAtLimit` stops the control being rendered there at all, so
+ * this clamp is the belt to its braces.
+ */
 export function showMoreHref(filters: MovementFilters): string {
-  return movementListHref({ ...filters, limit: filters.limit + DEFAULT_LIMIT });
+  return movementListHref({
+    ...filters,
+    limit: Math.min(filters.limit + DEFAULT_LIMIT, MAX_LIMIT),
+  });
 }
 
 /** Where **Clear filters** goes — the bare list, with nothing narrowed. */
@@ -403,7 +419,11 @@ export function pageAtLimit<Row>(
   rows: readonly Row[],
   limit: number,
 ): { visible: Row[]; hasMore: boolean } {
-  return { visible: rows.slice(0, limit), hasMore: rows.length > limit };
+  return {
+    visible: rows.slice(0, limit),
+    // At the cap there is no further to go, however many rows came back.
+    hasMore: rows.length > limit && limit < MAX_LIMIT,
+  };
 }
 
 /**

@@ -93,36 +93,39 @@ export default async function MovementsPage({
           <MovementTotals movements={everyMatchingRow} />
 
           {visible.length === 0 ? (
+            // The breakdowns are inside the other branch: with nothing
+            // matching they would both be empty too, and the page would say
+            // "nothing here" three times over one situation.
             <NoMovementsMatch />
           ) : (
             <>
               <MovementList movements={visible} />
               {hasMore ? <ShowMore filters={filters} /> : null}
+
+              <div className="mt-10 grid grid-cols-1 gap-8 md:grid-cols-2">
+                <MovementBreakdown
+                  heading="Inbound by producer"
+                  columnLabel="Producer"
+                  rows={rankCounterpartyTotals(
+                    totalByProducer(everyMatchingRow),
+                    producers,
+                  )}
+                  basePath="/producers"
+                  emptyMessage="No inbound movements in this view."
+                />
+                <MovementBreakdown
+                  heading="Outbound by sequestration site"
+                  columnLabel="Sequestration site"
+                  rows={rankCounterpartyTotals(
+                    totalBySequestrationSite(everyMatchingRow),
+                    sites,
+                  )}
+                  basePath="/sites"
+                  emptyMessage="No outbound movements in this view."
+                />
+              </div>
             </>
           )}
-
-          <div className="mt-10 grid grid-cols-1 gap-8 md:grid-cols-2">
-            <MovementBreakdown
-              heading="Inbound by producer"
-              columnLabel="Producer"
-              rows={rankCounterpartyTotals(
-                totalByProducer(everyMatchingRow),
-                producers,
-              )}
-              basePath="/producers"
-              emptyMessage="No inbound movements match these filters."
-            />
-            <MovementBreakdown
-              heading="Outbound by sequestration site"
-              columnLabel="Sequestration site"
-              rows={rankCounterpartyTotals(
-                totalBySequestrationSite(everyMatchingRow),
-                sites,
-              )}
-              basePath="/sites"
-              emptyMessage="No outbound movements match these filters."
-            />
-          </div>
         </>
       )}
     </section>

@@ -6,7 +6,23 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ReferenceForm } from "@/components/reference-form";
 import { Prisma } from "@/generated/prisma/client";
 import { Direction } from "@/generated/prisma/enums";
+import type { ListedMovement } from "@/lib/movement-queries";
 import type { MovementForTotals } from "@/lib/totals";
+
+/** A row the recent-movements list renders, so **See all** has something to
+ * see — the link is hidden when a counterparty has no movements. */
+const listedOutbound = (): ListedMovement => ({
+  id: "m1",
+  direction: Direction.OUTBOUND,
+  weightKg: new Prisma.Decimal("300"),
+  recordedAt: new Date("2026-08-18T13:45:00.000Z"),
+  producer: null,
+  sequestrationSite: {
+    id: "s1",
+    name: "Basalt Ridge Injection Site",
+    isActive: true,
+  },
+});
 
 /** A row the totals read, as the counterparty query would return it. */
 const outboundRow = (weightKg: string): MovementForTotals => ({
@@ -133,7 +149,7 @@ describe("the detail route", () => {
   beforeEach(() => {
     findSite.mockReset();
     notFound.mockClear();
-    listRecentMovementsFor.mockReset().mockResolvedValue([]);
+    listRecentMovementsFor.mockReset().mockResolvedValue([listedOutbound()]);
     listMovementsForCounterpartyTotals
       .mockReset()
       .mockResolvedValue([outboundRow("900"), outboundRow("250")]);

@@ -101,6 +101,19 @@ describe("the movements page", () => {
     ).toBeVisible();
   });
 
+  it("does not claim a filter is set when none is", async () => {
+    // An empty breakdown on a bare `/` is not a filter matching nothing — a
+    // facility whose movements are all outbound has an empty inbound one.
+    listMovementsForTotals.mockResolvedValue([outboundTotal("900")]);
+
+    await renderPage();
+
+    expect(
+      screen.getByText("No inbound movements in this view."),
+    ).toBeVisible();
+    expect(screen.queryByText(/match these filters/)).not.toBeInTheDocument();
+  });
+
   it("renders the breakdowns heaviest first, from the totals query", async () => {
     await renderPage();
 
@@ -192,6 +205,23 @@ describe("the page's two empty states", () => {
     // The filters stay, so the way out is reachable without a reload.
     expect(screen.getByRole("combobox", { name: "Direction" })).toBeVisible();
     expect(screen.queryAllByRole("listitem")).toHaveLength(0);
+  });
+
+  it("says nothing here once, not three times over", async () => {
+    listMovements.mockResolvedValue([]);
+    listMovementsForTotals.mockResolvedValue([]);
+
+    await renderPage({ direction: Direction.OUTBOUND, producer: "producer_b" });
+
+    // The breakdowns would both be empty in this state too, so rendering them
+    // beside the empty state stacks three "nothing here" messages on one
+    // situation.
+    expect(
+      screen.queryByRole("region", { name: "Inbound by producer" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("region", { name: "Outbound by sequestration site" }),
+    ).not.toBeInTheDocument();
   });
 
   it("renders the table, not an empty state, when rows come back", async () => {
