@@ -1,5 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 
 import { ReferenceDetail } from "@/components/reference-detail";
@@ -190,6 +192,32 @@ describe.each([PRODUCER, SITE])("the detail page for $entity", (fixture) => {
 });
 
 describe("the two pages side by side", () => {
+  const routeSource = (entity: string) =>
+    readFileSync(
+      join(process.cwd(), `src/app/(app)/${entity}/[id]/page.tsx`),
+      "utf8",
+    );
+
+  it("leaves neither route duplicating the other's markup", () => {
+    // The extraction is only real if the routes stopped carrying the page.
+    // Each renders one element and nothing else — no heading, no buttons, no
+    // archive dialog of its own.
+    for (const entity of ["producers", "sites"]) {
+      const source = routeSource(entity);
+
+      expect(source).toContain("<ReferenceDetail");
+      for (const markup of [
+        "<h1",
+        "<h2",
+        "<Button",
+        "<ArchiveDialog",
+        "<Link",
+      ]) {
+        expect(source).not.toContain(markup);
+      }
+    }
+  });
+
   it("takes every difference from props, not from a branch inside", () => {
     // The extraction's whole point: the words that differ arrive as props, so
     // neither page can drift from the other's structure.
