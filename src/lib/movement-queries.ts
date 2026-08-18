@@ -1,7 +1,7 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { Direction } from "@/generated/prisma/enums";
 import { db } from "@/lib/db";
-import type { CounterpartyOption } from "@/lib/movement-data";
+import type { CounterpartyOption, MovementFilters } from "@/lib/movement-data";
 
 /**
  * Reading counterparties and writing movements.
@@ -70,5 +70,68 @@ export function recordMovement({
         : { sequestrationSiteId: counterpartyId }),
     },
     select: { id: true },
+  });
+}
+
+/**
+ * What the movement list and the detail pages read off a movement.
+ *
+ * Both counterparties are selected because a row carries exactly one of them —
+ * Phase 2's check constraint — and which one is decided by `direction` rather
+ * than by the query. Each carries `isActive`, so an archived counterparty can
+ * be named and marked wherever it appears.
+ */
+const LISTED_MOVEMENT_SELECT = {
+  id: true,
+  direction: true,
+  weightKg: true,
+  recordedAt: true,
+  producer: { select: { id: true, name: true, isActive: true } },
+  sequestrationSite: { select: { id: true, name: true, isActive: true } },
+} satisfies Prisma.MovementSelect;
+
+export type ListedMovement = Prisma.MovementGetPayload<{
+  select: typeof LISTED_MOVEMENT_SELECT;
+}>;
+
+/**
+ * The three filters, as a `where`.
+ *
+ * An unset filter contributes nothing rather than a null comparison, so the
+ * unfiltered list reads the whole table and a filtered one narrows it. Both
+ * movement queries share this, which is what stops the table and the totals
+ * describing different sets of rows.
+ */
+function movementWhere(filters: MovementFilters): Prisma.MovementWhereInput {
+  return {
+    ...(filters.direction !== null ? { direction: filters.direction } : {}),
+    ...(filters.producerId !== null ? { producerId: filters.producerId } : {}),
+    ...(filters.sequestrationSiteId !== null
+      ? { sequestrationSiteId: filters.sequestrationSiteId }
+      : {}),
+  };
+}
+
+/**
+ * The movements the table shows, newest first.
+ *
+ * Reads one row more than the page displays, so whether a **Show more**
+ * control belongs is answered by this query rather than by a second count —
+ * `specs/2026-08-18-movement-list-and-totals/plan.md` § Decisions. The caller
+ * renders `limit` rows and reads the extra one as "there are more".
+ *
+ * The id breaks a tie on `recordedAt`. Two movements written in the same
+ * instant would otherwise come back in whatever order Postgres found them,
+ * which across a **Show more** round trip is how a row gets shown twice or
+ * skipped entirely.
+ */
+export function listMovements(
+  filters: MovementFilters,
+): Promise<ListedMovement[]> {
+  return db.movement.findMany({
+    where: movementWhere(filters),
+    orderBy: [{ recordedAt: "desc" }, { id: "desc" }],
+    take: filters.limit + 1,
+    select: LISTED_MOVEMENT_SELECT,
   });
 }
