@@ -204,3 +204,64 @@ export function listSitesWithMovements(): Promise<CounterpartyFilterOption[]> {
     select: { id: true, name: true, isActive: true },
   });
 }
+
+/**
+ * How many of a counterparty's movements its detail page lists.
+ *
+ * Enough to show the shape of recent activity without the page becoming a
+ * second movement list — `plan.md` § Decisions. Twenty-five was declined as a
+ * long stacked list on a phone before the edit and archive controls come back
+ * into reach; five as barely a sample. **See all** carries the rest to the
+ * movement list, where the cap and its **Show more** already live.
+ */
+export const RECENT_MOVEMENT_COUNT = 10;
+
+/**
+ * One counterparty's movements, expressed as filters over the whole table.
+ *
+ * Keyed on the column matching the direction and never the other: a producer
+ * is an inbound idea and a sequestration site an outbound one, which is what
+ * Phase 2's check constraint already guarantees. Written as `MovementFilters`
+ * so a detail page reads its rows through exactly the query the movement list
+ * does — one set of rows cannot then be filtered two different ways.
+ */
+function counterpartyFilters(
+  direction: Direction,
+  counterpartyId: string,
+): MovementFilters {
+  const isInbound = direction === Direction.INBOUND;
+
+  return {
+    direction,
+    producerId: isInbound ? counterpartyId : null,
+    sequestrationSiteId: isInbound ? null : counterpartyId,
+    limit: RECENT_MOVEMENT_COUNT,
+  };
+}
+
+/** The newest of one counterparty's movements, for its detail page. */
+export function listRecentMovementsFor(
+  direction: Direction,
+  counterpartyId: string,
+): Promise<ListedMovement[]> {
+  return db.movement.findMany({
+    where: movementWhere(counterpartyFilters(direction, counterpartyId)),
+    orderBy: [{ recordedAt: "desc" }, { id: "desc" }],
+    // Exactly ten, not ten plus one: a detail page has no Show more to decide
+    // about. Its See all link is unconditional.
+    take: RECENT_MOVEMENT_COUNT,
+    select: LISTED_MOVEMENT_SELECT,
+  });
+}
+
+/** Every one of a counterparty's movements, in the columns the sum reads.
+ *
+ * The detail page's total is that counterparty's whole history, not the ten
+ * rows above it — the same separation the movement list makes between its
+ * table and its totals. */
+export function listMovementsForCounterpartyTotals(
+  direction: Direction,
+  counterpartyId: string,
+): Promise<MovementForTotals[]> {
+  return listMovementsForTotals(counterpartyFilters(direction, counterpartyId));
+}
