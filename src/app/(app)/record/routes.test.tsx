@@ -47,6 +47,9 @@ const routes = [
       { id: "prd_1", name: "Aspen Ridge Timber" },
       { id: "prd_2", name: "Riverbend Sawmill" },
     ],
+    emptyTitle: "No producers yet",
+    emptyActionLabel: "Add the first producer",
+    createPath: "/producers/new",
   },
   {
     name: "feedstock out",
@@ -62,6 +65,9 @@ const routes = [
       { id: "sit_1", name: "Alkali Flat Storage" },
       { id: "sit_2", name: "Harney Basin Storage" },
     ],
+    emptyTitle: "No sequestration sites yet",
+    emptyActionLabel: "Add the first sequestration site",
+    createPath: "/sites/new",
   },
 ];
 
@@ -83,6 +89,9 @@ describe.each(routes)(
     query,
     otherQuery,
     rows,
+    emptyTitle,
+    emptyActionLabel,
+    createPath,
   }) => {
     beforeEach(() => {
       listActiveProducers.mockReset().mockResolvedValue([]);
@@ -144,6 +153,30 @@ describe.each(routes)(
       render(await Route());
 
       expect(listedOptions()).toEqual(rows.map((row) => row.name));
+    });
+
+    it("shows a way out instead of a form when there is nothing to offer", async () => {
+      query.mockResolvedValue([]);
+
+      render(await Route());
+
+      // A required dropdown with nothing in it is a dead end: told to choose,
+      // given nothing to choose from, and no way to find out why.
+      expect(screen.getByText(emptyTitle)).toBeVisible();
+      expect(
+        screen.getByRole("link", { name: emptyActionLabel }),
+      ).toHaveAttribute("href", createPath);
+      expect(screen.queryByLabelText("Weight (kg)")).not.toBeInTheDocument();
+      expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+    });
+
+    it("shows the form and no empty state once there is something to offer", async () => {
+      query.mockResolvedValue(rows);
+
+      render(await Route());
+
+      expect(screen.getByLabelText("Weight (kg)")).toBeVisible();
+      expect(screen.queryByText(emptyTitle)).not.toBeInTheDocument();
     });
   },
 );
