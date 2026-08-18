@@ -183,6 +183,15 @@ sequestration-site logins.
   then delete with `git branch -D`. Do not diff against `main` to check this: it compares
   tips, so it is non-empty for any branch older than the last merge.
 
+  The branch's Neon database branch is pruned in the same pass. Vercel's Neon integration
+  creates one per preview deployment as a required step, and deleting the git branch does
+  not take it with it. They accumulate silently against the Free plan's cap, and the
+  symptom lands on an unrelated pull request: the next new branch's first preview fails
+  before the build starts, with "Branch limit reached" and no build log, which reads as a
+  broken pull request rather than a full database. Phase 5's spec branch is where this
+  first bit. Delete the branch named for the merged git branch in the Neon console. Never
+  delete `main` — that is production.
+
 ## Open questions
 
 None outstanding for the tech stack.
