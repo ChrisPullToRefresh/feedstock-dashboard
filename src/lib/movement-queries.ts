@@ -2,6 +2,7 @@ import type { Prisma } from "@/generated/prisma/client";
 import { Direction } from "@/generated/prisma/enums";
 import { db } from "@/lib/db";
 import type { CounterpartyOption, MovementFilters } from "@/lib/movement-data";
+import type { MovementForTotals } from "@/lib/totals";
 
 /**
  * Reading counterparties and writing movements.
@@ -133,5 +134,32 @@ export function listMovements(
     orderBy: [{ recordedAt: "desc" }, { id: "desc" }],
     take: filters.limit + 1,
     select: LISTED_MOVEMENT_SELECT,
+  });
+}
+
+/**
+ * Every row the filters match, in the four columns the arithmetic reads.
+ *
+ * Separate from `listMovements` because the totals describe the filtered set
+ * and not the page — `plan.md` § Decisions. Summing only the loaded rows would
+ * move both figures every time someone tapped **Show more**, which is not what
+ * a running total means.
+ *
+ * The projection is exactly `MovementForTotals`, the shape `totals.ts` declared
+ * in Phase 2 against the day this phase would feed it. There is no `take`: the
+ * cap bounds the table, and only this narrow select bounds the cost of the
+ * sum.
+ */
+export function listMovementsForTotals(
+  filters: MovementFilters,
+): Promise<MovementForTotals[]> {
+  return db.movement.findMany({
+    where: movementWhere(filters),
+    select: {
+      direction: true,
+      weightKg: true,
+      producerId: true,
+      sequestrationSiteId: true,
+    },
   });
 }
