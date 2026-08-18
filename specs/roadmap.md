@@ -188,12 +188,12 @@ to end.
 - [ ] Outbound movements are recorded with a weight in kilograms and a sequestration site
       selected from a dropdown
 - [x] Feedstock producers can be created, edited, listed, and archived
-- [ ] Sequestration sites can be created, edited, listed, and archived
+- [x] Sequestration sites can be created, edited, listed, and archived
 - [ ] The movement list shows every movement, filterable, with running totals by producer
       and by sequestration site
 - [ ] Movement entry is usable one-handed on a phone; review is comfortable on desktop
 - [x] Clerk gates the app and staff accounts are provisioned via the Backend API
-- [ ] The Prisma schema and all migrations are checked in and run clean on a fresh
+- [x] The Prisma schema and all migrations are checked in and run clean on a fresh
       database
 - [ ] Lint, typecheck, Vitest, and the full Playwright suite pass in GitHub Actions and
       are required to merge

@@ -11,8 +11,8 @@ does not do. `specs/tech-stack.md` holds the binding technical decisions, and
 
 ## Running it locally
 
-Node is pinned by `.nvmrc`. `engines` sets a floor of 22.13.0 and `.npmrc` sets
-`engine-strict`, so an install on an older Node fails by name rather than dying
+Node is pinned by `.nvmrc`. `engines` pins the major to `24.x` and `.npmrc` sets
+`engine-strict`, so an install on another major fails by name rather than dying
 later inside a dependency.
 
 ```bash
@@ -25,19 +25,22 @@ npm run dev
 Without `.env.local` the app will not start: Clerk needs a publishable key at
 render time. `.env.local` is git-ignored and must stay that way.
 
-| Command                        | What it does                        |
-| ------------------------------ | ----------------------------------- |
-| `npm run dev`                  | Development server on port 3000     |
-| `npm run build`                | Production build                    |
-| `npm run lint`                 | ESLint, zero warnings tolerated     |
-| `npm run typecheck`            | `tsc --noEmit`                      |
-| `npm test`                     | Vitest, once                        |
-| `npm run test:watch`           | Vitest, watching                    |
-| `npm run format`               | Prettier, writing                   |
-| `npm run provision -- <email>` | Creates a staff account — see below |
+| Command                        | What it does                         |
+| ------------------------------ | ------------------------------------ |
+| `npm run dev`                  | Development server on port 3000      |
+| `npm run build`                | Production build                     |
+| `npm run lint`                 | ESLint, zero warnings tolerated      |
+| `npm run typecheck`            | `tsc --noEmit`                       |
+| `npm test`                     | Vitest, once                         |
+| `npm run test:watch`           | Vitest, watching                     |
+| `npm run format`               | Prettier, writing                    |
+| `npm run seed`                 | Loads the reference data, idempotent |
+| `npm run provision -- <email>` | Creates a staff account — see below  |
 
-`Lint`, `Typecheck`, `Test`, and `Commit convention` all run on every pull
-request and are required to merge.
+Six checks are required on `main` and must be green to merge: `Lint`,
+`Typecheck`, `Test`, `Commit convention`, and `Database` in GitHub Actions, plus
+the `Vercel` preview deployment. `specs/tech-stack.md` § CI/CD is the authority
+on what each one does.
 
 ## Accounts
 
@@ -76,12 +79,19 @@ This project has not named one yet, which is tracked in
 ```
 src/app/(app)/     Everything behind authentication — renders inside the shell
 src/app/sign-in/   Outside the group, so it renders without navigation
-src/components/    Shell, sign-out control, and shadcn/ui components under ui/
-src/lib/           Navigation, route rules, provisioning, helpers
+src/components/    Shell, sign-out control, the shared reference-data
+                   components, and shadcn/ui components under ui/
+src/lib/           Navigation, route rules, the name schema, Prisma queries,
+                   weight and totals arithmetic, provisioning, helpers
 src/proxy.ts       The gate: everything is protected except the public list
+prisma/            Schema, checked-in migrations, and the seed script
 scripts/           Operational commands, run by hand
 specs/             Mission, tech stack, roadmap, and one folder per phase
 ```
+
+Producers and sequestration sites are one surface built twice over: the form,
+the list, the archive dialog and the toast in `src/components/reference-*.tsx`
+are shared, and each entity brings its own queries, Server Actions and routes.
 
 Routes are protected by exception: `src/lib/routes.ts` lists what is reachable
 signed out, and everything else requires a session. A page added in a later
