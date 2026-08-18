@@ -16,6 +16,7 @@ import {
   movementSchema,
   type MovementSearchParams,
   NO_FILTERS,
+  pageAtLimit,
   parseMovementFilters,
   showMoreHref,
   WEIGHT_REFUSALS,
@@ -352,5 +353,36 @@ describe("when a movement was recorded", () => {
 
     expect(new Set(rendered).size).toBe(1);
     expect(rendered[0]).toBe("18 Aug 2026, 23:30 UTC");
+  });
+});
+
+describe("the page the query returned", () => {
+  const rows = [1, 2, 3];
+
+  it("renders the limit's worth and reports there is more", () => {
+    // The query takes limit + 1 rows, so the extra one answers "is there
+    // more" without a second count. It is never rendered.
+    expect(pageAtLimit(rows, 2)).toEqual({ visible: [1, 2], hasMore: true });
+  });
+
+  it("reports no more when exactly the limit came back", () => {
+    expect(pageAtLimit(rows, 3)).toEqual({
+      visible: [1, 2, 3],
+      hasMore: false,
+    });
+  });
+
+  it("reports no more when fewer than the limit came back", () => {
+    expect(pageAtLimit(rows, DEFAULT_LIMIT)).toEqual({
+      visible: [1, 2, 3],
+      hasMore: false,
+    });
+  });
+
+  it("handles nothing at all", () => {
+    expect(pageAtLimit([], DEFAULT_LIMIT)).toEqual({
+      visible: [],
+      hasMore: false,
+    });
   });
 });

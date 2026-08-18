@@ -392,6 +392,21 @@ export function showMoreHref(filters: MovementFilters): string {
 export const CLEARED_FILTERS_HREF = movementListHref(NO_FILTERS);
 
 /**
+ * Splits what `listMovements` returned into the rows to render and whether a
+ * **Show more** control belongs.
+ *
+ * The query reads `limit + 1` rows, so the extra one is the answer to "is
+ * there more" — `plan.md` § Decisions, which is why the page needs no second
+ * count. The extra row is never rendered.
+ */
+export function pageAtLimit<Row>(
+  rows: readonly Row[],
+  limit: number,
+): { visible: Row[]; hasMore: boolean } {
+  return { visible: rows.slice(0, limit), hasMore: rows.length > limit };
+}
+
+/**
  * A direction in the yard's words, not the enum's.
  *
  * The same two phrases Phase 5's chooser and forms already use — "Feedstock
