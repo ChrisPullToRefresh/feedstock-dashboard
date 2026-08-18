@@ -62,7 +62,12 @@ export function MovementTotals({
   movements: readonly MovementForTotals[];
 }) {
   return (
-    <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+    // Named, so the two figures are announced as a block of their own and are
+    // not confused with the same numbers in a breakdown below.
+    <section
+      aria-label="Running totals"
+      className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2"
+    >
       {/* Both are always rendered. Under a direction filter the other reads
           0 kg rather than disappearing, so nobody reads a missing figure as an
           unknown one. */}
@@ -76,6 +81,6 @@ export function MovementTotals({
         label={DIRECTION_LABEL[Direction.OUTBOUND]}
         weightKg={formatWeightKg(totalOutboundKg(movements))}
       />
-    </div>
+    </section>
   );
 }

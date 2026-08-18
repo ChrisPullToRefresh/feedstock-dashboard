@@ -43,7 +43,9 @@ export function MovementBreakdown({
   emptyMessage: string;
 }) {
   return (
-    <section>
+    // Named from its own heading, so each breakdown is announced as a block and
+    // a weight in one is never read as a weight in the other.
+    <section aria-label={heading}>
       <h2 className="mb-3 text-lg font-semibold tracking-tight">{heading}</h2>
 
       {rows.length === 0 ? (

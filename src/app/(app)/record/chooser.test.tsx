@@ -4,9 +4,9 @@ import { describe, expect, it } from "vitest";
 import RecordPage from "@/app/(app)/record/page";
 
 /*
- * `/record` was a PlaceholderPage until this phase. These assert the swap
- * happened; `src/app/(app)/producers/list-page.test.tsx` asserts that the one
- * placeholder still standing — `/`, behind Phase 6 — was not taken with it.
+ * `/record` was a PlaceholderPage until Phase 5. These assert the swap
+ * happened. Phase 6 took the last placeholder — `/` — and deleted the
+ * component with it; `src/app/(app)/movements-page.test.tsx` asserts that.
  */
 describe("the record chooser", () => {
   it("renders the two directions, not the placeholder", () => {

@@ -16,9 +16,9 @@ vi.mock("next/navigation", () => ({
 const { default: SitesPage } = await import("@/app/(app)/sites/page");
 
 /*
- * `/sites` was a PlaceholderPage until this phase. These assert the swap
- * happened; `src/app/(app)/producers/list-page.test.tsx` asserts the two
- * placeholders that remain were not taken with it.
+ * `/sites` was a PlaceholderPage until Phase 4. These assert the swap
+ * happened. Phase 6 took the last placeholder — `/` — and deleted the
+ * component with it; `src/app/(app)/movements-page.test.tsx` asserts that.
  */
 describe("the sites route", () => {
   it("renders the real list, not the placeholder", async () => {
