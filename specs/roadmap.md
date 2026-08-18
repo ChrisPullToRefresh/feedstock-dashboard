@@ -146,6 +146,12 @@ are reflected in the totals.
   sequestration site, and still readable on a phone
 - Running totals: inbound and outbound weight overall, and broken down by producer and by
   sequestration site
+- Extract the shared reference detail page before rendering totals into it.
+  `/producers/[id]` and `/sites/[id]` are near-identical and differ in five things — the
+  query, the archive action, one sentence of description, the edit path, and the confirm
+  label. Phase 4 generalized the form, the list, the archive dialog and the toast, and
+  stopped one short of this one. This phase gives both pages a counterparty's movements
+  and totals, so it extracts them first rather than adding the same block twice
 - Unit tests over the totals calculations
 
 ## Phase 7 — End-to-end coverage
@@ -206,7 +212,14 @@ to end.
 Deferred, unordered, unlabeled. Nothing here is committed to a version.
 
 - IoT weight capture, so weights are not entered by hand — Viam is the candidate
-  framework named in `specs/VISION.md`
+  framework named in `specs/VISION.md`. This is also what settles the movement timestamp:
+  `recordedAt` is entry time rather than scale time only because a person is typing after
+  the fact, and a machine reading the scale records both at once
+- A screen for archived producers and sequestration sites. Today the only route back to an
+  archived row is typing its name into the create form and taking the restore offer, so a
+  row nobody can name exactly cannot be reached. Phase 6's totals still show archived
+  counterparties that carry movement history, so what is deferred here is managing them,
+  not seeing them
 - Offline-tolerant data entry with queue and sync
 - Multiple facilities
 - Charts and trend dashboards beyond the movement list and totals

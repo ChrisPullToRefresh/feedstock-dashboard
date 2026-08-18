@@ -120,12 +120,19 @@ adjusting entry — `specs/mission.md` § Constraints.
 
 ## Open questions
 
-- **Whether the entry timestamp needs to be correctable.** `recordedAt` is the database's
-  `now()`, so a weighing entered after the fact carries entry time, not scale time — and
-  being append-only, nothing can correct it. Parked deliberately: the user chose the
-  database default and asked for the limitation recorded rather than settled.
-- **Whether archived rows ever need a screen.** Carried forward from Phases 3 and 4.
-  Phase 5 makes it sharper in one direction only: archiving now removes a counterparty
-  from a dropdown an operator is actively using.
-- **Whether the detail page earns its place before Phase 6.** Carried forward from
-  Phases 3 and 4, untouched by this phase.
+None outstanding. All three were settled once the implementation existed, and are recorded
+struck through rather than deleted so the reasoning stays with the phase that raised them.
+
+- ~~**Whether the entry timestamp needs to be correctable.**~~ No. An editable timestamp
+  was specified and then withdrawn before any of it was built, on the ground that the whole
+  category is temporary: back-dating exists only because a person is typing after the fact,
+  and `specs/roadmap.md` § After v0.1 has a machine reading the scale through the Viam API,
+  which records the weighing and its time in the same moment. Building the control now
+  means building what that work deletes. `recordedAt` stays the database's `now()`.
+- ~~**Whether archived rows ever need a screen.**~~ Not in v0.1 — now deferred work in
+  `specs/roadmap.md` § After v0.1. This phase's sharpening of the question is answered in
+  the code rather than by a screen: a stale dropdown is refused by name and refreshed,
+  which is what an operator holding an archived counterparty actually needs.
+- ~~**Whether the detail page earns its place before Phase 6.**~~ It does.
+  `specs/roadmap.md` Phase 6 extracts what the two detail pages duplicate rather than
+  deleting either.

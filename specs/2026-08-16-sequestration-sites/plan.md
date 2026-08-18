@@ -215,7 +215,9 @@ no obvious place to live in them.
 
 ## Open questions
 
-- **Whether archived rows ever need a screen.** Carried in `requirements.md`
-  § Open questions, and now for both entities rather than one.
-- **Whether the detail page earns its place before Phase 6.** Carried in `requirements.md`
-  § Open questions. Phase 3 parked it; this phase doubles the cost of getting it wrong.
+- ~~**Whether archived rows ever need a screen.**~~ Settled after Phase 5 shipped.
+  Answered in `requirements.md` § Open questions.
+- ~~**Whether the detail page earns its place before Phase 6.**~~ Settled after Phase 5
+  shipped, and the doubled cost this entry worried about is what the answer acts on:
+  `specs/roadmap.md` Phase 6 extracts the shared detail page. Answered in
+  `requirements.md` § Open questions.

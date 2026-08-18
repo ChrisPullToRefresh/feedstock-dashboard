@@ -112,13 +112,15 @@ Phase 0. Page headings, the empty state, the archive dialog and the toasts say
 
 ## Open questions
 
-- **Whether archived sites and archived producers ever need a screen of their own.** This
-  phase ships none, so the only way to reach an archived row is the name-collision restore
-  path. Phase 3 carried this question for producers; generalizing the surface now carries it
-  for both. If it proves too narrow in use, a list behind a filter is the smallest fix, and
-  it would be one fix for both entities rather than two.
-- **Whether the detail page earns its place before Phase 6.** It shows one field, for
-  producers and now for sites. It exists because `specs/roadmap.md` Phase 6 will want
-  somewhere to hang a counterparty's movements and totals, and that is still a guess about
-  Phase 6 rather than a requirement of this one. Phase 3 parked this; this phase doubles the
-  cost of getting it wrong.
+None outstanding. Both were settled after Phase 5 shipped, and are recorded struck through
+rather than deleted so the reasoning stays with the phase that raised them.
+
+- ~~**Whether archived sites and archived producers ever need a screen of their own.**~~
+  Not in v0.1, for either entity. The name-collision restore path stays the only route
+  back. `specs/roadmap.md` § After v0.1 carries the screen as deferred work, and it is one
+  deferral for both entities rather than two, exactly as generalizing the surface implied.
+- ~~**Whether the detail page earns its place before Phase 6.**~~ It does, for both. What
+  this phase got wrong was mirroring it rather than extracting it — the same fault the
+  rest of the phase existed to fix, applied everywhere except here.
+  `specs/roadmap.md` Phase 6 extracts the shared detail page before rendering totals into
+  it.
