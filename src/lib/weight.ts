@@ -1,4 +1,5 @@
 import { Prisma } from "@/generated/prisma/client";
+import { MAX_WEIGHT_KG, WEIGHT_DECIMAL_PLACES } from "@/lib/movement-data";
 
 /**
  * Weights in kilograms, held exactly.
@@ -8,19 +9,14 @@ import { Prisma } from "@/generated/prisma/client";
  * because Phase 6's running totals are precisely where binary floats drift.
  * Nothing here touches a database, so Phase 5's forms and Phase 6's totals
  * both build on arithmetic that is tested on its own.
+ *
+ * The two bounds come from `movement-data.ts` rather than being declared here.
+ * Phase 5's form validates the same column from the browser, and that module is
+ * the one both sides can import — this one constructs a `Prisma.Decimal` and so
+ * belongs to the server. One column, one statement of its precision.
  */
 
-/** Grams are the smallest unit the column can hold. */
-export const WEIGHT_DECIMAL_PLACES = 3;
-
-/**
- * The largest weight `Decimal(12, 3)` can hold: twelve digits of precision,
- * three of them after the point, so nine before it. A weight above this is
- * refused here rather than by Postgres, which would raise a numeric overflow
- * at INSERT — a raw failure at the write, well past the form that could have
- * said something useful about it.
- */
-export const MAX_WEIGHT_KG = "999999999.999";
+export { MAX_WEIGHT_KG, WEIGHT_DECIMAL_PLACES };
 
 /**
  * Why an entered weight was refused. Separate cases rather than one message,

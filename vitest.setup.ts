@@ -24,6 +24,25 @@ if (typeof window !== "undefined" && window.matchMedia === undefined) {
     }) as unknown as MediaQueryList;
 }
 
+// jsdom implements neither pointer capture nor the observers Radix's Select
+// uses to place its listbox, and it stubs no scrolling. Phase 5's counterparty
+// dropdowns are the first Radix component this suite drives by pointer, so
+// without these every click on a trigger throws before the list opens. None of
+// them change behavior under test — they let the component reach the state a
+// real browser would put it in.
+if (typeof window !== "undefined") {
+  Element.prototype.hasPointerCapture ??= () => false;
+  Element.prototype.setPointerCapture ??= () => {};
+  Element.prototype.releasePointerCapture ??= () => {};
+  Element.prototype.scrollIntoView ??= () => {};
+
+  window.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}
+
 afterEach(() => {
   cleanup();
 });
