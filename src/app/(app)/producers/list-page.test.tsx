@@ -14,16 +14,16 @@ vi.mock("next/navigation", () => ({
 }));
 
 const { default: ProducersPage } = await import("@/app/(app)/producers/page");
-const { default: RecordPage } = await import("@/app/(app)/record/page");
 const { default: MovementsPage } = await import("@/app/(app)/page");
 
 /*
  * `/producers` was a PlaceholderPage until Phase 3. These assert the swap
  * happened and that it did not take the remaining placeholders with it.
  *
- * Phase 4 took `/sites` off this list, because it is a real page now —
- * `src/app/(app)/sites/list-page.test.tsx` asserts that. `/` and `/record`
- * stand behind Phases 6 and 5.
+ * Phase 4 took `/sites` off this list and Phase 5 took `/record` off it, each
+ * because it is a real page now — `src/app/(app)/sites/list-page.test.tsx` and
+ * `src/app/(app)/record/chooser.test.tsx` assert those. `/` alone stands
+ * behind a later phase, Phase 6.
  */
 describe("the producers route", () => {
   it("renders the real list, not the placeholder", async () => {
@@ -50,12 +50,12 @@ describe("the producers route", () => {
 });
 
 describe("the routes still waiting on later phases", () => {
-  it.each([
-    { name: "/record", Page: RecordPage },
-    { name: "/", Page: MovementsPage },
-  ])("$name still renders its placeholder", ({ Page }) => {
-    render(<Page />);
+  it.each([{ name: "/", Page: MovementsPage }])(
+    "$name still renders its placeholder",
+    ({ Page }) => {
+      render(<Page />);
 
-    expect(screen.getByText(/Arrives in Phase/i)).toBeVisible();
-  });
+      expect(screen.getByText(/Arrives in Phase/i)).toBeVisible();
+    },
+  );
 });
