@@ -1,7 +1,11 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { Direction } from "@/generated/prisma/enums";
 import { db } from "@/lib/db";
-import type { CounterpartyOption, MovementFilters } from "@/lib/movement-data";
+import type {
+  CounterpartyFilterOption,
+  CounterpartyOption,
+  MovementFilters,
+} from "@/lib/movement-data";
 import type { MovementForTotals } from "@/lib/totals";
 
 /**
@@ -12,9 +16,13 @@ import type { MovementForTotals } from "@/lib/totals";
  * into the browser bundle — `specs/2026-08-17-movement-entry/plan.md`
  * § Decisions.
  *
- * The dropdown listings are not here: `listActiveProducers` and
+ * The entry forms' dropdown listings are not here: `listActiveProducers` and
  * `listActiveSites` already exist in `producer-queries.ts` and
- * `site-queries.ts`, and the routes read them directly.
+ * `site-queries.ts`, and the record routes read them directly. The movement
+ * list's filter dropdowns are a different question — every counterparty that
+ * has movements, archived included — and those queries do live here, because
+ * `specs/2026-08-18-movement-list-and-totals/plan.md` § Decisions keeps a query
+ * written for the movements page out of a module named for another one.
  */
 
 /**
@@ -161,5 +169,38 @@ export function listMovementsForTotals(
       producerId: true,
       sequestrationSiteId: true,
     },
+  });
+}
+
+/**
+ * The counterparties a filter dropdown offers: every one that has at least one
+ * movement, archived included, each carrying its flag.
+ *
+ * Not `listActiveProducers` and `listActiveSites`, which is what the entry
+ * forms use — `plan.md` § Decisions. An archived producer's rows still appear
+ * in this table and its weight still appears in the breakdown, so a filter
+ * that could not reach it would be a table nobody can narrow.
+ * `specs/roadmap.md` § After v0.1 settles the same point: what is deferred is
+ * managing archived counterparties, not seeing them.
+ *
+ * Filtered on having movements rather than offering the full reference lists,
+ * so no dropdown is padded with names that filter to an empty table.
+ */
+export function listProducersWithMovements(): Promise<
+  CounterpartyFilterOption[]
+> {
+  return db.producer.findMany({
+    where: { movements: { some: {} } },
+    orderBy: { name: "asc" },
+    select: { id: true, name: true, isActive: true },
+  });
+}
+
+/** The same, for the sequestration sites an outbound filter can name. */
+export function listSitesWithMovements(): Promise<CounterpartyFilterOption[]> {
+  return db.sequestrationSite.findMany({
+    where: { movements: { some: {} } },
+    orderBy: { name: "asc" },
+    select: { id: true, name: true, isActive: true },
   });
 }
