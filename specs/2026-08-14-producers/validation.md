@@ -8,7 +8,7 @@ Nothing in this section touches a database. No database test harness exists befo
 `specs/roadmap.md` Phase 7, which is why the Server Actions and query helpers are proven
 by the manual pass below rather than here.
 
-**Route protection** (`src/middleware.ts`) — a test over `config.matcher`, which nothing
+**Route protection** (`src/proxy.ts`) — a test over `config.matcher`, which nothing
 asserts today:
 
 - `/producers/acme.co` is matched, so the middleware runs and protects it. This is the

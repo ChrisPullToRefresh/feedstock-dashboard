@@ -171,6 +171,32 @@ whenever one entity needs something the other does not.
 The cost accepted: the same handful of props is repeated across four routes per entity, and
 Phase 5's dropdowns will have to name the routes themselves rather than importing them.
 
+**Both reference lists render per request, never prerendered.**
+
+Decided during implementation, after `/code-review` found it. `/sites` and `/producers`
+are Server Components awaiting a database query with no dynamic API, so Next prerendered
+them: `next build` ran the query and baked the rows it found into `sites.html`. Both pages
+now carry `export const dynamic = "force-dynamic"`.
+
+Only the Server Actions call `revalidatePath`, so a write that does not go through one is
+never reflected — and `vercel-build` is `prisma migrate deploy && next build` while
+seeding is a separate `npm run seed`. On a freshly seeded database the build would
+prerender the empty state, and the list would keep offering "Add the first sequestration
+site" while the create form refused every seeded name as already taken. That is
+`validation.md` § Manual step 1 failing on a correctly-built deployment. It also made the
+build itself depend on the database being reachable.
+
+`specs/tech-stack.md` pins no rendering strategy. These lists are small and read by
+authenticated staff only, so a query per request is the right trade.
+
+Producers shipped static in Phase 3 and is corrected in the same commit. Leaving the two
+reference surfaces rendering differently is the divergence this phase exists to remove.
+The cost accepted: a Phase 3 defect is fixed under Phase 4's number, outside what this
+plan's task table asked for.
+
+The rule binds forward. Phases 5 and 6 add pages that read the database, and the same
+prerendering applies to them unless they say otherwise.
+
 **Phase 3's component tests move with the components and run at both entities.**
 
 `producer-form.test.tsx`, `producer-list.test.tsx`, `archive-producer-dialog.test.tsx` and

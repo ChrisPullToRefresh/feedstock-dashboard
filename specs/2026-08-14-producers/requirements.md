@@ -46,7 +46,7 @@ restore it, movement history attached. This is deliberate and it is narrow — s
 **Feedback.** Creating, editing, archiving and restoring return to the list and confirm
 with a toast. Archiving especially needs saying, because the row simply disappears.
 
-**Route protection.** `src/middleware.ts` currently skips any path whose last segment
+**Route protection.** `src/proxy.ts` currently skips any path whose last segment
 contains a dot. `/producers/[id]` is the first dynamic route in the app, so
 `/producers/acme.co` would be served to an unauthenticated visitor. The matcher narrows to
 Clerk's documented form, which excludes a named extension list rather than any dot.
