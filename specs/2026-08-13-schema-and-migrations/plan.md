@@ -314,11 +314,14 @@ and would have to record the fact somewhere the system does not yet have.
 
 ## Open questions
 
-- **Whether build-time migration is right for production.** Carried in
-  `requirements.md` § Open questions; belongs to `specs/roadmap.md` Phase 8.
-- **Whether archived rows ever need pruning.** A consequence of soft deletion, with no
-  caller yet. `specs/2026-08-14-producers/requirements.md` § Open questions carries the
-  related question of whether archived producers ever need a screen.
+- ~~**Whether build-time migration is right for production.**~~ Now a Phase 8 bullet in
+  `specs/roadmap.md`, to settle before `main` is promoted. Answered in `requirements.md`
+  § Open questions.
+- ~~**Whether archived rows ever need pruning.**~~ No — `specs/mission.md` § Constraints
+  forbids hard deletion outright, and pruning is that under another name. The related
+  question this entry pointed at, whether archived producers ever need a screen, was
+  settled after Phase 5: no screen in v0.1, and one is deferred work under
+  `specs/roadmap.md` § After v0.1.
 - ~~**Whether an archived name should free itself for reuse.**~~ Answered by
   `specs/roadmap.md` Phase 3: it does not. The name stays taken and the archived producer
   is restored instead — `specs/2026-08-14-producers/plan.md` § Decisions, "A name that
