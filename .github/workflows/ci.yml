@@ -177,3 +177,46 @@ jobs:
           fi
 
           counts second-run.txt
+
+      # specs/mission.md § Constraints makes movement history immutable, and a
+      # movement rewritten while the trigger was missing leaves no trace of
+      # having been. src/test/prisma-migration.test.ts asserts the SQL is still
+      # checked in; only a real database can say whether it fires.
+      #
+      # The seed deliberately creates no movements — they are records of things
+      # that physically happened — so this inserts its own against a seeded
+      # producer. The container is thrown away with the job.
+      - name: Require the append-only trigger to refuse a rewrite
+        env:
+          PGPASSWORD: postgres
+        run: |
+          set -euo pipefail
+
+          psql() { command psql -h localhost -U postgres -d feedstock -v ON_ERROR_STOP=1 "$@"; }
+
+          psql -c "
+            INSERT INTO movements (id, direction, weight_kg, producer_id, recorded_at)
+            SELECT 'ci_append_only_probe', 'INBOUND'::\"Direction\", 1250.500, id, now()
+            FROM producers ORDER BY name LIMIT 1;
+          "
+
+          for statement in \
+            "UPDATE movements SET weight_kg = 1 WHERE id = 'ci_append_only_probe'" \
+            "DELETE FROM movements WHERE id = 'ci_append_only_probe'"
+          do
+            # The trigger raises, so a zero exit here is the failure.
+            if psql -c "$statement" 2>/dev/null; then
+              echo "::error::\"$statement\" succeeded. Movements are not append-only."
+              exit 1
+            fi
+
+            echo "refused as it should be: $statement"
+          done
+
+          # And the row is still exactly as written.
+          psql -tAc "
+            SELECT weight_kg FROM movements WHERE id = 'ci_append_only_probe';
+          " | grep -qx '1250.500' || {
+            echo "::error::The probe row did not survive intact."
+            exit 1
+          }

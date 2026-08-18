@@ -77,9 +77,11 @@ ALTER TABLE "movements" ADD CONSTRAINT "movements_counterparty_matches_direction
 -- history". Enforced here rather than remembered, so no application code path
 -- and no hand-run statement in psql can rewrite the record.
 --
--- Nothing guards this trigger between pull requests — plan.md § Decisions
--- accepts that deliberately, and validation.md § Manual steps 8-9 prove it
--- once by hand.
+-- Guarded on every pull request, as of the maintenance change that closed
+-- plan.md § Open questions, "Whether the trigger needs a guard":
+-- src/test/prisma-migration.test.ts asserts this SQL is still checked in and
+-- not dropped later, and the Database job in .github/workflows/ci.yml asks a
+-- real Postgres whether the UPDATE and the DELETE are actually refused.
 CREATE OR REPLACE FUNCTION "reject_movement_mutation"() RETURNS TRIGGER AS $$
 BEGIN
     RAISE EXCEPTION
