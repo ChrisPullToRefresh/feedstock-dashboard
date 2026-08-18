@@ -392,6 +392,29 @@ export function showMoreHref(filters: MovementFilters): string {
 export const CLEARED_FILTERS_HREF = movementListHref(NO_FILTERS);
 
 /**
+ * A direction in the yard's words, not the enum's.
+ *
+ * The same two phrases Phase 5's chooser and forms already use — "Feedstock
+ * in" and "Feedstock out" on screen, `INBOUND` and `OUTBOUND` in the column.
+ * Stated once here because the movement table renders it on every row and the
+ * filter dropdown offers it as a choice, and those two must not drift apart.
+ */
+export const DIRECTION_LABEL: Record<Direction, string> = {
+  [Direction.INBOUND]: "Feedstock in",
+  [Direction.OUTBOUND]: "Feedstock out",
+};
+
+/**
+ * Where a direction's counterparty is found. Inbound weight is only ever
+ * attributed to a producer and outbound weight only ever to a sequestration
+ * site, which is what Phase 2's check constraint guarantees.
+ */
+export const COUNTERPARTY_BASE_PATH: Record<Direction, string> = {
+  [Direction.INBOUND]: "/producers",
+  [Direction.OUTBOUND]: "/sites",
+};
+
+/**
  * Month names, so a rendered date can never be read day-first by one person
  * and month-first by another.
  */
