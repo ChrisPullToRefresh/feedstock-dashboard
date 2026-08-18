@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -200,11 +201,18 @@ export function MovementForm({
             <SelectValue placeholder={`Select a ${singular}`} />
           </SelectTrigger>
           <SelectContent>
-            {options.map((option) => (
-              <SelectItem key={option.id} value={option.id}>
-                {option.name}
-              </SelectItem>
-            ))}
+            {/* The group is what carries the popover's inner padding in this
+                registry's select.tsx — neither SelectContent nor the viewport
+                has any. Without it the first and last rows sit flush against
+                the rounded border and a highlighted row's fill squares off
+                against the corner. */}
+            <SelectGroup>
+              {options.map((option) => (
+                <SelectItem key={option.id} value={option.id}>
+                  {option.name}
+                </SelectItem>
+              ))}
+            </SelectGroup>
           </SelectContent>
         </Select>
         {counterpartyError ? (

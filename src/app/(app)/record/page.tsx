@@ -39,12 +39,12 @@ export default function RecordPage() {
           <Link
             key={href}
             href={href}
-            className="flex items-center gap-4 rounded-lg border p-6 transition-colors hover:bg-accent focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+            className="hover:bg-accent focus-visible:border-ring focus-visible:ring-ring/50 flex items-center gap-4 rounded-lg border p-6 transition-colors focus-visible:ring-3 focus-visible:outline-none"
           >
-            <Icon className="size-6 shrink-0 text-primary" aria-hidden />
+            <Icon className="text-primary size-6 shrink-0" aria-hidden />
             <span>
               <span className="block text-lg font-medium">{label}</span>
-              <span className="block text-sm text-muted-foreground">
+              <span className="text-muted-foreground block text-sm">
                 {description}
               </span>
             </span>

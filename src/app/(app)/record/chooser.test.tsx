@@ -25,10 +25,9 @@ describe("the record chooser", () => {
     // The words on screen are the yard's and the path is the enum's. A link
     // whose label and href disagree would send an operator to the wrong form
     // and record a movement in the wrong direction, which nothing can undo.
-    expect(screen.getByRole("link", { name: new RegExp(label) })).toHaveAttribute(
-      "href",
-      href,
-    );
+    expect(
+      screen.getByRole("link", { name: new RegExp(label) }),
+    ).toHaveAttribute("href", href);
   });
 
   it("offers both directions and nothing else", () => {

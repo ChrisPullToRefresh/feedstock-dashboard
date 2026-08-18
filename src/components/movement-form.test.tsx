@@ -67,7 +67,10 @@ describe.each(directions)(
     }
 
     /** Opens the dropdown and picks a row by its name. */
-    async function choose(user: ReturnType<typeof userEvent.setup>, name: string) {
+    async function choose(
+      user: ReturnType<typeof userEvent.setup>,
+      name: string,
+    ) {
       await user.click(screen.getByRole("combobox"));
       await user.click(await screen.findByRole("option", { name }));
     }
@@ -97,20 +100,20 @@ describe.each(directions)(
       { entered: "-5", refusal: WEIGHT_REFUSALS.notPositive },
       { entered: "12.3456", refusal: WEIGHT_REFUSALS.tooPrecise },
       { entered: "1000000000", refusal: WEIGHT_REFUSALS.tooLarge },
-    ])("refuses $entered without calling the action", async ({
-      entered,
-      refusal,
-    }) => {
-      const user = userEvent.setup();
-      const { action } = renderForm();
+    ])(
+      "refuses $entered without calling the action",
+      async ({ entered, refusal }) => {
+        const user = userEvent.setup();
+        const { action } = renderForm();
 
-      await choose(user, options[0].name);
-      if (entered !== "") await user.type(weight(), entered);
-      await user.click(save());
+        await choose(user, options[0].name);
+        if (entered !== "") await user.type(weight(), entered);
+        await user.click(save());
 
-      expect(await screen.findByText(refusal)).toBeVisible();
-      expect(action).not.toHaveBeenCalled();
-    });
+        expect(await screen.findByText(refusal)).toBeVisible();
+        expect(action).not.toHaveBeenCalled();
+      },
+    );
 
     it("refuses a submit with no counterparty chosen", async () => {
       const user = userEvent.setup();
@@ -152,7 +155,11 @@ describe.each(directions)(
         submittedCounterpartyId: options[0].id,
       });
 
-      await user.type(weight(), "1250.5");
+      // Typed padded and echoed back trimmed, so the assertion can only pass
+      // if the form took the value from the action's state. Asserting the
+      // same string that was typed would also pass on a form that ignored the
+      // state entirely and kept its own input value.
+      await user.type(weight(), "  1250.5  ");
       await choose(user, options[0].name);
       await user.click(save());
 
@@ -232,7 +239,11 @@ describe.each(directions)(
       const saving = await screen.findByRole("button", { name: "Saving…" });
       expect(saving).toBeDisabled();
 
-      release({ status: "success", weightLabel: "1,250", counterpartyName: options[0].name });
+      release({
+        status: "success",
+        weightLabel: "1,250",
+        counterpartyName: options[0].name,
+      });
       await waitFor(() => expect(save()).toBeEnabled());
       expect(action).toHaveBeenCalledTimes(1);
     });
