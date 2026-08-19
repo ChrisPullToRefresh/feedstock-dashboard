@@ -43,7 +43,14 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   forbidOnly: !!process.env.CI,
 
-  reporter: [["html", { open: "never" }], [process.env.CI ? "github" : "list"]],
+  // `list` in CI as well as `github`: the github reporter emits annotations
+  // rather than per-test lines, so without this the job log cannot show each
+  // spec running under both projects — which is what
+  // specs/2026-08-18-end-to-end-coverage/validation.md § Manual step 2 asks a
+  // person to check.
+  reporter: process.env.CI
+    ? [["html", { open: "never" }], ["github"], ["list"]]
+    : [["html", { open: "never" }], ["list"]],
 
   use: {
     baseURL: BASE_URL,
