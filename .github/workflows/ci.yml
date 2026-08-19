@@ -232,3 +232,80 @@ jobs:
             echo "::error::The probe row did not survive intact."
             exit 1
           }
+
+  # specs/roadmap.md Phase 7. The full Playwright suite, both projects, against
+  # a database that is empty at the start of every run.
+  #
+  # Its own service rather than an extension of the Database job: one red check
+  # then means one thing, and branch protection gets a distinct E2E gate.
+  # specs/2026-08-18-end-to-end-coverage/plan.md § Decisions.
+  #
+  # The migration, the seed and the sign-in are not steps here. They live in
+  # e2e/global-setup.ts, so the local run and this one take one path and cannot
+  # drift. This job supplies the container, the browser and the secrets.
+  e2e:
+    name: E2E
+    runs-on: ubuntu-latest
+
+    # Empty at the start of every run, which is what lets each spec name rows
+    # without colliding with the last run's.
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: feedstock
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      # Both, for the reason the Database job gives: prisma.config.ts migrates
+      # over the unpooled URL while the seed and the app connect over
+      # DATABASE_URL. There is no pooler here, so they are the same string.
+      # Omitting the unpooled one does not fail — it migrates whatever
+      # .env.local names, which is why e2e/global-setup.ts refuses a Neon host.
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/feedstock
+      DATABASE_URL_UNPOOLED: postgresql://postgres:postgres@localhost:5432/feedstock
+
+      # The Clerk development instance. clerkSetup refuses a production secret
+      # key outright, so this cannot be pointed at production by accident.
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.E2E_CLERK_PUBLISHABLE_KEY }}
+      CLERK_SECRET_KEY: ${{ secrets.E2E_CLERK_SECRET_KEY }}
+      E2E_USER_EMAIL: ${{ secrets.E2E_USER_EMAIL }}
+
+      # Read at build time. Without it redirectToSignIn in src/proxy.ts sends
+      # the browser to Clerk's hosted page rather than this app's /sign-in, and
+      # auth.spec.ts lands on a host it does not expect.
+      NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+
+      # Chromium alone. Both projects are Chromium, so the other engines would
+      # cost a download a run for browsers nothing drives.
+      - name: Install the Chromium browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run the suite
+        run: npm run test:e2e
+
+      # not cancelled() rather than failure(): a timed-out run is the one where
+      # the report is hardest to do without.
+      - name: Upload the report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
