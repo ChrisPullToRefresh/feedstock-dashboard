@@ -1,0 +1,106 @@
+import { existsSync } from "node:fs";
+
+import { defineConfig, devices } from "@playwright/test";
+
+import { STORAGE_STATE } from "./e2e/support/constants";
+
+/**
+ * The end-to-end suite — `specs/2026-08-18-end-to-end-coverage/plan.md`.
+ *
+ * Local runs read `.env.e2e`, never `.env.local`. `specs/mission.md`
+ * § Constraints makes every movement a test records permanent, so a suite
+ * pointed at the shared Neon development branch would leave weights in it that
+ * nothing can remove. In CI the variables are already in the environment and no
+ * file exists, which is what the guard is for — the same shape
+ * `prisma.config.ts` uses.
+ *
+ * `process.loadEnvFile` does not overwrite a variable that is already set, so
+ * an explicitly exported URL still wins over the file.
+ */
+if (existsSync(".env.e2e")) {
+  process.loadEnvFile(".env.e2e");
+}
+
+/**
+ * Not 3000. `next dev` is what a developer already has on that port, and a
+ * suite that silently attached to it would drive their database.
+ */
+const PORT = 3100;
+const BASE_URL = `http://127.0.0.1:${PORT}`;
+
+export default defineConfig({
+  testDir: "./e2e",
+  // Vitest owns `src/**/*.test.{ts,tsx}` and this owns `e2e/**/*.spec.ts`, so
+  // neither runner can collect the other's files.
+  testMatch: /.*\.spec\.ts$/,
+
+  // One worker, everywhere. The suite writes to one database and movements are
+  // append-only, so two workers recording at once would race on the figures the
+  // specs assert. `fullyParallel` off for the same reason.
+  workers: 1,
+  fullyParallel: false,
+
+  retries: process.env.CI ? 2 : 0,
+  forbidOnly: !!process.env.CI,
+
+  // `list` in CI as well as `github`: the github reporter emits annotations
+  // rather than per-test lines, so without this the job log cannot show each
+  // spec running under both projects — which is what
+  // specs/2026-08-18-end-to-end-coverage/validation.md § Manual step 2 asks a
+  // person to check.
+  reporter: process.env.CI
+    ? [["html", { open: "never" }], ["github"], ["list"]]
+    : [["html", { open: "never" }], ["list"]],
+
+  use: {
+    baseURL: BASE_URL,
+    // On the first retry rather than on every failure: a trace costs time and
+    // disk on a merge gate, and the run worth diagnosing is the one that failed
+    // twice.
+    trace: "on-first-retry",
+    screenshot: "only-on-failure",
+  },
+
+  // Applies the migrations, seeds the reference data and saves the signed-in
+  // session the projects below reuse.
+  globalSetup: "./e2e/global-setup.ts",
+
+  projects: [
+    {
+      name: "desktop",
+      use: { ...devices["Desktop Chrome"], storageState: STORAGE_STATE },
+    },
+    {
+      name: "mobile",
+      use: { ...devices["Pixel 5"], storageState: STORAGE_STATE },
+    },
+  ],
+
+  webServer: {
+    // A production build, not `next dev`: the suite has to drive the output
+    // Vercel serves, or a green gate proves something no deployment runs.
+    command: `npm run build && npx next start --port ${PORT}`,
+    // `/sign-in` is public and queries nothing, which is why the probe names
+    // it. Playwright starts `webServer` as a plugin task and plugin tasks run
+    // before `globalSetup`, so at the moment this fires the migrations have not
+    // been applied and every other route would fail against an empty database.
+    url: `${BASE_URL}/sign-in`,
+    // Never reuse. `!process.env.CI` adopted whatever was already listening on
+    // this port, which fails two ways: a run interrupted with Ctrl-C leaves its
+    // `next start` orphaned, so the next run silently tests the previous build;
+    // and a server started by hand carries `.env.local`, pointing the app at the
+    // shared Neon development branch. requireThrowawayDatabase() cannot see
+    // that — it inspects this process's environment, not the adopted server's —
+    // so roughly ten append-only movements would land in the shared database
+    // permanently. The cost is a build per local run, which is the cheaper side
+    // of specs/mission.md § Constraints.
+    reuseExistingServer: false,
+    // Generous because every CI run is a cold production build: the E2E job
+    // caches npm and never `.next`. At 180s a build drifting past three minutes
+    // turns a required check red for a reason unrelated to the change, and no
+    // other job builds, so nothing warns first.
+    timeout: 300_000,
+    stdout: "pipe",
+    stderr: "pipe",
+  },
+});

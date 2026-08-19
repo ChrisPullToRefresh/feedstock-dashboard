@@ -214,7 +214,7 @@ to end.
 - [x] Clerk gates the app and staff accounts are provisioned via the Backend API
 - [x] The Prisma schema and all migrations are checked in and run clean on a fresh
       database
-- [ ] Lint, typecheck, Vitest, and the full Playwright suite pass in GitHub Actions and
+- [x] Lint, typecheck, Vitest, and the full Playwright suite pass in GitHub Actions and
       are required to merge
 - [x] `main` is branch-protected and no commit has landed on it outside a pull request
 - [ ] The app is deployed to production on the company Vercel team

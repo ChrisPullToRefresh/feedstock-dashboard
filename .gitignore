@@ -16,9 +16,19 @@ src/generated/
 # Test output
 coverage/
 
+# Playwright writes these at the repository root on every run
+test-results/
+playwright-report/
+blob-report/
+
 # Environment
 .env
 .env*.local
+# The end-to-end suite's own env file. `.env*.local` does not cover it.
+.env.e2e
+
+# A real signed-in Clerk session, written by the suite's global setup.
+e2e/.auth/
 
 # Vercel
 .vercel

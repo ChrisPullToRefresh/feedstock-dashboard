@@ -17,6 +17,12 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Prisma writes this on every install; it is generated, not authored.
     "src/generated/**",
+    // Playwright's run output. The HTML report bundles its own scripts, so
+    // without these `npm run lint` goes red over generated assets after any
+    // local run.
+    "test-results/**",
+    "playwright-report/**",
+    "blob-report/**",
   ]),
 ]);
 
