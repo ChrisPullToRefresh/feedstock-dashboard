@@ -1,14 +1,53 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { isValidElement, type ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ReferenceForm } from "@/components/reference-form";
+import { Prisma } from "@/generated/prisma/client";
+import { Direction } from "@/generated/prisma/enums";
+import type { ListedMovement } from "@/lib/movement-queries";
+import type { MovementForTotals } from "@/lib/totals";
+
+/** A row the recent-movements list renders, so **See all** has something to
+ * see — the link is hidden when a counterparty has no movements. */
+const listedOutbound = (): ListedMovement => ({
+  id: "m1",
+  direction: Direction.OUTBOUND,
+  weightKg: new Prisma.Decimal("300"),
+  recordedAt: new Date("2026-08-18T13:45:00.000Z"),
+  producer: null,
+  sequestrationSite: {
+    id: "s1",
+    name: "Basalt Ridge Injection Site",
+    isActive: true,
+  },
+});
+
+/** A row the totals read, as the counterparty query would return it. */
+const outboundRow = (weightKg: string): MovementForTotals => ({
+  direction: Direction.OUTBOUND,
+  weightKg: new Prisma.Decimal(weightKg),
+  producerId: null,
+  sequestrationSiteId: "s1",
+});
 
 const findSite = vi.fn();
 
 vi.mock("@/lib/site-queries", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/site-queries")>()),
   findSite: (id: string) => findSite(id),
+}));
+
+const listRecentMovementsFor = vi.fn();
+const listMovementsForCounterpartyTotals = vi.fn();
+
+vi.mock("@/lib/movement-queries", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/movement-queries")>()),
+  listRecentMovementsFor: (...args: unknown[]) =>
+    listRecentMovementsFor(...args),
+  listMovementsForCounterpartyTotals: (...args: unknown[]) =>
+    listMovementsForCounterpartyTotals(...args),
 }));
 
 const notFound = vi.fn(() => {
@@ -101,19 +140,29 @@ describe("the edit route", () => {
 
 const { default: SitePage } = await import("@/app/(app)/sites/[id]/page");
 
+/*
+ * The mirror of `/producers/[id]`, which is the point of the extraction: same
+ * structure through the shared ReferenceDetail, this entity's own query,
+ * archive action and words.
+ */
 describe("the detail route", () => {
   beforeEach(() => {
     findSite.mockReset();
     notFound.mockClear();
+    listRecentMovementsFor.mockReset().mockResolvedValue([listedOutbound()]);
+    listMovementsForCounterpartyTotals
+      .mockReset()
+      .mockResolvedValue([outboundRow("900"), outboundRow("250")]);
   });
 
-  it("renders the site's name", async () => {
-    findSite.mockResolvedValue({
-      id: "s1",
-      name: "Basalt Ridge Injection Site",
-    });
+  const renderPage = async (id = "s1") => {
+    findSite.mockResolvedValue({ id, name: "Basalt Ridge Injection Site" });
 
-    render(await SitePage({ params: Promise.resolve({ id: "s1" }) }));
+    render(await SitePage({ params: Promise.resolve({ id }) }));
+  };
+
+  it("renders the site's name", async () => {
+    await renderPage();
 
     expect(
       screen.getByRole("heading", { name: "Basalt Ridge Injection Site" }),
@@ -121,18 +170,63 @@ describe("the detail route", () => {
   });
 
   it("offers Edit and Archive", async () => {
-    findSite.mockResolvedValue({
-      id: "s1",
-      name: "Basalt Ridge Injection Site",
-    });
-
-    render(await SitePage({ params: Promise.resolve({ id: "s1" }) }));
+    await renderPage();
 
     expect(screen.getByRole("link", { name: /edit/i })).toHaveAttribute(
       "href",
       "/sites/s1/edit",
     );
     expect(screen.getByRole("button", { name: /archive/i })).toBeVisible();
+  });
+
+  it("uses the site's own description and confirm label", async () => {
+    const user = userEvent.setup();
+
+    await renderPage();
+
+    expect(
+      screen.getByText(
+        "Outbound movements record the processed feedstock that went to this sequestration site.",
+      ),
+    ).toBeVisible();
+
+    await user.click(screen.getByRole("button", { name: "Archive" }));
+
+    expect(
+      await screen.findByRole("button", { name: "Archive sequestration site" }),
+    ).toBeVisible();
+    expect(
+      screen.getByText(/stops appearing in the sequestration sites list/),
+    ).toBeVisible();
+  });
+
+  it("reads this site's movements and totals, keyed outbound", async () => {
+    await renderPage("s9");
+
+    expect(listRecentMovementsFor).toHaveBeenCalledWith(
+      Direction.OUTBOUND,
+      "s9",
+    );
+    expect(listMovementsForCounterpartyTotals).toHaveBeenCalledWith(
+      Direction.OUTBOUND,
+      "s9",
+    );
+  });
+
+  it("renders the site's total outbound weight", async () => {
+    await renderPage();
+
+    expect(screen.getByText("Total outbound")).toBeVisible();
+    expect(screen.getByText("1,150 kg")).toBeVisible();
+  });
+
+  it("links See all to the movement list filtered to this site", async () => {
+    await renderPage("s9");
+
+    expect(screen.getByRole("link", { name: "See all" })).toHaveAttribute(
+      "href",
+      "/?site=s9",
+    );
   });
 
   it("is a 404 when no such site exists", async () => {

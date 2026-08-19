@@ -198,3 +198,299 @@ export type MovementFormAction = (
   state: MovementFormState,
   formData: FormData,
 ) => Promise<MovementFormState>;
+
+/**
+ * The movement list's URL contract.
+ *
+ * `/?direction=INBOUND&producer=<id>` is the whole state of the page —
+ * `specs/2026-08-18-movement-list-and-totals/plan.md` § Decisions — so a
+ * filtered view survives a reload, can be sent to someone, and can be linked
+ * into from a counterparty's detail page.
+ *
+ * It lives in this module rather than beside the queries for the reason the
+ * header above gives: the filter component is a client component that has to
+ * build these URLs, and anything reaching `db` drags the Postgres driver into
+ * the browser bundle.
+ */
+
+/** The newest rows a page shows before **Show more** offers the next hundred. */
+export const DEFAULT_LIMIT = 100;
+
+/**
+ * The most a `limit` may ask for, whether hand-typed or reached by tapping
+ * **Show more** enough times.
+ *
+ * It bounds the rendered table and nothing else. The totals query is
+ * deliberately unbounded — `plan.md` § Decisions accepts that every matching
+ * row is summed in Node on every load, and only that query's narrow projection
+ * bounds its cost — so this cap is about how many full rows are read, joined
+ * and rendered, not about the arithmetic.
+ */
+export const MAX_LIMIT = 10_000;
+
+/** A counterparty a filter dropdown offers.
+ *
+ * Carries `isActive` because the filters offer every counterparty that has
+ * movements, archived ones included and marked —
+ * `specs/2026-08-18-movement-list-and-totals/requirements.md`. A filter that
+ * could not reach a name already in the table would be a table nobody can
+ * narrow. */
+export type CounterpartyFilterOption = CounterpartyOption & {
+  isActive: boolean;
+};
+
+/** Both dropdowns' contents, which is also what resolves an id in the URL. */
+export type MovementFilterOptions = {
+  producers: readonly CounterpartyFilterOption[];
+  sites: readonly CounterpartyFilterOption[];
+};
+
+/** The page's state, once the URL has been read. */
+export type MovementFilters = {
+  direction: Direction | null;
+  producerId: string | null;
+  sequestrationSiteId: string | null;
+  limit: number;
+};
+
+/** Nothing narrowed — what a bare `/` parses to, and the base a **See all**
+ * link builds its one filter onto. */
+export const NO_FILTERS: MovementFilters = {
+  direction: null,
+  producerId: null,
+  sequestrationSiteId: null,
+  limit: DEFAULT_LIMIT,
+};
+
+/** What Next hands a page as its `searchParams`, once awaited. */
+export type MovementSearchParams = Record<
+  string,
+  string | string[] | undefined
+>;
+
+/**
+ * One parameter's value, or nothing.
+ *
+ * A repeated parameter arrives as an array and no control on this page
+ * produces one, so it is treated as unset rather than guessed at — the same
+ * rule `requirements.md` states for any unrecognized value.
+ */
+function one(value: string | string[] | undefined): string | null {
+  if (typeof value !== "string") return null;
+
+  const trimmed = value.trim();
+
+  return trimmed === "" ? null : trimmed;
+}
+
+const DIRECTIONS: readonly string[] = Object.values(Direction);
+
+/**
+ * The `limit`, or the default.
+ *
+ * Digits only, so a negative sign fails the shape rather than the range. Zero
+ * and anything past `MAX_LIMIT` fall back to the default; a limit *below* the
+ * default is honored, which is what makes `?limit=2` a usable way to walk the
+ * **Show more** control without bulk data.
+ */
+function parseLimit(value: string | string[] | undefined): number {
+  const raw = one(value);
+
+  if (raw === null || !/^\d+$/.test(raw)) return DEFAULT_LIMIT;
+
+  const limit = Number(raw);
+
+  return limit >= 1 && limit <= MAX_LIMIT ? limit : DEFAULT_LIMIT;
+}
+
+/**
+ * An id, but only if some option carries it.
+ *
+ * An id nobody offers is treated as unset rather than as a filter matching
+ * nothing: a `Select` handed a value none of its items has renders a blank
+ * trigger, so the page would show an unnarrowable empty table above a control
+ * that looks untouched.
+ */
+function parseCounterpartyId(
+  value: string | string[] | undefined,
+  options: readonly CounterpartyFilterOption[],
+): string | null {
+  const raw = one(value);
+
+  return raw !== null && options.some((option) => option.id === raw)
+    ? raw
+    : null;
+}
+
+/** The URL, read. Anything unrecognized is unset — never an error. */
+export function parseMovementFilters(
+  searchParams: MovementSearchParams,
+  options: MovementFilterOptions,
+): MovementFilters {
+  const direction = one(searchParams.direction);
+
+  return {
+    direction:
+      direction !== null && DIRECTIONS.includes(direction)
+        ? (direction as Direction)
+        : null,
+    producerId: parseCounterpartyId(searchParams.producer, options.producers),
+    sequestrationSiteId: parseCounterpartyId(searchParams.site, options.sites),
+    limit: parseLimit(searchParams.limit),
+  };
+}
+
+/** Whether a **Clear filters** control belongs on the page. The limit is not
+ * a filter — it narrows nothing, and clearing it alone would be a control that
+ * appears to do nothing. */
+export function hasAnyFilter(filters: MovementFilters): boolean {
+  return (
+    filters.direction !== null ||
+    filters.producerId !== null ||
+    filters.sequestrationSiteId !== null
+  );
+}
+
+/** The movement list at these filters. The default limit is left off, so the
+ * ordinary URL stays bare. */
+export function movementListHref(filters: MovementFilters): string {
+  const params = new URLSearchParams();
+
+  if (filters.direction !== null) params.set("direction", filters.direction);
+  if (filters.producerId !== null) params.set("producer", filters.producerId);
+  if (filters.sequestrationSiteId !== null) {
+    params.set("site", filters.sequestrationSiteId);
+  }
+  if (filters.limit !== DEFAULT_LIMIT) {
+    params.set("limit", String(filters.limit));
+  }
+
+  const query = params.toString();
+
+  return query === "" ? "/" : `/?${query}`;
+}
+
+/** What one control's change navigates to. */
+export type MovementFilterChange = Partial<
+  Pick<MovementFilters, "direction" | "producerId" | "sequestrationSiteId">
+>;
+
+/**
+ * One filter changed, the other two carried along.
+ *
+ * `limit` is dropped rather than carried: a new filter selects a different set
+ * of rows, so it starts over at the newest hundred.
+ */
+export function filterHref(
+  filters: MovementFilters,
+  change: MovementFilterChange,
+): string {
+  return movementListHref({ ...filters, ...change, limit: DEFAULT_LIMIT });
+}
+
+/**
+ * The next hundred rows, with every filter left exactly as it was.
+ *
+ * Clamped to `MAX_LIMIT`, because `parseMovementFilters` refuses anything past
+ * it and falls back to the default: without the clamp, tapping **Show more**
+ * at the cap would collapse the table to its first hundred rows instead of
+ * growing it. `pageAtLimit` stops the control being rendered there at all, so
+ * this clamp is the belt to its braces.
+ */
+export function showMoreHref(filters: MovementFilters): string {
+  return movementListHref({
+    ...filters,
+    limit: Math.min(filters.limit + DEFAULT_LIMIT, MAX_LIMIT),
+  });
+}
+
+/** Where **Clear filters** goes — the bare list, with nothing narrowed. */
+export const CLEARED_FILTERS_HREF = movementListHref(NO_FILTERS);
+
+/**
+ * Splits what `listMovements` returned into the rows to render and whether a
+ * **Show more** control belongs.
+ *
+ * The query reads `limit + 1` rows, so the extra one is the answer to "is
+ * there more" — `plan.md` § Decisions, which is why the page needs no second
+ * count. The extra row is never rendered.
+ */
+export function pageAtLimit<Row>(
+  rows: readonly Row[],
+  limit: number,
+): { visible: Row[]; hasMore: boolean } {
+  return {
+    visible: rows.slice(0, limit),
+    // At the cap there is no further to go, however many rows came back.
+    hasMore: rows.length > limit && limit < MAX_LIMIT,
+  };
+}
+
+/**
+ * A direction in the yard's words, not the enum's.
+ *
+ * The same two phrases Phase 5's chooser and forms already use — "Feedstock
+ * in" and "Feedstock out" on screen, `INBOUND` and `OUTBOUND` in the column.
+ * Stated once here because the movement table renders it on every row and the
+ * filter dropdown offers it as a choice, and those two must not drift apart.
+ */
+export const DIRECTION_LABEL: Record<Direction, string> = {
+  [Direction.INBOUND]: "Feedstock in",
+  [Direction.OUTBOUND]: "Feedstock out",
+};
+
+/**
+ * Where a direction's counterparty is found. Inbound weight is only ever
+ * attributed to a producer and outbound weight only ever to a sequestration
+ * site, which is what Phase 2's check constraint guarantees.
+ */
+export const COUNTERPARTY_BASE_PATH: Record<Direction, string> = {
+  [Direction.INBOUND]: "/producers",
+  [Direction.OUTBOUND]: "/sites",
+};
+
+/**
+ * Month names, so a rendered date can never be read day-first by one person
+ * and month-first by another.
+ */
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+] as const;
+
+/** Two digits, so 09:05 lines up under 13:45 in Inter's tabular numerals. */
+const pad = (value: number) => String(value).padStart(2, "0");
+
+/**
+ * When a movement was recorded, as an absolute date and time in UTC with the
+ * zone named.
+ *
+ * UTC rather than the facility's own zone because nothing in this constitution
+ * names a location — `plan.md` § Decisions, and
+ * `requirements.md` § Open questions carries the question to
+ * `specs/roadmap.md` Phase 8. The label is what stops anyone mistaking which
+ * zone they are reading; changing the zone later is this one constant, not a
+ * schema change, because `recorded_at` stores an instant either way.
+ *
+ * Built from the `getUTC*` accessors rather than through `Intl`: this is
+ * rendered on the server and compared in a test, and `Intl`'s output for a
+ * given locale moves with the ICU version the runtime was built against. The
+ * accessors read the same instant on every machine.
+ */
+export function formatRecordedAt(recordedAt: Date): string {
+  const day = pad(recordedAt.getUTCDate());
+  const month = MONTHS[recordedAt.getUTCMonth()];
+  const time = `${pad(recordedAt.getUTCHours())}:${pad(recordedAt.getUTCMinutes())}`;
+
+  return `${day} ${month} ${recordedAt.getUTCFullYear()}, ${time} UTC`;
+}

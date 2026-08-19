@@ -1,14 +1,49 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { isValidElement, type ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ReferenceForm } from "@/components/reference-form";
+import { Prisma } from "@/generated/prisma/client";
+import { Direction } from "@/generated/prisma/enums";
+import type { ListedMovement } from "@/lib/movement-queries";
+import type { MovementForTotals } from "@/lib/totals";
+
+/** A row the recent-movements list renders, so **See all** has something to
+ * see — the link is hidden when a counterparty has no movements. */
+const listedInbound = (): ListedMovement => ({
+  id: "m1",
+  direction: Direction.INBOUND,
+  weightKg: new Prisma.Decimal("300"),
+  recordedAt: new Date("2026-08-18T13:45:00.000Z"),
+  producer: { id: "p1", name: "Cascade Timber Mill", isActive: true },
+  sequestrationSite: null,
+});
+
+/** A row the totals read, as the counterparty query would return it. */
+const inboundRow = (weightKg: string): MovementForTotals => ({
+  direction: Direction.INBOUND,
+  weightKg: new Prisma.Decimal(weightKg),
+  producerId: "p1",
+  sequestrationSiteId: null,
+});
 
 const findProducer = vi.fn();
 
 vi.mock("@/lib/producer-queries", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/producer-queries")>()),
   findProducer: (id: string) => findProducer(id),
+}));
+
+const listRecentMovementsFor = vi.fn();
+const listMovementsForCounterpartyTotals = vi.fn();
+
+vi.mock("@/lib/movement-queries", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/movement-queries")>()),
+  listRecentMovementsFor: (...args: unknown[]) =>
+    listRecentMovementsFor(...args),
+  listMovementsForCounterpartyTotals: (...args: unknown[]) =>
+    listMovementsForCounterpartyTotals(...args),
 }));
 
 const notFound = vi.fn(() => {
@@ -103,16 +138,31 @@ describe("the edit route", () => {
 const { default: ProducerPage } =
   await import("@/app/(app)/producers/[id]/page");
 
+/*
+ * Phase 6 made this route thin: it keeps its own query, its own notFound, its
+ * own archive action and its own words, and renders them through the shared
+ * ReferenceDetail. What follows asserts the words are this entity's, and
+ * `src/components/reference-detail.test.tsx` asserts the structure they land
+ * in.
+ */
 describe("the detail route", () => {
   beforeEach(() => {
     findProducer.mockReset();
     notFound.mockClear();
+    listRecentMovementsFor.mockReset().mockResolvedValue([listedInbound()]);
+    listMovementsForCounterpartyTotals
+      .mockReset()
+      .mockResolvedValue([inboundRow("2050.5"), inboundRow("300")]);
   });
 
-  it("renders the producer's name", async () => {
-    findProducer.mockResolvedValue({ id: "p1", name: "Cascade Timber Mill" });
+  const renderPage = async (id = "p1") => {
+    findProducer.mockResolvedValue({ id, name: "Cascade Timber Mill" });
 
-    render(await ProducerPage({ params: Promise.resolve({ id: "p1" }) }));
+    render(await ProducerPage({ params: Promise.resolve({ id }) }));
+  };
+
+  it("renders the producer's name", async () => {
+    await renderPage();
 
     expect(
       screen.getByRole("heading", { name: "Cascade Timber Mill" }),
@@ -120,15 +170,63 @@ describe("the detail route", () => {
   });
 
   it("offers Edit and Archive", async () => {
-    findProducer.mockResolvedValue({ id: "p1", name: "Cascade Timber Mill" });
-
-    render(await ProducerPage({ params: Promise.resolve({ id: "p1" }) }));
+    await renderPage();
 
     expect(screen.getByRole("link", { name: /edit/i })).toHaveAttribute(
       "href",
       "/producers/p1/edit",
     );
     expect(screen.getByRole("button", { name: /archive/i })).toBeVisible();
+  });
+
+  it("uses the producer's own description and confirm label", async () => {
+    const user = userEvent.setup();
+
+    await renderPage();
+
+    expect(
+      screen.getByText(
+        "Inbound movements record the feedstock that came from this producer.",
+      ),
+    ).toBeVisible();
+
+    await user.click(screen.getByRole("button", { name: "Archive" }));
+
+    expect(
+      await screen.findByRole("button", { name: "Archive producer" }),
+    ).toBeVisible();
+    expect(
+      screen.getByText(/stops appearing in the producers list/),
+    ).toBeVisible();
+  });
+
+  it("reads this producer's movements and totals, keyed inbound", async () => {
+    await renderPage("p9");
+
+    expect(listRecentMovementsFor).toHaveBeenCalledWith(
+      Direction.INBOUND,
+      "p9",
+    );
+    expect(listMovementsForCounterpartyTotals).toHaveBeenCalledWith(
+      Direction.INBOUND,
+      "p9",
+    );
+  });
+
+  it("renders the producer's total inbound weight", async () => {
+    await renderPage();
+
+    expect(screen.getByText("Total inbound")).toBeVisible();
+    expect(screen.getByText("2,350.5 kg")).toBeVisible();
+  });
+
+  it("links See all to the movement list filtered to this producer", async () => {
+    await renderPage("p9");
+
+    expect(screen.getByRole("link", { name: "See all" })).toHaveAttribute(
+      "href",
+      "/?producer=p9",
+    );
   });
 
   it("is a 404 when no such producer exists", async () => {
