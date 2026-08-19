@@ -2,6 +2,8 @@ import { existsSync } from "node:fs";
 
 import { defineConfig, devices } from "@playwright/test";
 
+import { STORAGE_STATE } from "./e2e/support/constants";
+
 /**
  * The end-to-end suite — `specs/2026-08-18-end-to-end-coverage/plan.md`.
  *
@@ -52,9 +54,19 @@ export default defineConfig({
     screenshot: "only-on-failure",
   },
 
+  // Applies the migrations, seeds the reference data and saves the signed-in
+  // session the projects below reuse.
+  globalSetup: "./e2e/global-setup.ts",
+
   projects: [
-    { name: "desktop", use: { ...devices["Desktop Chrome"] } },
-    { name: "mobile", use: { ...devices["Pixel 5"] } },
+    {
+      name: "desktop",
+      use: { ...devices["Desktop Chrome"], storageState: STORAGE_STATE },
+    },
+    {
+      name: "mobile",
+      use: { ...devices["Pixel 5"], storageState: STORAGE_STATE },
+    },
   ],
 
   webServer: {
