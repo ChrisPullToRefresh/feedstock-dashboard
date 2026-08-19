@@ -24,6 +24,12 @@ const EMERALD_400 = "oklch(76.5% 0.177 163.223)";
 const WHITE = "oklch(1 0 0)";
 const NEAR_BLACK = "oklch(0.145 0 0)";
 
+// The light-palette field border. An Input and a SelectTrigger are
+// `bg-transparent` there, so this is the only thing marking the control —
+// WCAG 2.1 SC 1.4.11 puts that at 3:1 and this measures 3.23:1 on
+// --background. It equalled --border at 1.26:1 until the fix.
+const FIELD_BORDER_LIGHT = "oklch(0.65 0 0)";
+
 /**
  * The declarations of the first `:root` block at or after `anchor`, or the
  * file's first `:root` block when `anchor` is empty.
@@ -111,5 +117,26 @@ describe("accent tokens", () => {
         );
       }
     }
+  });
+});
+
+describe("the field border", () => {
+  it("clears 3:1 against the light background", () => {
+    // Pinned by value: the ratio is in `specs/tech-stack.md` § Application,
+    // which carries it measured, and this test does not recompute it. What it
+    // stops is the token drifting back to --border, which is where it started
+    // and which measures 1.26:1.
+    expect(light["--input"]).toBe(FIELD_BORDER_LIGHT);
+  });
+
+  it("is darker than the decorative border it used to equal", () => {
+    // --border rules table rows and separators, which carry no information SC
+    // 1.4.11 covers, so it is deliberately left alone. If a later change makes
+    // them equal again, the field boundary has silently gone back to 1.26:1.
+    expect(light["--input"]).not.toBe(light["--border"]);
+  });
+
+  it("leaves the dark palette alone, which already passed at 3.82:1", () => {
+    expect(dark["--input"]).toBe("oklch(1 0 0 / 15%)");
   });
 });
