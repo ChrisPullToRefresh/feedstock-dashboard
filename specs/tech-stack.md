@@ -1,6 +1,6 @@
 # Tech Stack
 
-Decisions below are binding for v0.1. See `specs/mission.md` for scope and
+Decisions below are binding for v0.2. See `specs/mission.md` for scope and
 `specs/roadmap.md` for the order this gets built in.
 
 ## Application
@@ -34,7 +34,8 @@ Decisions below are binding for v0.1. See `specs/mission.md` for scope and
   `bg-primary/80` washes toward the background instead, which measured 3.72:1 under a
   white label and failed AA.
 - **Destructive color:** red, and the only non-neutral besides the accent. It marks the
-  one irreversible control in v0.1 — archiving. Like the accent it is a theme-dependent
+  most consequential control in v0.2 — archiving, which takes a counterparty's movements
+  out of every view until it is unarchived. Like the accent it is a theme-dependent
   pair on a solid fill, carried by `--destructive` and `--destructive-foreground`: white
   on the light red (4.76:1), near-black on the dark red (6.84:1). White in dark measures
   2.89:1 and is not used. A tinted fill under the label — `bg-destructive/10` — is not
@@ -50,7 +51,7 @@ Decisions below are binding for v0.1. See `specs/mission.md` for scope and
   critique measured the pair at 1.26:1 — `--border` rules table rows and separators,
   which carry no information the criterion covers, and stays where it is.
 - **Theme:** light and dark, chosen by the operating system through
-  `prefers-color-scheme`. v0.1 has no in-app toggle and stores no per-user preference, so
+  `prefers-color-scheme`. v0.2 has no in-app toggle and stores no per-user preference, so
   there is nothing to persist and no flash of the wrong palette to guard against. Both
   palettes are the same neutral grays and the same single accent; only the shade differs,
   per the accent entry above. Every color decision has to hold in both, which is why the
@@ -59,6 +60,15 @@ Decisions below are binding for v0.1. See `specs/mission.md` for scope and
   default type scale, rounded corners, subtle shadows.
 - **Responsive strategy:** mobile-first. Movement entry is designed for a phone at the
   scale; desktop layouts are widened from that, never the reverse.
+- **Touch targets:** entry controls are sized for a gloved hand — `specs/mission.md`
+  § Constraints. The weight steppers and the counterparty picker are the controls this
+  binds; it is why a weight can be set without typing.
+- **Client-side state:** the last counterparty recorded is remembered per device, in the
+  browser. It is a convenience default, not data: nothing reads it server-side, losing it
+  costs one dropdown selection, and two phones at the scale keep separate defaults.
+- **Document generation:** a transaction downloads as a CSV row and as a printable PDF
+  receipt. CSV is hand-built and needs no dependency; the PDF library is chosen in
+  Phase 13's spec and recorded here when it is.
 
 ## Data
 
@@ -73,13 +83,21 @@ Decisions below are binding for v0.1. See `specs/mission.md` for scope and
   We will not edit the database by hand.
 - **Units:** weights are stored in kilograms. See the constraint in
   `specs/mission.md`.
-- **Immutability:** movement records are append-only. Producers and sequestration sites
-  are editable, and archived rather than deleted — deletion is soft everywhere, so no row
-  a movement references can be removed.
+- **Identifiers:** every movement carries a cuid primary key and a short sequential
+  receipt number. The receipt number is what the app shows and what a download, an
+  invoice, or a phone call cites; the cuid stays the key.
+- **Immutability:** movement records are append-only, enforced by a trigger that refuses
+  both UPDATE and DELETE. Feedstock suppliers and sequestration sites are editable, and
+  archived rather than deleted — deletion is soft everywhere, so no row a movement
+  references can be removed. The app has no delete at all; test data is cleared with SQL
+  run directly against the database — `specs/mission.md` § Non-goals.
+- **Archived reads:** every query behind the logging view and the totals excludes
+  movements whose counterparty is archived. The rows are untouched, so unarchiving
+  restores them — `specs/mission.md` § Constraints.
 
 ## Auth
 
-v0.1 has real authentication. Internal staff only — no external producer or
+v0.2 has real authentication. Internal staff only — no external feedstock supplier or
 sequestration-site logins.
 
 - **Provider:** Clerk, gating the app from `src/proxy.ts`, Next's proxy file convention.
@@ -87,7 +105,7 @@ sequestration-site logins.
   Accounts are created deliberately by someone with access to the Clerk instance, and
   there is no self-service sign-up, which is what internal-staff-only access
   (`specs/mission.md` § Non-goals) requires.
-- **Roles:** not modeled in v0.1. Every authenticated user can record movements and
+- **Roles:** not modeled in v0.2. Every authenticated user can record movements and
   manage reference data.
 
 ## Hosting & deployment
@@ -103,9 +121,11 @@ sequestration-site logins.
 ## Testing
 
 - **Unit and component tests:** Vitest with React Testing Library.
-- **E2E tests:** Playwright, with full coverage in v0.1 — every page, both movement entry
+- **E2E tests:** Playwright, with full coverage in v0.2 — every page, both movement entry
   flows, both CRUD surfaces, and validation paths. At least one E2E run exercises a
-  mobile viewport, because mobile field entry is a binding constraint.
+  mobile viewport, because mobile field entry is a binding constraint, and it records a
+  movement using the weight steppers alone. Every phase that moves a surface rewrites its
+  specs in the same pull request rather than leaving them to a later one.
 - **Coverage enforcement:** none. Tests must pass; there is no numeric coverage
   threshold and CI will not fail on a percentage.
 - **Test data:** E2E runs against an ephemeral or preview database, never production.
