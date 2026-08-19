@@ -77,19 +77,41 @@ test("a producer can be created, edited and archived", async ({
  * One representative rejection, end to end. The field-by-field messages are
  * `src/components/reference-form.test.tsx`'s job; what a component test cannot
  * reach is the round trip — refused, said so, and wrote nothing.
+ *
+ * A blank name is the only refusal reachable through the UI: the input carries
+ * `maxLength`, so the over-length rule cannot be typed past it and is proven at
+ * the schema level instead.
+ *
+ * "Wrote nothing" is therefore a row count, taken before and after. It counts
+ * rows — links into `/producers/<id>` — and not every link on the page, which
+ * would also move when a navigation destination is added and would pass or fail
+ * for reasons the form has nothing to do with.
  */
-test("the create form refuses an empty name and writes nothing", async ({
+test("the create form refuses a blank name and writes nothing", async ({
   page,
 }) => {
+  const rows = page
+    .locator('a[href^="/producers/"]:not([href$="/new"])')
+    .filter({ visible: true });
+
   await page.goto("/producers");
-  const before = await page.getByRole("link").count();
+  const before = await rows.count();
+
+  // Guards the guard. If the row locator ever stops matching, `before` and the
+  // count below are both zero and this test passes without proving anything.
+  // The seed loads reference data, so there is always at least one row.
+  expect(before).toBeGreaterThan(0);
 
   await page.goto("/producers/new");
+
+  // Whitespace rather than an empty field: the schema trims before it measures,
+  // so this proves the trim and not the browser's own required handling.
+  await page.getByLabel("Name").fill("   ");
   await page.getByRole("button", { name: "Create producer" }).click();
 
   await expect(page.getByText("Enter a producer name")).toBeVisible();
   await expect(page).toHaveURL(/\/producers\/new/);
 
   await page.goto("/producers");
-  await expect(page.getByRole("link")).toHaveCount(before);
+  await expect(rows).toHaveCount(before);
 });

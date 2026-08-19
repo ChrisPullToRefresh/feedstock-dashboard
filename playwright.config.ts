@@ -85,8 +85,21 @@ export default defineConfig({
     // before `globalSetup`, so at the moment this fires the migrations have not
     // been applied and every other route would fail against an empty database.
     url: `${BASE_URL}/sign-in`,
-    reuseExistingServer: !process.env.CI,
-    timeout: 180_000,
+    // Never reuse. `!process.env.CI` adopted whatever was already listening on
+    // this port, which fails two ways: a run interrupted with Ctrl-C leaves its
+    // `next start` orphaned, so the next run silently tests the previous build;
+    // and a server started by hand carries `.env.local`, pointing the app at the
+    // shared Neon development branch. requireThrowawayDatabase() cannot see
+    // that — it inspects this process's environment, not the adopted server's —
+    // so roughly ten append-only movements would land in the shared database
+    // permanently. The cost is a build per local run, which is the cheaper side
+    // of specs/mission.md § Constraints.
+    reuseExistingServer: false,
+    // Generous because every CI run is a cold production build: the E2E job
+    // caches npm and never `.next`. At 180s a build drifting past three minutes
+    // turns a required check red for a reason unrelated to the change, and no
+    // other job builds, so nothing warns first.
+    timeout: 300_000,
     stdout: "pipe",
     stderr: "pipe",
   },
