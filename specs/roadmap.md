@@ -169,7 +169,25 @@ on `main`.
 - Add the Playwright job to the GitHub Actions pull request workflow and make it a
   required check
 
-## Phase 8 — Production launch
+## v0.1 — Definition of done
+
+- [x] Inbound movements are recorded with a weight in kilograms and a producer selected
+      from a dropdown
+- [x] Outbound movements are recorded with a weight in kilograms and a sequestration site
+      selected from a dropdown
+- [x] Feedstock producers can be created, edited, listed, and archived
+- [x] Sequestration sites can be created, edited, listed, and archived
+- [x] The movement list shows every movement, filterable, with running totals by producer
+      and by sequestration site
+- [x] Movement entry is usable one-handed on a phone; review is comfortable on desktop
+- [x] Clerk gates the app and staff accounts are provisioned via the Backend API
+- [x] The Prisma schema and all migrations are checked in and run clean on a fresh
+      database
+- [x] Lint, typecheck, Vitest, and the full Playwright suite pass in GitHub Actions and
+      are required to merge
+- [x] `main` is branch-protected and no commit has landed on it outside a pull request
+
+## v0.2 — Production launch
 
 **Goal:** v0.1 is running in production and demoable to Arin.
 
@@ -199,26 +217,6 @@ to end.
 - Verify the deployed app manually on a phone and on desktop
 - Walk Arin through recording an inbound movement, an outbound movement, reference data
   management, and the movement list with totals
-
-## v0.1 — Definition of done
-
-- [x] Inbound movements are recorded with a weight in kilograms and a producer selected
-      from a dropdown
-- [x] Outbound movements are recorded with a weight in kilograms and a sequestration site
-      selected from a dropdown
-- [x] Feedstock producers can be created, edited, listed, and archived
-- [x] Sequestration sites can be created, edited, listed, and archived
-- [x] The movement list shows every movement, filterable, with running totals by producer
-      and by sequestration site
-- [x] Movement entry is usable one-handed on a phone; review is comfortable on desktop
-- [x] Clerk gates the app and staff accounts are provisioned via the Backend API
-- [x] The Prisma schema and all migrations are checked in and run clean on a fresh
-      database
-- [x] Lint, typecheck, Vitest, and the full Playwright suite pass in GitHub Actions and
-      are required to merge
-- [x] `main` is branch-protected and no commit has landed on it outside a pull request
-- [ ] The app is deployed to production on the company Vercel team
-- [ ] Arin has been walked through the deployed app end to end
 
 ## After v0.1
 
