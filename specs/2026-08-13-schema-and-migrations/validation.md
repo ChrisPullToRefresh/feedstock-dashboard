@@ -25,6 +25,12 @@ still contains the counterparty check constraint. This is the guard that stops a
 regenerated migration from silently dropping hand-written SQL. It asserts the SQL is
 present, not that it works; steps 4–7 below prove the behavior.
 
+**Since shipped:** `src/test/prisma-migration.test.ts` guards the append-only trigger the
+same way — that the raising function is still declared, that it still fires before every
+UPDATE and DELETE row by row, and that no later migration drops it or drops the
+`movements` table out from under it. `plan.md` § Decisions records why the original claim
+that this had to wait for a live-database harness was wrong.
+
 **Weight** (`src/lib/weight.ts`):
 
 - Whole and fractional kilogram strings parse to the expected `Decimal`
@@ -54,6 +60,9 @@ On every pull request, against a Postgres service container that starts empty:
    condition, proven per pull request rather than once
 2. Runs `npm run seed`, then records the row counts
 3. Runs `npm run seed` a second time and fails if the row counts moved
+4. Inserts a movement against a seeded producer and requires the append-only trigger to
+   refuse both an `UPDATE` and a `DELETE` — added after Phase 5, and the half no search
+   over the migration SQL can answer. `plan.md` § Decisions
 
 The other half — that it works *against Neon* — is **not** covered by this job, and is
 not covered by any automated check. It was proven once during implementation by
@@ -144,9 +153,11 @@ migration applied.
 
 ## Open questions
 
-- **Nothing guards the immutability trigger between pull requests.** Steps 8 and 9 prove
-  it once. See `plan.md` § Decisions for the choice and § Open questions for when to
-  revisit.
+- ~~**Nothing guards the immutability trigger between pull requests.**~~ It is guarded at
+  both levels as of the maintenance change after Phase 5: `src/test/prisma-migration.test.ts`
+  asserts the SQL is still checked in, and the `Database` job inserts a movement and
+  requires the `UPDATE` and the `DELETE` to be refused. Steps 8 and 9 stay as the manual
+  record. `plan.md` § Decisions and § Open questions carry the reasoning.
 - **Nothing re-proves that migrations apply from empty against Neon.** Proven once by
   hand; see `plan.md` § Decisions. The cheapest continuous substitute would be a CI step
   running `prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma`

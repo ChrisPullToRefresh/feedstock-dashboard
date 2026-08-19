@@ -135,8 +135,8 @@ exists.
 
 ## Open questions
 
-- **Whether the expression index reads as drift to Prisma.** Carried in `plan.md`
-  § Open questions; task 2 answers it and records the answer there.
+- ~~**Whether the expression index reads as drift to Prisma.**~~ Answered by task 2: it
+  does not, in either direction. `plan.md` § Decisions records it.
 - **Nothing automated covers the Server Actions.** Steps 2 to 9 prove them by hand, once.
   `specs/roadmap.md` Phase 7's Playwright suite is what covers these flows per pull
   request, and it is the phase that should pick this up.

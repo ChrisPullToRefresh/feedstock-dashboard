@@ -146,3 +146,7 @@ filters**. They are not the same screen, because they do not have the same way o
   timestamps render in UTC with the zone labeled rather than in a zone this spec guessed.
   Ask Arin before `specs/roadmap.md` Phase 8's walkthrough; changing it is a formatting
   constant, not a schema change, because `recorded_at` stores an instant either way.
+
+  `specs/roadmap.md` Phase 8 now carries this as a bullet, so it is work with an owner
+  rather than a note in a shipped spec. It stays open here because only Arin can close
+  it.

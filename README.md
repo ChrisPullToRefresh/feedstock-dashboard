@@ -80,7 +80,8 @@ This project has not named one yet, which is tracked in
 src/app/(app)/     Everything behind authentication — renders inside the shell
 src/app/sign-in/   Outside the group, so it renders without navigation
 src/components/    Shell, sign-out control, the shared reference-data
-                   components, and shadcn/ui components under ui/
+                   components, the movement entry form, the movement list,
+                   filters, totals and breakdowns, and shadcn/ui under ui/
 src/lib/           Navigation, route rules, the name schema, Prisma queries,
                    weight and totals arithmetic, provisioning, helpers
 src/proxy.ts       The gate: everything is protected except the public list
@@ -90,8 +91,9 @@ specs/             Mission, tech stack, roadmap, and one folder per phase
 ```
 
 Producers and sequestration sites are one surface built twice over: the form,
-the list, the archive dialog and the toast in `src/components/reference-*.tsx`
-are shared, and each entity brings its own queries, Server Actions and routes.
+the list, the detail page, the archive dialog and the toast in
+`src/components/reference-*.tsx` are shared, and each entity brings its own
+queries, Server Actions and routes.
 
 Routes are protected by exception: `src/lib/routes.ts` lists what is reachable
 signed out, and everything else requires a session. A page added in a later
