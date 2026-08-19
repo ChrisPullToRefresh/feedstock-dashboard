@@ -189,8 +189,10 @@ sequestration-site logins.
   symptom lands on an unrelated pull request: the next new branch's first preview fails
   before the build starts, with "Branch limit reached" and no build log, which reads as a
   broken pull request rather than a full database. Phase 5's spec branch is where this
-  first bit. Delete the branch named for the merged git branch in the Neon console. Never
-  delete `main` — that is production.
+  first bit. `.claude/skills/pr-merged-branch-deleted/prune-neon-branch.sh <git-branch>`
+  deletes it, over a project-scoped `NEON_API_KEY` in `.env.local`; it refuses the default
+  and protected branches, so it cannot take `main` — that is production — and it matches
+  the git branch's own name or Vercel's `preview/` form of it, never a loose substring.
 
 ## Open questions
 
