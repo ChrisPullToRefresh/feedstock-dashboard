@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 import { uniqueName } from "./support/unique";
+import { visibleText } from "./support/visible";
 
 /**
  * Recording feedstock in, and finding it again on the movement list.
@@ -53,8 +54,8 @@ test("an inbound movement is recorded and appears on the list", async ({
   await page.getByRole("combobox", { name: "Producer" }).click();
   await page.getByRole("option", { name: producer }).click();
 
-  await expect(page.getByText("Feedstock in").first()).toBeVisible();
-  await expect(page.getByText(`${FORMATTED} kg`).first()).toBeVisible();
+  await expect(visibleText(page, "Feedstock in")).toBeVisible();
+  await expect(visibleText(page, `${FORMATTED} kg`)).toBeVisible();
   await expect(
     page.getByRole("link", { name: producer }).first(),
   ).toBeVisible();
