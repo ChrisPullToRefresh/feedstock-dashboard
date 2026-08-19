@@ -10,6 +10,7 @@ import {
 } from "@/lib/movement-data";
 import { findActiveCounterparty, recordMovement } from "@/lib/movement-queries";
 import { findProducer } from "@/lib/producer-queries";
+import { requireUser } from "@/lib/require-user";
 import { findSite } from "@/lib/site-queries";
 import { formatWeightKg, parseWeightKg } from "@/lib/weight";
 
@@ -43,6 +44,8 @@ async function record(
   direction: Direction,
   formData: FormData,
 ): Promise<MovementFormState> {
+  await requireUser();
+
   const singular = COUNTERPARTY_SINGULAR[direction];
   const submittedWeightKg = submitted(formData, "weightKg");
   const submittedCounterpartyId = submitted(formData, "counterpartyId");

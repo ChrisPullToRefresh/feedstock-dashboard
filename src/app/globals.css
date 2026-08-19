@@ -103,7 +103,14 @@
   --destructive-foreground: oklch(1 0 0);
   --destructive-hover: oklch(0.505 0.213 27.518);
   --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
+  /* Darker than --border, which it used to equal. An Input and a SelectTrigger
+     are `bg-transparent` in the light palette, so this border is the only
+     thing marking where the control is — WCAG 2.1 SC 1.4.11 puts that at 3:1,
+     and the shared 0.922 measured 1.26:1. This is 3.23:1 on --background. The
+     dark palette needs no change: its --input already measures 3.82:1 there.
+     --border stays where it is; it rules table rows and separators, which
+     carry no information the SC covers. */
+  --input: oklch(0.65 0 0);
   --ring: var(--accent-emerald);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);

@@ -42,6 +42,13 @@ Decisions below are binding for v0.1. See `specs/mission.md` for scope and
 - **Destructive hover:** `--destructive-hover`, darker in light (6.42:1 with white on it)
   and lighter in dark (8.50:1 with near-black on it), moving the fill away from the
   background exactly as the accent hover does.
+- **Field border:** `--input`, the boundary of a text input and a select trigger.
+  Both render `bg-transparent` in light, so the border is the only thing marking where
+  the control is, and WCAG 2.1 SC 1.4.11 puts that at 3:1. Light is `oklch(0.65 0 0)`
+  (3.23:1 on the background); dark keeps `oklch(1 0 0 / 15%)`, which already measured
+  3.82:1. It is deliberately darker than `--border`, which the two shared until a
+  critique measured the pair at 1.26:1 — `--border` rules table rows and separators,
+  which carry no information the criterion covers, and stays where it is.
 - **Theme:** light and dark, chosen by the operating system through
   `prefers-color-scheme`. v0.1 has no in-app toggle and stores no per-user preference, so
   there is nothing to persist and no flash of the wrong palette to guard against. Both
