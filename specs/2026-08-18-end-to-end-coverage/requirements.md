@@ -65,7 +65,7 @@ its own check and becomes required in `main`'s branch protection. `specs/tech-st
 - [ ] Both CRUD surfaces create, edit and archive a row, and the archived row leaves the
       entry form's dropdown
 - [ ] Each of the four forms refuses one representative invalid submit, showing its
-      message and writing nothing
+      message, with the spec's own filtered view unchanged behind it
 - [ ] A spec with no stored session is redirected from a protected route to `/sign-in`
 - [ ] Every spec runs in both the desktop and the mobile Chromium project
 - [ ] The E2E job appears in `.github/workflows/ci.yml` with its own Postgres service and

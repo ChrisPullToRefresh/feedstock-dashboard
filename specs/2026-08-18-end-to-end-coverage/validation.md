@@ -22,6 +22,13 @@ Two projects — desktop Chromium and mobile Chromium — running every spec bel
 spec starts from the seeded reference data and the stored signed-in session, except
 `auth.spec.ts`, which starts from neither.
 
+**Every figure below is read under a filter.** Both projects run every spec against one
+database and movements are append-only, so an unfiltered total or a bare row count
+carries rows the asserting spec did not write. Reference rows are named with a suffix
+unique to the run and the project, and each weight is read with the filters set to that
+spec's own counterparty. Nothing asserts on the unfiltered totals — `plan.md`
+§ Decisions.
+
 **`e2e/smoke.spec.ts`**
 
 - `/sign-in` renders. It is the first spec to run and the one that fails when the config,
@@ -43,8 +50,8 @@ spec starts from the seeded reference data and the stored signed-in session, exc
   detail page
 - Archiving through the dialog removes it from `/record/inbound`'s dropdown while its
   detail page still resolves
-- Submitting the create form empty is refused, the message is on screen, and the list is
-  unchanged behind it
+- Submitting the create form empty is refused, `Enter a producer name` is on screen, and
+  no row under this spec's suffix was added
 
 **`e2e/sites.spec.ts`**
 
@@ -55,23 +62,29 @@ spec starts from the seeded reference data and the stored signed-in session, exc
 **`e2e/record-inbound.spec.ts`**
 
 - `/record` offers both directions and reaches `/record/inbound`
-- A weight recorded against a seeded producer appears on `/` with that weight, that
-  producer and **Feedstock in**
-- An invalid weight is refused, the message is on screen, and `/` gained no row
+- A weight recorded against this spec's own producer appears on `/` **filtered to that
+  producer**, with that weight and **Feedstock in**
+- An invalid weight is refused, the message is on screen, and `/` filtered to that
+  producer still shows only the movement it already had
 
 **`e2e/record-outbound.spec.ts`**
 
-- The same three assertions against a sequestration site and **Feedstock out**
+- The same three assertions against this spec's own sequestration site and
+  **Feedstock out**, read under the sequestration site filter
 
 **`e2e/movements.spec.ts`**
 
-- Movements this spec recorded appear newest first
-- The inbound and outbound totals read the figures those movements sum to
-- The direction, producer and site filters each narrow the table and survive a reload
-- **Clear filters** restores the unfiltered view and a bare URL
-- A lowered `limit` renders **Show more**, and the totals are identical before and after
-  it is used
-- An archived counterparty still appears in the filter, marked
+- The movements this spec recorded appear newest first under its own producer filter
+- Under that filter the inbound total reads what those movements sum to, and the outbound
+  total reads `0 kg` rather than disappearing
+- The direction, producer and site filters each narrow the table, and the producer filter
+  survives a reload
+- **Clear filters** restores the unfiltered view and a bare URL, asserted as this spec's
+  own rows being visible again rather than as a row count
+- With `limit` lowered below this spec's own row count, **Show more** renders, and the
+  totals under its producer filter are identical before and after it is used
+- A producer this spec recorded a movement against and archived **afterwards** still
+  appears in the filter, marked, and selecting it shows its rows
 
 ## Manual
 
@@ -90,7 +103,8 @@ phase's own pull request; steps 4 and 5 need repository settings access.
    and no run-unique producer or site — the suite must not have reached it.
 4. In the repository's branch protection settings for `main`, add **E2E** to the required
    checks. Expect it to sit alongside **Commit convention**, **Lint**, **Typecheck**,
-   **Test** and **Database**.
+   **Test**, **Database** and **Vercel**, and expect this pull request to start requiring
+   it as well.
 5. Prove the gate blocks. Push one commit that breaks a single assertion — change an
    expected weight in `e2e/record-inbound.spec.ts`. Expect **E2E** to go red, expect the
    merge button to be unavailable with the failing check named, and expect the run to have
@@ -114,10 +128,11 @@ the real ones in `.github/workflows/ci.yml`; **E2E** is the one this phase adds.
 Plus the Vercel preview deployment, which this phase does not exercise: the suite runs
 against a locally started production build, not the preview.
 
-**E2E** cannot be a required check while this pull request is open, because a required
-check must have run at least once before it can be selected. Step 4 of the manual pass
-adds it after the first green run, and step 5 proves it blocks. That ordering is the only
-reason the roadmap's **Done when** line is not satisfiable by the automated run alone.
+**E2E** becomes required through step 4 of the manual pass, which is a repository
+setting rather than anything this pull request can carry. Adding it while the pull
+request is open makes the pull request wait on the new check too, which is the intended
+behavior and not a conflict with the list above. Step 5 then proves the check blocks —
+the half of the roadmap's **Done when** line that no green run can establish on its own.
 
 ## Open questions
 
