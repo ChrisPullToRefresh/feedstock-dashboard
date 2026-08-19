@@ -114,7 +114,9 @@ sequestration-site logins.
 
 - **Runner:** GitHub Actions.
 - **On every pull request, CI runs:**
-  1. Lint — ESLint
+  1. Lint — ESLint, then Prettier in `--check` mode. One job, because
+     `eslint-config-prettier` switches off every rule Prettier owns, so ESLint
+     deliberately checks no formatting and something has to.
   2. Typecheck — `tsc --noEmit`
   3. Unit and component tests — Vitest
   4. E2E tests — Playwright. Not installed yet: `specs/roadmap.md` Phase 7 adds the suite

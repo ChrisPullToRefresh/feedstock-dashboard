@@ -77,6 +77,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
+      # ESLint checks no formatting: eslint-config-prettier switches off every
+      # rule Prettier owns, so without this nothing does, and `npm run format`
+      # later lands a diff over files nobody touched.
+      - run: npm run format:check
 
   typecheck:
     name: Typecheck
@@ -107,12 +111,20 @@ jobs:
   # request rather than once by hand, and gives Phase 7's E2E runs the
   # throwaway-database harness it will need.
   #
-  # The Done when line is proven in two halves, because no one half covers it:
-  # this job applies the checked-in migration to a genuinely empty database and
-  # proves the seed is idempotent, deterministically and on every pull request;
-  # and the Vercel preview deployment applies the same migration to a real Neon
-  # branch of its own, because branch-per-preview is on and vercel-build runs
-  # prisma migrate deploy. See the spec's plan.md § Decisions.
+  # It proves one half of that line, not both. This job applies the checked-in
+  # migration to a genuinely empty database and proves the seed is idempotent,
+  # deterministically and on every pull request. It runs stock Postgres, not
+  # Neon's build.
+  #
+  # Nothing proves the Neon half. An earlier version of this comment said the
+  # Vercel preview did, on the reasoning that branch-per-preview hands each
+  # pull request an empty Neon branch for vercel-build to migrate. The build
+  # log disproved it: previews report "No pending migrations to apply", because
+  # Neon's preview branches are copy-on-write clones that arrive already
+  # carrying the parent's schema and rows. The preview proves the app builds
+  # and runs against Neon and nothing more. See the spec's plan.md § Decisions,
+  # which states the gap plainly, and validation.md § Open questions, which
+  # carries the migrate-diff check as the cheapest substitute.
   database:
     name: Database
     runs-on: ubuntu-latest
