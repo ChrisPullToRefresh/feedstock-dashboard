@@ -1,6 +1,6 @@
 ---
 name: create-constitution
-description: Bootstrap a project's constitution — specs/mission.md, specs/tech-stack.md, and specs/roadmap.md — seeded from specs/VISION.md. Together these three files ARE the constitution; there is no separate CONSTITUTION.md. Use only when called directly.
+description: Bootstrap a project's constitution — specs/mission.md, specs/tech-stack.md, and specs/roadmap.md — seeded from specs/vision0.1/VISION.md. Together these three files ARE the constitution; there is no separate CONSTITUTION.md. Use only when called directly.
 disable-model-invocation: true
 allowed-tools: Read, Write, Glob, Grep, AskUserQuestion, Bash
 ---
@@ -18,7 +18,7 @@ umbrella file. Do not create additional spec files beyond these three.
 
 ## Core rule: ask, never invent
 
-`specs/VISION.md` is a seed, not a specification. It will be silent on most of what
+`specs/vision0.1/VISION.md` is a seed, not a specification. It will be silent on most of what
 the constitution needs. Every gap is a question for the user, asked with
 **AskUserQuestion** — never an assumption you quietly fill in.
 
@@ -39,7 +39,7 @@ Three files, so at least three rounds. Rules for the rounds:
 
 ### 1. Read the seed
 
-Read `specs/VISION.md`. If it is missing, stop and tell the user this skill needs it
+Read `specs/vision0.1/VISION.md`. If it is missing, stop and tell the user this skill needs it
 first — do not interview a constitution out of thin air.
 
 Check whether `specs/mission.md`, `specs/tech-stack.md`, or `specs/roadmap.md` already

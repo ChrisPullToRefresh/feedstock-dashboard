@@ -223,7 +223,7 @@ to end.
 Deferred, unordered, unlabeled. Nothing here is committed to a version.
 
 - IoT weight capture, so weights are not entered by hand — Viam is the candidate
-  framework named in `specs/VISION.md`. This is also what settles the movement timestamp:
+  framework named in `specs/vision0.1/VISION.md`. This is also what settles the movement timestamp:
   `recordedAt` is entry time rather than scale time only because a person is typing after
   the fact, and a machine reading the scale records both at once
 - A screen for archived producers and sequestration sites. Today the only route back to an
