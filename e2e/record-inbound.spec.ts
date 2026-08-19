@@ -18,7 +18,7 @@ import { visibleText } from "./support/visible";
 
 /** What is typed at the keypad, and what the app renders it back as. */
 const WEIGHT = "1250.5";
-const FORMATTED = "9,999.9"; // deliberately wrong — row 18
+const FORMATTED = "1,250.5";
 
 test("an inbound movement is recorded and appears on the list", async ({
   page,
