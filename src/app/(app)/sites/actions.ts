@@ -10,6 +10,7 @@ import {
   SEQUESTRATION_SITE_SINGULAR,
   type ReferenceFormState,
 } from "@/lib/reference-data";
+import { requireUser } from "@/lib/require-user";
 import { findSiteByName } from "@/lib/site-queries";
 
 /**
@@ -68,6 +69,8 @@ export async function createSite(
   _previous: ReferenceFormState,
   formData: FormData,
 ): Promise<ReferenceFormState> {
+  await requireUser();
+
   const parsed = parseName(formData);
 
   if ("status" in parsed) return parsed;
@@ -114,6 +117,8 @@ export async function renameSite(
   _previous: ReferenceFormState,
   formData: FormData,
 ): Promise<ReferenceFormState> {
+  await requireUser();
+
   const parsed = parseName(formData);
 
   if ("status" in parsed) return parsed;
@@ -157,6 +162,8 @@ export async function renameSite(
  * The row stays, so every movement that references it stays resolvable.
  */
 export async function archiveSite(id: string): Promise<void> {
+  await requireUser();
+
   const archived = await db.sequestrationSite.update({
     where: { id },
     data: { isActive: false },
@@ -167,6 +174,8 @@ export async function archiveSite(id: string): Promise<void> {
 }
 
 export async function restoreSite(id: string): Promise<void> {
+  await requireUser();
+
   const restored = await db.sequestrationSite.update({
     where: { id },
     data: { isActive: true },

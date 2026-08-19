@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { findProducerByName } from "@/lib/producer-queries";
+import { requireUser } from "@/lib/require-user";
 import {
   producerSchema,
   PRODUCER_SINGULAR,
@@ -67,6 +68,8 @@ export async function createProducer(
   _previous: ReferenceFormState,
   formData: FormData,
 ): Promise<ReferenceFormState> {
+  await requireUser();
+
   const parsed = parseName(formData);
 
   if ("status" in parsed) return parsed;
@@ -113,6 +116,8 @@ export async function renameProducer(
   _previous: ReferenceFormState,
   formData: FormData,
 ): Promise<ReferenceFormState> {
+  await requireUser();
+
   const parsed = parseName(formData);
 
   if ("status" in parsed) return parsed;
@@ -156,6 +161,8 @@ export async function renameProducer(
  * The row stays, so every movement that references it stays resolvable.
  */
 export async function archiveProducer(id: string): Promise<void> {
+  await requireUser();
+
   const archived = await db.producer.update({
     where: { id },
     data: { isActive: false },
@@ -166,6 +173,8 @@ export async function archiveProducer(id: string): Promise<void> {
 }
 
 export async function restoreProducer(id: string): Promise<void> {
+  await requireUser();
+
   const restored = await db.producer.update({
     where: { id },
     data: { isActive: true },
