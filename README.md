@@ -36,11 +36,41 @@ render time. `.env.local` is git-ignored and must stay that way.
 | `npm run format`               | Prettier, writing                    |
 | `npm run seed`                 | Loads the reference data, idempotent |
 | `npm run provision -- <email>` | Creates a staff account — see below  |
+| `npm run test:e2e`             | Playwright, against `.env.e2e`       |
 
-Six checks are required on `main` and must be green to merge: `Lint`,
-`Typecheck`, `Test`, `Commit convention`, and `Database` in GitHub Actions, plus
-the `Vercel` preview deployment. `specs/tech-stack.md` § CI/CD is the authority
-on what each one does.
+Seven checks are required on `main` and must be green to merge: `Lint`,
+`Typecheck`, `Test`, `Commit convention`, `Database` and `E2E` in GitHub
+Actions, plus the `Vercel` preview deployment. `specs/tech-stack.md` § CI/CD is
+the authority on what each one does.
+
+### End-to-end tests
+
+Playwright drives a production build against a **throwaway** database. It never
+reads `.env.local`: `specs/mission.md` § Constraints makes a recorded movement
+permanent, so a suite pointed at the shared Neon development branch would leave
+weights in it that nothing can remove.
+
+```bash
+docker run -d --name feedstock-e2e \
+  -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=feedstock -p 55432:5432 postgres:17
+
+cp .env.e2e.example .env.e2e   # then fill in the Clerk keys
+npm run test:e2e
+```
+
+`.env.e2e` is git-ignored and must stay that way. Set **both** `DATABASE_URL`
+and `DATABASE_URL_UNPOOLED` to the throwaway database: `prisma.config.ts`
+migrates over the unpooled one and falls back to `.env.local` when it is unset,
+so omitting it migrates the development branch without failing.
+
+Playwright's global setup applies the migrations, seeds the reference data and
+signs in as the account named by `E2E_USER_EMAIL` — over a short-lived Backend
+API ticket, so no password is stored anywhere. The suite runs twice, once at a
+desktop viewport and once at a mobile one.
+
+The HTML report lands in `playwright-report/`; open it with
+`npx playwright show-report`.
 
 ## Accounts
 

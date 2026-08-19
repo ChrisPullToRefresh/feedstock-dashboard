@@ -24,6 +24,8 @@ blob-report/
 # Environment
 .env
 .env*.local
+# The end-to-end suite's own env file. `.env*.local` does not cover it.
+.env.e2e
 
 # Vercel
 .vercel
