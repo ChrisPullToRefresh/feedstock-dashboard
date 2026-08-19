@@ -189,6 +189,12 @@ to end.
   phase that was named as where to re-examine it. What changes here is that the database
   starts holding records nobody can re-enter: a migration that half-applies fails the
   build after the fact, and nothing separates changing the schema from shipping the code
+- Ask Arin what timezone the facility keeps, before the walkthrough. The movement list
+  renders every time in UTC with the zone labeled, because nothing in this constitution
+  names a location — `specs/2026-08-18-movement-list-and-totals/requirements.md`
+  § Open questions. A manager reading a movement's time on the walkthrough is the moment
+  a wrong zone shows. It is a formatting constant, not a schema change: `recorded_at`
+  stores an instant either way
 - Promote `main` to the production Vercel deployment
 - Verify the deployed app manually on a phone and on desktop
 - Walk Arin through recording an inbound movement, an outbound movement, reference data
@@ -196,15 +202,15 @@ to end.
 
 ## v0.1 — Definition of done
 
-- [ ] Inbound movements are recorded with a weight in kilograms and a producer selected
+- [x] Inbound movements are recorded with a weight in kilograms and a producer selected
       from a dropdown
-- [ ] Outbound movements are recorded with a weight in kilograms and a sequestration site
+- [x] Outbound movements are recorded with a weight in kilograms and a sequestration site
       selected from a dropdown
 - [x] Feedstock producers can be created, edited, listed, and archived
 - [x] Sequestration sites can be created, edited, listed, and archived
-- [ ] The movement list shows every movement, filterable, with running totals by producer
+- [x] The movement list shows every movement, filterable, with running totals by producer
       and by sequestration site
-- [ ] Movement entry is usable one-handed on a phone; review is comfortable on desktop
+- [x] Movement entry is usable one-handed on a phone; review is comfortable on desktop
 - [x] Clerk gates the app and staff accounts are provisioned via the Backend API
 - [x] The Prisma schema and all migrations are checked in and run clean on a fresh
       database

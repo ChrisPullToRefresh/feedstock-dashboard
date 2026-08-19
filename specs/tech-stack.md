@@ -116,7 +116,9 @@ sequestration-site logins.
      The title is what the squash merge writes onto `main`, so it is the thing worth
      gating; branch commits are squashed away and are not checked.
   6. Database — applies every checked-in migration to an empty Postgres service
-     container, seeds it twice, and fails if the row counts moved.
+     container, seeds it twice, fails if the row counts moved, and inserts a movement to
+     require the append-only trigger to refuse both an UPDATE and a DELETE. That last
+     assertion is the one no search over the migration SQL can make.
 - **Merge gate:** green CI is a hard requirement. A pull request with any failing check
   does not merge, including a failing E2E job.
 - **Build:** Vercel builds each PR as a preview deployment alongside the Actions run.
