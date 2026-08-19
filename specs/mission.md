@@ -38,10 +38,13 @@ establishes that record.
 
 ## What success looks like for v0.1
 
-v0.1 is done when the app is deployed and Arin can be walked through it end to end:
-recording an inbound movement, recording an outbound movement, managing producers and
-sequestration sites, and viewing the movement list with running totals — on a phone for
-entry and on desktop for review.
+v0.1 is done when the app records the movements: an inbound movement, an outbound
+movement, producer and sequestration site management, and the movement list with running
+totals — on a phone for entry and on desktop for review — each covered by tests that gate
+a merge.
+
+Deploying to production and walking Arin through it belong to v0.2. Arin's feedback comes
+first, and what it asks for is what v0.2 is planned around.
 
 ## Non-goals
 

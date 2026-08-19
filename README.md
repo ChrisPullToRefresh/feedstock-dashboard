@@ -102,7 +102,7 @@ provisioned against production cannot sign in to a preview, and vice versa.
 
 A production instance additionally needs a domain with DNS records you control.
 This project has not named one yet, which is tracked in
-`specs/2026-08-13-auth/plan.md` § Open questions and belongs to Phase 8.
+`specs/2026-08-13-auth/plan.md` § Open questions and belongs to v0.2.
 
 ## Layout
 
