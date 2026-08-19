@@ -16,6 +16,11 @@ src/generated/
 # Test output
 coverage/
 
+# Playwright writes these at the repository root on every run
+test-results/
+playwright-report/
+blob-report/
+
 # Environment
 .env
 .env*.local

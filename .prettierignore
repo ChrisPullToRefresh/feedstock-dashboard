@@ -2,6 +2,9 @@
 out/
 build/
 coverage/
+test-results/
+playwright-report/
+blob-report/
 node_modules/
 package-lock.json
 next-env.d.ts
