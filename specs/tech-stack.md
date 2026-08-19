@@ -119,8 +119,11 @@ sequestration-site logins.
      deliberately checks no formatting and something has to.
   2. Typecheck — `tsc --noEmit`
   3. Unit and component tests — Vitest
-  4. E2E tests — Playwright. Not installed yet: `specs/roadmap.md` Phase 7 adds the suite
-     and makes the job a required check. Until then the workflow runs the other five.
+  4. E2E tests — Playwright. The full suite, in a desktop and a mobile Chromium project,
+     against a `postgres:17` service container that is empty at the start of every run.
+     Playwright's global setup applies the migrations, seeds the reference data and signs
+     in the dedicated CI account over a Backend API ticket, so the local run and the CI
+     run take one path. See `specs/2026-08-18-end-to-end-coverage/`.
   5. Commit convention — the pull request title is checked against Conventional Commits.
      The title is what the squash merge writes onto `main`, so it is the thing worth
      gating; branch commits are squashed away and are not checked.
